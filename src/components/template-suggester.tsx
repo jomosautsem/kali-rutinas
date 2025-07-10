@@ -22,8 +22,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Skeleton } from "./ui/skeleton"
 
 const formSchema = z.object({
-  userFeedback: z.string().min(10, "Please provide more detailed feedback."),
-  commonRequests: z.string().min(10, "Please provide more detailed requests."),
+  userFeedback: z.string().min(10, "Por favor, proporciona comentarios más detallados."),
+  commonRequests: z.string().min(10, "Por favor, proporciona solicitudes más detalladas."),
 })
 
 export function TemplateSuggester() {
@@ -34,8 +34,8 @@ export function TemplateSuggester() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      userFeedback: "Some users find the beginner plans too easy after a few weeks.",
-      commonRequests: "More HIIT and bodyweight-only templates are frequently requested.",
+      userFeedback: "Algunos usuarios encuentran los planes para principiantes demasiado fáciles después de unas pocas semanas.",
+      commonRequests: "Se solicitan con frecuencia más plantillas de HIIT y solo de peso corporal.",
     },
   })
 
@@ -46,11 +46,11 @@ export function TemplateSuggester() {
       const result = await generateTemplateSuggestions(values)
       setSuggestions(result.templateSuggestions)
     } catch (error) {
-      console.error("Failed to generate suggestions:", error)
+      console.error("Error al generar sugerencias:", error)
       toast({
         variant: "destructive",
-        title: "Generation Failed",
-        description: "Could not generate suggestions. Please try again.",
+        title: "Falló la Generación",
+        description: "No se pudieron generar sugerencias. Por favor, inténtalo de nuevo.",
       })
     } finally {
       setIsLoading(false)
@@ -61,7 +61,7 @@ export function TemplateSuggester() {
      <div className="grid md:grid-cols-2 gap-8">
         <Card className="shadow-none border-0 md:border md:shadow-sm">
             <CardHeader>
-                <CardTitle className="font-headline">Generate Template Ideas</CardTitle>
+                <CardTitle className="font-headline">Generar Ideas de Plantillas</CardTitle>
             </CardHeader>
             <CardContent>
                  <Form {...form}>
@@ -71,9 +71,9 @@ export function TemplateSuggester() {
                         name="userFeedback"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>User Feedback</FormLabel>
+                            <FormLabel>Comentarios de Usuarios</FormLabel>
                             <FormControl>
-                            <Textarea placeholder="Enter user feedback..." {...field} rows={4}/>
+                            <Textarea placeholder="Ingresa comentarios de usuarios..." {...field} rows={4}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -84,9 +84,9 @@ export function TemplateSuggester() {
                         name="commonRequests"
                         render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Common Requests</FormLabel>
+                            <FormLabel>Solicitudes Comunes</FormLabel>
                             <FormControl>
-                            <Textarea placeholder="Enter common requests..." {...field} rows={4}/>
+                            <Textarea placeholder="Ingresa solicitudes comunes..." {...field} rows={4}/>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -94,14 +94,14 @@ export function TemplateSuggester() {
                     />
                     <Button type="submit" disabled={isLoading}>
                         <Sparkles className="mr-2 h-4 w-4" />
-                        {isLoading ? "Generating..." : "Generate Suggestions"}
+                        {isLoading ? "Generando..." : "Generar Sugerencias"}
                     </Button>
                     </form>
                 </Form>
             </CardContent>
         </Card>
         <div className="rounded-lg border bg-card p-6">
-            <h3 className="font-semibold mb-4 font-headline">AI-Generated Suggestions</h3>
+            <h3 className="font-semibold mb-4 font-headline">Sugerencias Generadas por IA</h3>
              {isLoading ? (
                <div className="space-y-4">
                  <Skeleton className="h-8 w-full" />
@@ -119,7 +119,7 @@ export function TemplateSuggester() {
               </ul>
             ) : (
               <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
-                Suggestions will appear here...
+                Las sugerencias aparecerán aquí...
               </div>
             )}
         </div>

@@ -8,41 +8,41 @@ export default function AdminTemplatesPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Template Management</h1>
-                    <p className="text-muted-foreground">Create, edit, and manage workout templates.</p>
+                    <h1 className="text-3xl font-bold font-headline">Gestión de Plantillas</h1>
+                    <p className="text-muted-foreground">Crea, edita y gestiona plantillas de entrenamiento.</p>
                 </div>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    New Template
+                    Nueva Plantilla
                 </Button>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-3">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Full Body HIIT</CardTitle>
-                        <CardDescription>High-intensity interval training for all major muscle groups.</CardDescription>
+                        <CardTitle>HIIT de Cuerpo Completo</CardTitle>
+                        <CardDescription>Entrenamiento de intervalos de alta intensidad para todos los grupos musculares principales.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Button variant="secondary" className="w-full">Edit</Button>
+                        <Button variant="secondary" className="w-full">Editar</Button>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Beginner Strength</CardTitle>
-                        <CardDescription>A 3-day split for those new to weightlifting.</CardDescription>
+                        <CardTitle>Fuerza para Principiantes</CardTitle>
+                        <CardDescription>Una rutina de 3 días para quienes se inician en el levantamiento de pesas.</CardDescription>
                     </CardHeader>
                      <CardContent>
-                        <Button variant="secondary" className="w-full">Edit</Button>
+                        <Button variant="secondary" className="w-full">Editar</Button>
                     </CardContent>
                 </Card>
                  <Card>
                     <CardHeader>
-                        <CardTitle>Advanced Calisthenics</CardTitle>
-                        <CardDescription>Master your bodyweight with advanced progressions.</CardDescription>
+                        <CardTitle>Calistenia Avanzada</CardTitle>
+                        <CardDescription>Domina tu peso corporal con progresiones avanzadas.</CardDescription>
                     </CardHeader>
                      <CardContent>
-                        <Button variant="secondary" className="w-full">Edit</Button>
+                        <Button variant="secondary" className="w-full">Editar</Button>
                     </CardContent>
                 </Card>
             </div>

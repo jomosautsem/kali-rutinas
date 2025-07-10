@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button"
 
 export default function AdminDashboardPage() {
   const stats = [
-    { title: "Total Users", value: "1,254", icon: Users, color: "text-blue-500" },
-    { title: "Active Plans", value: "873", icon: FileText, color: "text-green-500" },
-    { title: "New Users Today", value: "12", icon: Users, color: "text-purple-500" },
-    { title: "Pending Approvals", value: "3", icon: CheckCircle, color: "text-yellow-500" },
+    { title: "Usuarios Totales", value: "1,254", icon: Users, color: "text-blue-500" },
+    { title: "Planes Activos", value: "873", icon: FileText, color: "text-green-500" },
+    { title: "Nuevos Usuarios Hoy", value: "12", icon: Users, color: "text-purple-500" },
+    { title: "Aprobaciones Pendientes", value: "3", icon: CheckCircle, color: "text-yellow-500" },
   ]
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, Admin. Here&apos;s a snapshot of your system.</p>
+        <h1 className="text-3xl font-bold font-headline">Panel de Administrador</h1>
+        <p className="text-muted-foreground">Bienvenido de nuevo, Admin. Aquí tienes un resumen de tu sistema.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -35,41 +35,41 @@ export default function AdminDashboardPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Quick Actions</CardTitle>
+            <CardTitle className="font-headline">Acciones Rápidas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
              <Link href="/admin/users" className="block">
               <Button variant="outline" className="w-full justify-between">
-                Manage Users <ArrowRight className="h-4 w-4" />
+                Gestionar Usuarios <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
              <Link href="/admin/templates" className="block">
               <Button variant="outline" className="w-full justify-between">
-                Update Templates <ArrowRight className="h-4 w-4" />
+                Actualizar Plantillas <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
              <Link href="/admin/status" className="block">
               <Button variant="outline" className="w-full justify-between">
-                Check System Status <ArrowRight className="h-4 w-4" />
+                Verificar Estado del Sistema <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Recent Activity</CardTitle>
+            <CardTitle className="font-headline">Actividad Reciente</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Mock activity feed */}
             <div className="flex items-center">
               <Users className="h-4 w-4 mr-2" />
-              <p className="text-sm text-muted-foreground">New user 'Jane Doe' registered.</p>
-              <p className="text-sm text-muted-foreground ml-auto">2 min ago</p>
+              <p className="text-sm text-muted-foreground">Nuevo usuario 'Jane Doe' registrado.</p>
+              <p className="text-sm text-muted-foreground ml-auto">hace 2 min</p>
             </div>
             <div className="flex items-center">
               <FileText className="h-4 w-4 mr-2" />
-              <p className="text-sm text-muted-foreground">Plan generated for 'John Smith'.</p>
-              <p className="text-sm text-muted-foreground ml-auto">15 min ago</p>
+              <p className="text-sm text-muted-foreground">Plan generado para 'John Smith'.</p>
+              <p className="text-sm text-muted-foreground ml-auto">hace 15 min</p>
             </div>
           </CardContent>
         </Card>

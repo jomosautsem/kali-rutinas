@@ -13,21 +13,21 @@ import {z} from 'genkit';
 const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   goals: z
     .string()
-    .describe('The fitness goals of the user, e.g., weight loss, muscle gain, improved endurance.'),
+    .describe('Los objetivos de fitness del usuario, ej., pérdida de peso, ganancia muscular, mejora de la resistencia.'),
   currentFitnessLevel: z
     .string()
-    .describe('The current fitness level of the user, e.g., beginner, intermediate, advanced.'),
+    .describe('El nivel de fitness actual del usuario, ej., principiante, intermedio, avanzado.'),
   daysPerWeek: z
     .number()
-    .describe('The number of days per week the user can dedicate to training.'),
+    .describe('El número de días a la semana que el usuario puede dedicar al entrenamiento.'),
   preferredWorkoutStyle: z
     .string()
-    .describe('The preferred workout style of the user, e.g., weightlifting, cardio, calisthenics.'),
+    .describe('El estilo de entrenamiento preferido del usuario, ej., levantamiento de pesas, cardio, calistenia.'),
 });
 export type GeneratePersonalizedTrainingPlanInput = z.infer<typeof GeneratePersonalizedTrainingPlanInputSchema>;
 
 const GeneratePersonalizedTrainingPlanOutputSchema = z.object({
-  plan: z.string().describe('A personalized training plan based on the user input.'),
+  plan: z.string().describe('Un plan de entrenamiento personalizado basado en la entrada del usuario.'),
 });
 export type GeneratePersonalizedTrainingPlanOutput = z.infer<typeof GeneratePersonalizedTrainingPlanOutputSchema>;
 
@@ -41,16 +41,16 @@ const prompt = ai.definePrompt({
   name: 'generatePersonalizedTrainingPlanPrompt',
   input: {schema: GeneratePersonalizedTrainingPlanInputSchema},
   output: {schema: GeneratePersonalizedTrainingPlanOutputSchema},
-  prompt: `You are a personal trainer who specializes in creating personalized training plans.
+  prompt: `Eres un entrenador personal que se especializa en crear planes de entrenamiento personalizados.
 
-  Based on the user's goals, current fitness level, available training days per week, and preferred workout style, create a detailed training plan.
+  Basado en los objetivos del usuario, nivel de condición física actual, días de entrenamiento disponibles por semana y estilo de entrenamiento preferido, crea un plan de entrenamiento detallado.
 
-  Goals: {{{goals}}}
-  Current Fitness Level: {{{currentFitnessLevel}}}
-  Days Per Week: {{{daysPerWeek}}}
-  Preferred Workout Style: {{{preferredWorkoutStyle}}}
+  Objetivos: {{{goals}}}
+  Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
+  Días por Semana: {{{daysPerWeek}}}
+  Estilo de Entrenamiento Preferido: {{{preferredWorkoutStyle}}}
 
-  Training Plan:`,
+  Plan de Entrenamiento:`,
 });
 
 const generatePersonalizedTrainingPlanFlow = ai.defineFlow(

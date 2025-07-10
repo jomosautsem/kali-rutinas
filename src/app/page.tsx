@@ -17,11 +17,11 @@ export default function Home() {
             className="text-sm font-medium hover:underline underline-offset-4"
             prefetch={false}
           >
-            Login
+            Iniciar Sesión
           </Link>
           <Button asChild>
             <Link href="/register" prefetch={false}>
-              Register
+              Registrarse
             </Link>
           </Button>
         </nav>
@@ -34,16 +34,16 @@ export default function Home() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline">
-                    Unlock Your Potential with AI-Powered Training
+                    Desbloquea tu Potencial con Entrenamiento Potenciado por IA
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Dojo Dynamics creates personalized fitness plans that adapt to your goals, level, and preferences.
+                    Dojo Dynamics crea planes de fitness personalizados que se adaptan a tus metas, nivel y preferencias.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Button asChild size="lg">
                     <Link href="/register" className="inline-flex items-center gap-2" prefetch={false}>
-                      Start Your Journey <ArrowRight className="h-4 w-4" />
+                      Comienza tu Viaje <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
                 </div>
@@ -52,7 +52,7 @@ export default function Home() {
                 src="https://placehold.co/600x600.png"
                 width="600"
                 height="600"
-                alt="Hero"
+                alt="Héroe"
                 data-ai-hint="fitness workout"
                 className="mx-auto aspect-square overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
               />
@@ -64,46 +64,46 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Key Features</div>
+                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Características Clave</div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">
-                  Train Smarter, Not Harder
+                  Entrena Más Inteligente, No Más Duro
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Our platform provides everything you need to succeed, from intelligent plan generation to progress tracking.
+                  Nuestra plataforma proporciona todo lo que necesitas para tener éxito, desde la generación inteligente de planes hasta el seguimiento del progreso.
                 </p>
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-lg font-medium font-headline">AI Plan Generation</CardTitle>
+                  <CardTitle className="text-lg font-medium font-headline">Generación de Planes con IA</CardTitle>
                   <Sparkles className="w-6 h-6 text-primary" />
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Our advanced AI crafts unique workout plans based on your individual needs and goals.
+                    Nuestra IA avanzada crea planes de entrenamiento únicos basados en tus necesidades y objetivos individuales.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-lg font-medium font-headline">Client Dashboard</CardTitle>
+                  <CardTitle className="text-lg font-medium font-headline">Panel del Cliente</CardTitle>
                   <Activity className="w-6 h-6 text-primary" />
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    An intuitive dashboard to view your personalized plan and track your progress over time.
+                    Un panel intuitivo para ver tu plan personalizado y seguir tu progreso a lo largo del tiempo.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-lg font-medium font-headline">Admin Center</CardTitle>
+                  <CardTitle className="text-lg font-medium font-headline">Centro de Administración</CardTitle>
                   <Users className="w-6 h-6 text-primary" />
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Comprehensive tools for admins to manage users, templates, and monitor system health.
+                    Herramientas completas para que los administradores gestionen usuarios, plantillas y supervisen la salud del sistema.
                   </p>
                 </CardContent>
               </Card>
@@ -113,13 +113,13 @@ export default function Home() {
       </main>
 
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-muted-foreground">&copy; 2024 Dojo Dynamics. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground">&copy; 2024 Dojo Dynamics. Todos los derechos reservados.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link href="#" className="text-xs hover:underline underline-offset-4" prefetch={false}>
-            Terms of Service
+            Términos de Servicio
           </Link>
           <Link href="#" className="text-xs hover:underline underline-offset-4" prefetch={false}>
-            Privacy
+            Privacidad
           </Link>
         </nav>
       </footer>

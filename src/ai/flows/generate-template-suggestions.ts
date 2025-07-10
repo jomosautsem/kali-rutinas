@@ -14,17 +14,17 @@ import {z} from 'genkit';
 const GenerateTemplateSuggestionsInputSchema = z.object({
   userFeedback: z
     .string()
-    .describe("User feedback and requests regarding training plans."),
+    .describe("Comentarios y solicitudes de los usuarios sobre los planes de entrenamiento."),
   commonRequests: z
     .string()
-    .describe("Commonly requested training plan features or types."),
+    .describe("Funciones o tipos de planes de entrenamiento solicitados con frecuencia."),
 });
 export type GenerateTemplateSuggestionsInput = z.infer<typeof GenerateTemplateSuggestionsInputSchema>;
 
 const GenerateTemplateSuggestionsOutputSchema = z.object({
   templateSuggestions: z
     .array(z.string())
-    .describe("A list of suggested training plan templates."),
+    .describe("Una lista de plantillas de planes de entrenamiento sugeridas."),
 });
 export type GenerateTemplateSuggestionsOutput = z.infer<typeof GenerateTemplateSuggestionsOutputSchema>;
 
@@ -36,14 +36,14 @@ const prompt = ai.definePrompt({
   name: 'generateTemplateSuggestionsPrompt',
   input: {schema: GenerateTemplateSuggestionsInputSchema},
   output: {schema: GenerateTemplateSuggestionsOutputSchema},
-  prompt: `You are an expert training plan template generator.
+  prompt: `Eres un generador experto de plantillas de planes de entrenamiento.
 
-Based on user feedback and common requests, suggest training plan templates.
+Basado en los comentarios de los usuarios y las solicitudes comunes, sugiere plantillas de planes de entrenamiento.
 
-User Feedback: {{{userFeedback}}}
-Common Requests: {{{commonRequests}}}
+Comentarios de los usuarios: {{{userFeedback}}}
+Solicitudes comunes: {{{commonRequests}}}
 
-Suggest training plan templates:
+Sugerir plantillas de planes de entrenamiento:
 `,
 });
 

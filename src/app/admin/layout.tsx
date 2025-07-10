@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // }
   
   const mockUser = {
-    name: "Admin User",
+    name: "Usuario Administrador",
     email: "admin@dojodynamics.com",
     avatarUrl: "https://placehold.co/100x100.png"
   }
@@ -51,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <SidebarMenuButton asChild>
                   <Link href="/admin/dashboard">
                     <LayoutDashboard />
-                    <span>Dashboard</span>
+                    <span>Panel</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -59,7 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <SidebarMenuButton asChild>
                   <Link href="/admin/users">
                     <Users />
-                    <span>Users</span>
+                    <span>Usuarios</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -67,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <SidebarMenuButton asChild>
                   <Link href="/admin/templates">
                     <FileText />
-                    <span>Templates</span>
+                    <span>Plantillas</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -75,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <SidebarMenuButton asChild>
                   <Link href="/admin/status">
                     <Activity />
-                    <span>System Status</span>
+                    <span>Estado del Sistema</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

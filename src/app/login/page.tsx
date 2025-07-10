@@ -26,8 +26,8 @@ export default function LoginPage() {
 
     if (email === adminEmail && password === adminPassword) {
       toast({
-        title: "Login Successful",
-        description: "Redirecting to admin dashboard...",
+        title: "Inicio de Sesión Exitoso",
+        description: "Redirigiendo al panel de administrador...",
       })
       // In a real app, you'd set a session token here.
       // For this prototype, we'll just redirect.
@@ -35,8 +35,8 @@ export default function LoginPage() {
     } else {
       toast({
         variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid email or password. Please try again.",
+        title: "Inicio de Sesión Fallido",
+        description: "Correo o contraseña inválidos. Por favor, inténtalo de nuevo.",
       })
       setIsLoading(false)
     }
@@ -44,20 +44,20 @@ export default function LoginPage() {
 
   return (
     <AuthCard
-      title="Welcome Back"
-      description="Enter your credentials to access your account."
+      title="Bienvenido de Nuevo"
+      description="Ingresa tus credenciales para acceder a tu cuenta."
       footer={
         <p className="text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          ¿No tienes una cuenta?{" "}
           <Link href="/register" className="font-medium text-primary hover:underline" prefetch={false}>
-            Register
+            Regístrate
           </Link>
         </p>
       }
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Correo Electrónico</Label>
           <Input 
             id="email" 
             type="email" 
@@ -69,7 +69,7 @@ export default function LoginPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Contraseña</Label>
           <Input 
             id="password" 
             type="password" 
@@ -80,7 +80,7 @@ export default function LoginPage() {
           />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Logging in..." : "Login"}
+          {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
         </Button>
       </form>
     </AuthCard>

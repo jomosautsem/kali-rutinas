@@ -36,7 +36,7 @@ export type User = {
   name: string
   email: string
   role: "admin" | "client"
-  status: "active" | "pending"
+  status: "activo" | "pendiente"
   registeredAt: string
 }
 
@@ -55,7 +55,7 @@ export function UserTableClient({ users }: UserTableClientProps) {
   
   const handleConfirmDelete = () => {
     if (selectedUser) {
-      console.log("Deleting user:", selectedUser.id)
+      console.log("Eliminando usuario:", selectedUser.id)
       // TODO: Implement actual delete logic
       setIsDeleteDialogOpen(false)
       setSelectedUser(null)
@@ -68,12 +68,12 @@ export function UserTableClient({ users }: UserTableClientProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Registered</TableHead>
+              <TableHead>Usuario</TableHead>
+              <TableHead>Rol</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Registrado</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Acciones</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -90,7 +90,7 @@ export function UserTableClient({ users }: UserTableClientProps) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={user.status === "active" ? "outline" : "destructive"}>
+                  <Badge variant={user.status === "activo" ? "outline" : "destructive"}>
                     {user.status}
                   </Badge>
                 </TableCell>
@@ -99,20 +99,20 @@ export function UserTableClient({ users }: UserTableClientProps) {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Abrir menú</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>View details</DropdownMenuItem>
-                      <DropdownMenuItem>Confirm user</DropdownMenuItem>
+                      <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                      <DropdownMenuItem>Ver detalles</DropdownMenuItem>
+                      <DropdownMenuItem>Confirmar usuario</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => handleDeleteClick(user)}
                       >
-                        Delete user
+                        Eliminar usuario
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -126,16 +126,16 @@ export function UserTableClient({ users }: UserTableClientProps) {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the user account for{" "}
+              Esta acción no se puede deshacer. Esto eliminará permanentemente la cuenta de usuario para{" "}
               <span className="font-semibold">{selectedUser?.name}</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive hover:bg-destructive/90">
-              Delete
+              Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

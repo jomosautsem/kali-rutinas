@@ -3,23 +3,23 @@ import { Server, Database, Mail } from "lucide-react"
 
 export default function SystemStatusPage() {
   const services = [
-    { name: "API Services", status: "Operational", icon: Server, color: "text-green-500" },
-    { name: "Supabase Database", status: "Operational", icon: Database, color: "text-green-500" },
-    { name: "AI Plan Generator", status: "Operational", icon: Server, color: "text-green-500" },
-    { name: "Email Notifications (Resend)", status: "Operational", icon: Mail, color: "text-green-500" },
-    { name: "Authentication Service", status: "Monitoring", icon: Server, color: "text-yellow-500" },
+    { name: "Servicios de API", status: "Operacional", icon: Server, color: "text-green-500" },
+    { name: "Base de Datos Supabase", status: "Operacional", icon: Database, color: "text-green-500" },
+    { name: "Generador de Planes AI", status: "Operacional", icon: Server, color: "text-green-500" },
+    { name: "Notificaciones por Email (Resend)", status: "Operacional", icon: Mail, color: "text-green-500" },
+    { name: "Servicio de Autenticación", status: "Monitoreando", icon: Server, color: "text-yellow-500" },
   ]
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">System Status</h1>
-        <p className="text-muted-foreground">Monitor the health of your application's services.</p>
+        <h1 className="text-3xl font-bold font-headline">Estado del Sistema</h1>
+        <p className="text-muted-foreground">Monitorea la salud de los servicios de tu aplicación.</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Service Health</CardTitle>
+          <CardTitle>Salud del Servicio</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -30,7 +30,7 @@ export default function SystemStatusPage() {
                   <span className="font-medium">{service.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className={`h-2.5 w-2.5 rounded-full ${service.status === 'Operational' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                  <div className={`h-2.5 w-2.5 rounded-full ${service.status === 'Operacional' ? 'bg-green-500' : 'bg-yellow-500'}`} />
                   <span className={`${service.color} font-semibold text-sm`}>{service.status}</span>
                 </div>
               </div>
@@ -41,10 +41,10 @@ export default function SystemStatusPage() {
       
       <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Response Time</CardTitle>
+            <CardTitle className="font-headline">Tiempo de Respuesta</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
-             <img src="https://placehold.co/800x250.png" alt="Response time chart" data-ai-hint="server response chart" className="rounded-lg w-full" />
+             <img src="https://placehold.co/800x250.png" alt="Gráfico de tiempo de respuesta" data-ai-hint="server response chart" className="rounded-lg w-full" />
           </CardContent>
         </Card>
     </div>

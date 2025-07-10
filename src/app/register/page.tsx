@@ -9,36 +9,36 @@ import { AuthCard } from "@/components/auth-card"
 export default function RegisterPage() {
   return (
     <AuthCard
-      title="Create an Account"
-      description="Fill in the details below to join Dojo Dynamics."
+      title="Crear una Cuenta"
+      description="Completa los detalles a continuación para unirte a Dojo Dynamics."
       footer={
         <p className="text-muted-foreground">
-          Already have an account?{" "}
+          ¿Ya tienes una cuenta?{" "}
           <Link href="/login" className="font-medium text-primary hover:underline" prefetch={false}>
-            Login
+            Iniciar Sesión
           </Link>
         </p>
       }
     >
       <form className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
+          <Label htmlFor="fullName">Nombre Completo</Label>
           <Input id="fullName" placeholder="John Doe" required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Correo Electrónico</Label>
           <Input id="email" type="email" placeholder="m@example.com" required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Contraseña</Label>
           <Input id="password" type="password" required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="inviteCode">Invite Code</Label>
-          <Input id="inviteCode" placeholder="Enter your invite code" required />
+          <Label htmlFor="inviteCode">Código de Invitación</Label>
+          <Input id="inviteCode" placeholder="Ingresa tu código de invitación" required />
         </div>
         <Button type="submit" className="w-full">
-          Create Account
+          Crear Cuenta
         </Button>
       </form>
     </AuthCard>

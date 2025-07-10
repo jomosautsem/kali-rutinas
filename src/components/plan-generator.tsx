@@ -38,10 +38,10 @@ import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "./ui/skeleton"
 
 const formSchema = z.object({
-  goals: z.string().min(10, "Please describe your goals in more detail."),
-  currentFitnessLevel: z.enum(["beginner", "intermediate", "advanced"]),
+  goals: z.string().min(10, "Por favor, describe tus objetivos con más detalle."),
+  currentFitnessLevel: z.enum(["principiante", "intermedio", "avanzado"]),
   daysPerWeek: z.coerce.number().min(1).max(7),
-  preferredWorkoutStyle: z.string().min(3, "Please specify a workout style."),
+  preferredWorkoutStyle: z.string().min(3, "Por favor, especifica un estilo de entrenamiento."),
 })
 
 export function PlanGenerator() {
@@ -54,7 +54,7 @@ export function PlanGenerator() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       goals: "",
-      currentFitnessLevel: "beginner",
+      currentFitnessLevel: "principiante",
       daysPerWeek: 3,
       preferredWorkoutStyle: "",
     },
@@ -67,11 +67,11 @@ export function PlanGenerator() {
       const result = await generatePersonalizedTrainingPlan(values)
       setGeneratedPlan(result.plan)
     } catch (error) {
-      console.error("Failed to generate plan:", error)
+      console.error("Error al generar el plan:", error)
       toast({
         variant: "destructive",
-        title: "Generation Failed",
-        description: "Could not generate a plan. Please try again.",
+        title: "Falló la Generación",
+        description: "No se pudo generar un plan. Por favor, inténtalo de nuevo.",
       })
     } finally {
       setIsLoading(false)
@@ -92,14 +92,14 @@ export function PlanGenerator() {
       <DialogTrigger asChild>
         <Button>
           <Sparkles className="mr-2 h-4 w-4" />
-          Generate New Plan
+          Generar Nuevo Plan
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
-          <DialogTitle className="font-headline">Create Your Personalized Plan</DialogTitle>
+          <DialogTitle className="font-headline">Crea Tu Plan Personalizado</DialogTitle>
           <DialogDescription>
-            Provide your details and let our AI craft the perfect workout plan for you.
+            Proporciona tus detalles y deja que nuestra IA cree el plan de entrenamiento perfecto para ti.
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
@@ -110,9 +110,9 @@ export function PlanGenerator() {
                 name="goals"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fitness Goals</FormLabel>
+                    <FormLabel>Metas de Fitness</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g., lose 10 pounds, build muscle" {...field} />
+                      <Textarea placeholder="ej., perder 5 kilos, ganar músculo" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,17 +123,17 @@ export function PlanGenerator() {
                 name="currentFitnessLevel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fitness Level</FormLabel>
+                    <FormLabel>Nivel de Condición Física</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select your fitness level" />
+                          <SelectValue placeholder="Selecciona tu nivel de condición física" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="beginner">Beginner</SelectItem>
-                        <SelectItem value="intermediate">Intermediate</SelectItem>
-                        <SelectItem value="advanced">Advanced</SelectItem>
+                        <SelectItem value="principiante">Principiante</SelectItem>
+                        <SelectItem value="intermedio">Intermedio</SelectItem>
+                        <SelectItem value="avanzado">Avanzado</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -145,7 +145,7 @@ export function PlanGenerator() {
                 name="daysPerWeek"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Days per week</FormLabel>
+                    <FormLabel>Días por semana</FormLabel>
                     <FormControl>
                       <Input type="number" min="1" max="7" {...field} />
                     </FormControl>
@@ -158,9 +158,9 @@ export function PlanGenerator() {
                 name="preferredWorkoutStyle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preferred Workout Style</FormLabel>
+                    <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Weightlifting, Cardio, HIIT" {...field} />
+                      <Input placeholder="ej., Levantamiento de pesas, Cardio, HIIT" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -168,13 +168,13 @@ export function PlanGenerator() {
               />
               <DialogFooter>
                 <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? "Generating..." : "Generate Plan"}
+                  {isLoading ? "Generando..." : "Generar Plan"}
                 </Button>
               </DialogFooter>
             </form>
           </Form>
           <div className="rounded-lg border bg-secondary p-4 space-y-2 overflow-auto max-h-[500px]">
-            <h3 className="font-semibold font-headline">Your AI-Generated Plan</h3>
+            <h3 className="font-semibold font-headline">Tu Plan Generado por IA</h3>
             {isLoading ? (
                <div className="space-y-3">
                  <Skeleton className="h-4 w-3/4" />
@@ -186,7 +186,7 @@ export function PlanGenerator() {
               <div className="text-sm whitespace-pre-wrap">{generatedPlan}</div>
             ) : (
               <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
-                Your plan will appear here...
+                Tu plan aparecerá aquí...
               </div>
             )}
           </div>
