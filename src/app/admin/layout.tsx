@@ -1,0 +1,104 @@
+import Link from "next/link";
+import {
+  Activity,
+  Dumbbell,
+  FileText,
+  LayoutDashboard,
+  Users,
+} from "lucide-react";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+  SidebarTrigger,
+  SidebarInset,
+} from "@/components/ui/sidebar";
+import { DashboardHeader } from "@/components/dashboard-header";
+import { Button } from "@/components/ui/button";
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  // TODO: Add real authentication check here.
+  // This is a placeholder for a protected route.
+  // const session = await auth();
+  // if (!session?.user || session.user.role !== 'admin') {
+  //   redirect('/login');
+  // }
+  
+  const mockUser = {
+    name: "Admin User",
+    email: "admin@dojodynamics.com",
+    avatarUrl: "https://placehold.co/100x100.png"
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <Sidebar>
+          <SidebarHeader>
+            <div className="flex items-center gap-2 p-2">
+              <Dumbbell className="w-8 h-8 text-primary" />
+              <span className="text-lg font-bold font-headline">Dojo Dynamics</span>
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin/dashboard">
+                    <LayoutDashboard />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin/users">
+                    <Users />
+                    <span>Users</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin/templates">
+                    <FileText />
+                    <span>Templates</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin/status">
+                    <Activity />
+                    <span>System Status</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+             {/* Can add footer items here if needed */}
+          </SidebarFooter>
+        </Sidebar>
+        <div className="flex flex-col w-full">
+            <header className="flex h-16 items-center border-b bg-card px-4 md:px-6 sticky top-0 z-40">
+                <div className="md:hidden">
+                    <SidebarTrigger />
+                </div>
+                <div className="ml-auto">
+                    <DashboardHeader user={mockUser} />
+                </div>
+            </header>
+          <main className="flex-1 overflow-auto p-4 md:p-8">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
