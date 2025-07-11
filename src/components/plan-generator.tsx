@@ -33,11 +33,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Sparkles, Trash2, GripVertical, ImagePlus } from "lucide-react"
+import { Sparkles, Trash2, GripVertical, ImagePlus, Save } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "./ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
+import Image from "next/image"
 
 const formSchema = z.object({
   goals: z.string().min(10, "Por favor, describe tus objetivos con más detalle."),
@@ -110,6 +111,15 @@ export function PlanGenerator() {
     const newPlan = { ...generatedPlan };
     newPlan.weeklyPlan[dayIndex].exercises.splice(exerciseIndex, 1);
     setGeneratedPlan(newPlan);
+  };
+  
+  const handleSaveChanges = () => {
+    // In a real app, you would send the `generatedPlan` object to your backend to save it.
+    console.log("Saving changes:", generatedPlan);
+    toast({
+      title: "Plan Guardado",
+      description: "Tus cambios han sido guardados exitosamente.",
+    });
   };
 
 
@@ -270,7 +280,16 @@ export function PlanGenerator() {
             </form>
           </Form>
           <div className="rounded-lg border bg-secondary/50 space-y-2 overflow-hidden max-h-[500px] md:max-h-[600px] flex flex-col">
-            <h3 className="font-semibold font-headline p-4 pb-0">Tu Plan Generado por IA</h3>
+             <div className="flex justify-between items-center p-4 pb-0">
+                <h3 className="font-semibold font-headline">Tu Plan Generado por IA</h3>
+                {generatedPlan && (
+                    <Button variant="outline" size="sm" onClick={handleSaveChanges}>
+                        <Save className="mr-2 h-4 w-4"/>
+                        Guardar Cambios
+                    </Button>
+                )}
+             </div>
+
             {isLoading ? (
                <div className="p-4 space-y-4">
                  <Skeleton className="h-10 w-full" />
@@ -322,14 +341,28 @@ export function PlanGenerator() {
                                 </div>
                             </div>
                             
-                            <div className="flex items-center gap-2">
-                                <ImagePlus className="h-4 w-4 text-muted-foreground"/>
-                                <Input 
-                                    placeholder="Añadir URL de video/imagen..."
-                                    className="h-8 text-sm"
-                                    value={exercise.mediaUrl}
-                                    onChange={(e) => handleExerciseChange(dayIndex, exerciseIndex, 'mediaUrl', e.target.value)}
-                                />
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <ImagePlus className="h-4 w-4 text-muted-foreground"/>
+                                    <Input 
+                                        placeholder="Añadir URL de video/imagen..."
+                                        className="h-8 text-sm"
+                                        value={exercise.mediaUrl}
+                                        onChange={(e) => handleExerciseChange(dayIndex, exerciseIndex, 'mediaUrl', e.target.value)}
+                                    />
+                                </div>
+                                {exercise.mediaUrl && (
+                                    <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+                                        <Image 
+                                            src={exercise.mediaUrl} 
+                                            alt={`Vista previa de ${exercise.name}`} 
+                                            layout="fill"
+                                            objectFit="cover"
+                                            className="bg-muted"
+                                            unoptimized // Use this if you are using external image URLs not configured in next.config.js
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                       </Card>
