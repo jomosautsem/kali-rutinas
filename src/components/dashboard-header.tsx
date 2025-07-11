@@ -35,11 +35,11 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   return (
     <>
       <div className="flex items-center gap-4">
-        <Link href="/">
-          <Button variant="ghost" size="icon" aria-label="Home">
-            <Home className="h-5 w-5" />
-          </Button>
-        </Link>
+        <Button variant="outline" size="icon" asChild>
+            <Link href="/" aria-label="Home">
+                <Home className="h-5 w-5" />
+            </Link>
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
