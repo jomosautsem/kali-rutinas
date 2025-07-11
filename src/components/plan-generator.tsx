@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
+import { generatePersonalizedTrainingPlan, type GeneratePersonalizedTrainingPlanOutput } from "@/ai/flows/generate-personalized-training-plan"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -33,9 +33,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Trash2, GripVertical, ImagePlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "./ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent } from "@/components/ui/card"
 
 const formSchema = z.object({
   goals: z.string().min(10, "Por favor, describe tus objetivos con más detalle."),
@@ -50,7 +52,7 @@ const formSchema = z.object({
 
 export function PlanGenerator() {
   const [isOpen, setIsOpen] = useState(false)
-  const [generatedPlan, setGeneratedPlan] = useState("")
+  const [generatedPlan, setGeneratedPlan] = useState<GeneratePersonalizedTrainingPlanOutput | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -70,7 +72,7 @@ export function PlanGenerator() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    setGeneratedPlan("")
+    setGeneratedPlan(null)
     try {
       const result = await generatePersonalizedTrainingPlan(values)
       setGeneratedPlan(result)
@@ -90,10 +92,26 @@ export function PlanGenerator() {
     setIsOpen(open)
     if (!open) {
       form.reset()
-      setGeneratedPlan("")
+      setGeneratedPlan(null)
       setIsLoading(false)
     }
   }
+  
+  const handleExerciseChange = (dayIndex: number, exerciseIndex: number, field: string, value: string) => {
+    if (!generatedPlan) return
+    const newPlan = { ...generatedPlan }
+    // @ts-ignore
+    newPlan.weeklyPlan[dayIndex].exercises[exerciseIndex][field] = value
+    setGeneratedPlan(newPlan)
+  }
+
+  const removeExercise = (dayIndex: number, exerciseIndex: number) => {
+    if (!generatedPlan) return;
+    const newPlan = { ...generatedPlan };
+    newPlan.weeklyPlan[dayIndex].exercises.splice(exerciseIndex, 1);
+    setGeneratedPlan(newPlan);
+  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -251,21 +269,76 @@ export function PlanGenerator() {
               </DialogFooter>
             </form>
           </Form>
-          <div className="rounded-lg border bg-secondary p-4 space-y-2 overflow-auto max-h-[500px] md:max-h-[600px]">
-            <h3 className="font-semibold font-headline">Tu Plan Generado por IA</h3>
+          <div className="rounded-lg border bg-secondary/50 space-y-2 overflow-hidden max-h-[500px] md:max-h-[600px] flex flex-col">
+            <h3 className="font-semibold font-headline p-4 pb-0">Tu Plan Generado por IA</h3>
             {isLoading ? (
-               <div className="space-y-3">
-                 <Skeleton className="h-4 w-3/4" />
-                 <Skeleton className="h-4 w-1/2" />
-                 <Skeleton className="h-4 w-full" />
-                 <Skeleton className="h-4 w-5/6" />
-                 <Skeleton className="h-4 w-3/4" />
-                 <Skeleton className="h-4 w-full" />
+               <div className="p-4 space-y-4">
+                 <Skeleton className="h-10 w-full" />
+                 <Skeleton className="h-24 w-full" />
+                 <Skeleton className="h-24 w-full" />
+                 <Skeleton className="h-24 w-full" />
                </div>
-            ) : generatedPlan ? (
-              <div className="text-sm whitespace-pre-wrap">{generatedPlan}</div>
+            ) : generatedPlan && generatedPlan.weeklyPlan ? (
+              <Tabs defaultValue={generatedPlan.weeklyPlan[0]?.day} className="w-full flex-1 flex flex-col overflow-auto">
+                <div className="px-4">
+                  <TabsList className="grid w-full grid-cols-5">
+                    {generatedPlan.weeklyPlan.map(dayPlan => (
+                      <TabsTrigger key={dayPlan.day} value={dayPlan.day}>{dayPlan.day.substring(0,3)}</TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
+                {generatedPlan.weeklyPlan.map((dayPlan, dayIndex) => (
+                  <TabsContent key={dayPlan.day} value={dayPlan.day} className="flex-1 overflow-auto p-4 space-y-4">
+                    <h4 className="font-semibold">{dayPlan.day} - {dayPlan.focus}</h4>
+                    {dayPlan.exercises.map((exercise, exerciseIndex) => (
+                      <Card key={exerciseIndex} className="bg-background/80">
+                        <CardContent className="p-4 space-y-3">
+                            <div className="flex items-start justify-between">
+                                <Input 
+                                    className="text-base font-semibold border-0 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                                    value={exercise.name}
+                                    onChange={(e) => handleExerciseChange(dayIndex, exerciseIndex, 'name', e.target.value)}
+                                />
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeExercise(dayIndex, exerciseIndex)}>
+                                      <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                  <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab"/>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div>
+                                    <span className="text-foreground font-medium">Series:</span>
+                                    <Input className="inline-block w-12 ml-2 h-7" value={exercise.series} onChange={(e) => handleExerciseChange(dayIndex, exerciseIndex, 'series', e.target.value)} />
+                                </div>
+                                <div>
+                                    <span className="text-foreground font-medium">Reps:</span>
+                                    <Input className="inline-block w-16 ml-2 h-7" value={exercise.reps} onChange={(e) => handleExerciseChange(dayIndex, exerciseIndex, 'reps', e.target.value)} />
+                                </div>
+                                <div>
+                                    <span className="text-foreground font-medium">Descanso:</span>
+                                    <Input className="inline-block w-16 ml-2 h-7" value={exercise.rest} onChange={(e) => handleExerciseChange(dayIndex, exerciseIndex, 'rest', e.target.value)} />
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                <ImagePlus className="h-4 w-4 text-muted-foreground"/>
+                                <Input 
+                                    placeholder="Añadir URL de video/imagen..."
+                                    className="h-8 text-sm"
+                                    value={exercise.mediaUrl}
+                                    onChange={(e) => handleExerciseChange(dayIndex, exerciseIndex, 'mediaUrl', e.target.value)}
+                                />
+                            </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </TabsContent>
+                ))}
+              </Tabs>
             ) : (
-              <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
+              <div className="text-sm text-muted-foreground flex items-center justify-center h-full p-4">
                 Tu plan aparecerá aquí...
               </div>
             )}
