@@ -73,7 +73,7 @@ export function PlanGenerator() {
     setGeneratedPlan("")
     try {
       const result = await generatePersonalizedTrainingPlan(values)
-      setGeneratedPlan(result.plan)
+      setGeneratedPlan(result)
     } catch (error) {
       console.error("Error al generar el plan:", error)
       toast({

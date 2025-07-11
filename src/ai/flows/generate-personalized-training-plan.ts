@@ -16,6 +16,7 @@ const GeneratePersonalizedTrainingPlanInputSchema = z.object({
     .describe('Los objetivos de fitness del usuario, ej., pérdida de peso, ganancia muscular, mejora de la resistencia.'),
   currentFitnessLevel: z
     .string()
+
     .describe('El nivel de fitness actual del usuario, ej., principiante, intermedio, avanzado.'),
   daysPerWeek: z
     .number()
@@ -30,9 +31,8 @@ const GeneratePersonalizedTrainingPlanInputSchema = z.object({
 });
 export type GeneratePersonalizedTrainingPlanInput = z.infer<typeof GeneratePersonalizedTrainingPlanInputSchema>;
 
-const GeneratePersonalizedTrainingPlanOutputSchema = z.object({
-  plan: z.string().describe('Un plan de entrenamiento personalizado basado en la entrada del usuario.'),
-});
+const GeneratePersonalizedTrainingPlanOutputSchema = z.string().describe('Un plan de entrenamiento personalizado basado en la entrada del usuario.');
+
 export type GeneratePersonalizedTrainingPlanOutput = z.infer<typeof GeneratePersonalizedTrainingPlanOutputSchema>;
 
 export async function generatePersonalizedTrainingPlan(
@@ -44,7 +44,7 @@ export async function generatePersonalizedTrainingPlan(
 const prompt = ai.definePrompt({
   name: 'generatePersonalizedTrainingPlanPrompt',
   input: {schema: GeneratePersonalizedTrainingPlanInputSchema},
-  output: {schema: GeneratePersonalizedTrainingPlanOutputSchema},
+  output: {schema: GeneratePersonalizedTrainingPlanOutputSchema, format: 'text'},
   prompt: `Eres un entrenador personal que se especializa en crear planes de entrenamiento personalizados.
 
   Basado en los objetivos del usuario, nivel de condición física actual, días de entrenamiento disponibles por semana y estilo de entrenamiento preferido, crea un plan de entrenamiento detallado.
