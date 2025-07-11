@@ -1,10 +1,15 @@
+
+"use client"
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
 import { CheckCircle, Dumbbell, Clock } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import type { User } from "@/components/admin/user-table-client";
 
 // MOCK: In a real app, this would come from the user's data.
-const planStatus: 'aprobado' | 'pendiente' | 'sin-plan' = 'pendiente'; 
+// const planStatus: 'aprobado' | 'pendiente' | 'sin-plan' = 'pendiente'; 
 // const planStatus: 'aprobado' | 'pendiente' | 'sin-plan' = 'aprobado'; 
 // const planStatus: 'aprobado' | 'pendiente' | 'sin-plan' = 'sin-plan'; 
 
@@ -78,7 +83,47 @@ const SinPlan = () => (
 )
 
 export default function DashboardPage() {
+  const [planStatus, setPlanStatus] = useState<'aprobado' | 'pendiente' | 'sin-plan' | null>(null);
+
+  useEffect(() => {
+    // This simulates fetching the current user's plan status after they log in.
+    if (typeof window !== 'undefined') {
+      const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
+      const storedUsers = localStorage.getItem("registeredUsers");
+      if (loggedInUserEmail && storedUsers) {
+        const users: User[] = JSON.parse(storedUsers);
+        const currentUser = users.find(u => u.email === loggedInUserEmail);
+        if (currentUser) {
+          setPlanStatus(currentUser.planStatus as any);
+        } else {
+          setPlanStatus('sin-plan');
+        }
+      } else {
+        setPlanStatus('sin-plan'); // Default for users not found
+      }
+    }
+  }, []);
+
+
+  const handlePlanGenerated = () => {
+    // When a plan is generated, it should be set to 'pending'
+    if (typeof window !== 'undefined') {
+      const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
+      const storedUsers = localStorage.getItem("registeredUsers");
+      if (loggedInUserEmail && storedUsers) {
+        let users: User[] = JSON.parse(storedUsers);
+        users = users.map(u => u.email === loggedInUserEmail ? { ...u, planStatus: 'pendiente' } : u);
+        localStorage.setItem("registeredUsers", JSON.stringify(users));
+        setPlanStatus('pendiente');
+      }
+    }
+  };
+
+
   const renderPlanContent = () => {
+    if (planStatus === null) {
+        return <p>Cargando estado del plan...</p>; // Or a skeleton loader
+    }
     switch(planStatus) {
       case 'aprobado':
         return <PlanAprobado />;
@@ -95,7 +140,7 @@ export default function DashboardPage() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl md:text-3xl font-bold font-headline">Tu Panel</h1>
-        <PlanGenerator />
+        <PlanGenerator onPlanGenerated={handlePlanGenerated} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
@@ -125,3 +170,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    

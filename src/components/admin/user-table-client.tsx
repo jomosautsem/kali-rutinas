@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -45,6 +46,7 @@ export type User = {
 type UserTableClientProps = {
   users: User[]
   onDeleteUser: (userId: string) => void;
+  onApprovePlan: (userId: string) => void;
 }
 
 const planStatusConfig = {
@@ -55,7 +57,7 @@ const planStatusConfig = {
 };
 
 
-export function UserTableClient({ users, onDeleteUser }: UserTableClientProps) {
+export function UserTableClient({ users, onDeleteUser, onApprovePlan }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
@@ -134,7 +136,14 @@ export function UserTableClient({ users, onDeleteUser }: UserTableClientProps) {
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                       <DropdownMenuItem>Ver detalles del usuario</DropdownMenuItem>
                       <DropdownMenuItem>Ver plan de entrenamiento</DropdownMenuItem>
-                      <DropdownMenuItem className="text-green-600 focus:text-green-600">Aprobar Plan</DropdownMenuItem>
+                      {user.planStatus === 'pendiente' && (
+                        <DropdownMenuItem 
+                            className="text-green-600 focus:text-green-600"
+                            onClick={() => onApprovePlan(user.id)}
+                        >
+                            Aprobar Plan
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
@@ -171,3 +180,5 @@ export function UserTableClient({ users, onDeleteUser }: UserTableClientProps) {
     </>
   )
 }
+
+    

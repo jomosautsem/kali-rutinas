@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -51,7 +52,11 @@ const formSchema = z.object({
   goalTerm: z.enum(["corto", "mediano", "largo"]),
 })
 
-export function PlanGenerator() {
+type PlanGeneratorProps = {
+  onPlanGenerated: () => void;
+};
+
+export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [generatedPlan, setGeneratedPlan] = useState<GeneratePersonalizedTrainingPlanOutput | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -117,9 +122,11 @@ export function PlanGenerator() {
     // In a real app, you would send the `generatedPlan` object to your backend to save it.
     console.log("Saving changes:", generatedPlan);
     toast({
-      title: "Plan Guardado",
-      description: "Tus cambios han sido guardados exitosamente.",
+      title: "Plan Enviado para Aprobación",
+      description: "Tu plan se ha guardado y ahora está pendiente de revisión por un administrador.",
     });
+    onPlanGenerated();
+    handleOpenChange(false); // Close the dialog
   };
 
 
@@ -285,7 +292,7 @@ export function PlanGenerator() {
                 {generatedPlan && (
                     <Button variant="outline" size="sm" onClick={handleSaveChanges}>
                         <Save className="mr-2 h-4 w-4"/>
-                        Guardar Cambios
+                        Guardar y Enviar a Revisión
                     </Button>
                 )}
              </div>
@@ -381,3 +388,5 @@ export function PlanGenerator() {
     </Dialog>
   )
 }
+
+    

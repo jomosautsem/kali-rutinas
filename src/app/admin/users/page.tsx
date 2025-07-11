@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -41,6 +42,14 @@ export default function AdminUsersPage() {
     setUsers(updatedUsers);
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
   };
+  
+  const handleApprovePlan = (userId: string) => {
+    const updatedUsers = users.map(user => 
+      user.id === userId ? { ...user, planStatus: 'aprobado' } : user
+    );
+    setUsers(updatedUsers);
+    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+  };
 
 
   return (
@@ -55,7 +64,9 @@ export default function AdminUsersPage() {
           Añadir Usuario
         </Button>
       </div>
-      <UserTableClient users={users} onDeleteUser={handleDeleteUser} />
+      <UserTableClient users={users} onDeleteUser={handleDeleteUser} onApprovePlan={handleApprovePlan} />
     </div>
   )
 }
+
+    

@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthCard } from "@/components/auth-card"
 import { useToast } from "@/hooks/use-toast"
+import type { User } from "@/components/admin/user-table-client"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,34 +22,48 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Credenciales de administrador (hardcoded)
     const adminEmail = "kalicentrodeportivotemixco@gmail.com"
     const adminPassword = "123321qw"
 
-    // Simulación de inicio de sesión
-    // En una app real, aquí se llamaría a un servicio de autenticación.
     if (email === adminEmail && password === adminPassword) {
-      // Es el administrador
       toast({
         title: "Inicio de Sesión Exitoso",
         description: "Redirigiendo al panel de administrador...",
       })
+      sessionStorage.setItem("loggedInUser", email);
       router.push("/admin/dashboard")
-    } else if (email && password) {
-      // Se asume que es un cliente
-      toast({
-        title: "Inicio de Sesión Exitoso",
-        description: "Redirigiendo a tu panel...",
-      })
-      router.push("/dashboard")
-    } else {
-      // Error
-      toast({
-        variant: "destructive",
-        title: "Inicio de Sesión Fallido",
-        description: "Correo o contraseña inválidos. Por favor, inténtalo de nuevo.",
-      })
-      setIsLoading(false)
+      return;
+    }
+
+    try {
+        const storedUsers = localStorage.getItem("registeredUsers");
+        const users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+        const user = users.find(u => u.email === email);
+
+        if (user) {
+            // In a real app, you would verify the password hash here
+            toast({
+                title: "Inicio de Sesión Exitoso",
+                description: "Redirigiendo a tu panel...",
+            });
+            sessionStorage.setItem("loggedInUser", email);
+            router.push("/dashboard");
+        } else {
+             toast({
+                variant: "destructive",
+                title: "Inicio de Sesión Fallido",
+                description: "Correo o contraseña inválidos. Por favor, inténtalo de nuevo.",
+            });
+            setIsLoading(false);
+        }
+
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Ocurrió un error al intentar iniciar sesión.",
+        });
+        setIsLoading(false);
     }
   }
 
@@ -95,3 +111,5 @@ export default function LoginPage() {
     </AuthCard>
   )
 }
+
+    
