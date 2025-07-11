@@ -5,17 +5,25 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Video, Image as ImageIcon } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import type { User, UserPlan } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const isVideo = (url: string) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.mov'];
     const lowercasedUrl = url.toLowerCase();
-    return videoExtensions.some(ext => lowercasedUrl.includes(ext));
+    return videoExtensions.some(ext => lowercasedUrl.endsWith(ext));
 };
+
+const isYoutubeUrl = (url: string) => {
+    if (!url) return false;
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
+    return youtubeRegex.test(url);
+}
 
 const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
     if (!url) {
@@ -25,6 +33,17 @@ const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
             </div>
         )
     };
+
+    if (isYoutubeUrl(url)) {
+        return (
+            <Button asChild variant="secondary" className="w-full">
+                <Link href={url} target="_blank" rel="noopener noreferrer">
+                    <Youtube className="mr-2 h-5 w-5" />
+                    Ver Video en YouTube
+                </Link>
+            </Button>
+        )
+    }
 
     if (isVideo(url)) {
         return <video src={url} controls className="w-full aspect-video rounded-md" />
@@ -55,7 +74,7 @@ const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
                                         <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
                                     </div>
                                 </div>
-                                <div className="md:col-span-4">
+                                <div className="md:col-span-4 self-center">
                                      <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
                                 </div>
                             </div>

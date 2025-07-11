@@ -12,10 +12,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Trash2, PlusCircle, Sparkles, Loader2, Save, Video, Image as ImageIcon } from "lucide-react";
+import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
+import Link from "next/link";
 
 type PlanEditorProps = {
   user: User | null;
@@ -28,8 +29,14 @@ const isVideo = (url: string) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.mov'];
     const lowercasedUrl = url.toLowerCase();
-    return videoExtensions.some(ext => lowercasedUrl.includes(ext));
+    return videoExtensions.some(ext => lowercasedUrl.endsWith(ext));
 };
+
+const isYoutubeUrl = (url: string) => {
+    if (!url) return false;
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
+    return youtubeRegex.test(url);
+}
 
 
 export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEditorProps) {
@@ -53,7 +60,12 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
       setIsLoading(true);
       const storedPlan = localStorage.getItem(`userPlan_${user.email}`);
       if (storedPlan) {
-        form.reset(JSON.parse(storedPlan));
+        try {
+          form.reset(JSON.parse(storedPlan));
+        } catch (error) {
+           console.error("Failed to parse stored plan:", error);
+           form.reset({ weeklyPlan: [] });
+        }
       } else {
         form.reset({ weeklyPlan: [] });
       }
@@ -213,6 +225,17 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
             )
         };
 
+        if (isYoutubeUrl(mediaUrl)) {
+            return (
+                <Button asChild variant="secondary" className="w-full">
+                     <Link href={mediaUrl} target="_blank" rel="noopener noreferrer">
+                        <Youtube className="mr-2 h-5 w-5" />
+                        Ver en YouTube
+                    </Link>
+                </Button>
+            )
+        }
+
         if (isVideo(mediaUrl)) {
             return <video src={mediaUrl} controls className="w-full aspect-video rounded-md" />
         }
@@ -253,7 +276,7 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
                             />
                         </div>
                     </div>
-                    <div className="md:col-span-3">
+                    <div className="md:col-span-3 self-center">
                          <MediaPreview exerciseIndex={exerciseIndex} />
                     </div>
                     <Button
