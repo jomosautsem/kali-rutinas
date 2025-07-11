@@ -44,6 +44,7 @@ export type User = {
 
 type UserTableClientProps = {
   users: User[]
+  onDeleteUser: (userId: string) => void;
 }
 
 const planStatusConfig = {
@@ -54,7 +55,7 @@ const planStatusConfig = {
 };
 
 
-export function UserTableClient({ users }: UserTableClientProps) {
+export function UserTableClient({ users, onDeleteUser }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
@@ -65,8 +66,7 @@ export function UserTableClient({ users }: UserTableClientProps) {
   
   const handleConfirmDelete = () => {
     if (selectedUser) {
-      console.log("Eliminando usuario:", selectedUser.id)
-      // TODO: Implement actual delete logic
+      onDeleteUser(selectedUser.id);
       setIsDeleteDialogOpen(false)
       setSelectedUser(null)
     }

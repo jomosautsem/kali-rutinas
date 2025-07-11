@@ -36,6 +36,13 @@ export default function AdminUsersPage() {
     }
   }, []);
 
+  const handleDeleteUser = (userId: string) => {
+    const updatedUsers = users.filter(user => user.id !== userId);
+    setUsers(updatedUsers);
+    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+  };
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -48,7 +55,7 @@ export default function AdminUsersPage() {
           Añadir Usuario
         </Button>
       </div>
-      <UserTableClient users={users} />
+      <UserTableClient users={users} onDeleteUser={handleDeleteUser} />
     </div>
   )
 }
