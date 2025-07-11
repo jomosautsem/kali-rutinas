@@ -13,7 +13,7 @@ type AuthCardProps = {
 export function AuthCard({ title, description, children, footer }: AuthCardProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md shadow-lg">
+      <Card className="w-full max-w-md shadow-lg border-primary/20">
         <CardHeader className="text-center">
           <Dumbbell className="mx-auto h-10 w-10 text-primary" />
           <CardTitle className="mt-4 text-2xl font-bold font-headline">{title}</CardTitle>

@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-14 flex items-center bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      <header className="px-4 lg:px-6 h-14 flex items-center bg-background/80 backdrop-blur-sm sticky top-0 z-50 border-b border-border">
         <Link href="#" className="flex items-center justify-center" prefetch={false}>
           <Dumbbell className="h-6 w-6 text-primary" />
-          <span className="ml-2 text-lg font-bold font-headline">Dojo Dynamics</span>
+          <span className="ml-2 text-lg font-bold font-headline">Rutinas Kali</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
@@ -37,7 +37,7 @@ export default function Home() {
                     Desbloquea tu Potencial con Entrenamiento Potenciado por IA
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Dojo Dynamics crea planes de fitness personalizados que se adaptan a tus metas, nivel y preferencias.
+                    Rutinas Kali crea planes de fitness personalizados que se adaptan a tus metas, nivel y preferencias.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -113,7 +113,7 @@ export default function Home() {
       </main>
 
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-muted-foreground">&copy; 2024 Dojo Dynamics. Todos los derechos reservados.</p>
+        <p className="text-xs text-muted-foreground">&copy; 2024 Rutinas Kali. Todos los derechos reservados.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link href="#" className="text-xs hover:underline underline-offset-4" prefetch={false}>
             Términos de Servicio

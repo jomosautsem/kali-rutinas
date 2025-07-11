@@ -31,7 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   
   const mockUser = {
     name: "Usuario Administrador",
-    email: "admin@dojodynamics.com",
+    email: "admin@rutinaskali.com",
     avatarUrl: "https://placehold.co/100x100.png"
   }
 
@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
               <Dumbbell className="w-8 h-8 text-primary" />
-              <span className="text-lg font-bold font-headline">Dojo Dynamics</span>
+              <span className="text-lg font-bold font-headline">Rutinas Kali</span>
             </div>
           </SidebarHeader>
           <SidebarContent>
