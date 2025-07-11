@@ -23,6 +23,10 @@ const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   preferredWorkoutStyle: z
     .string()
     .describe('El estilo de entrenamiento preferido del usuario, ej., levantamiento de pesas, cardio, calistenia.'),
+  age: z.number().describe('La edad del usuario.'),
+  weight: z.number().describe('El peso del usuario en kilogramos.'),
+  height: z.number().describe('La estatura del usuario en centímetros.'),
+  goalTerm: z.string().describe('El plazo para alcanzar la meta: corto, mediano o largo plazo.'),
 });
 export type GeneratePersonalizedTrainingPlanInput = z.infer<typeof GeneratePersonalizedTrainingPlanInputSchema>;
 
@@ -49,6 +53,10 @@ const prompt = ai.definePrompt({
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
   Días por Semana: {{{daysPerWeek}}}
   Estilo de Entrenamiento Preferido: {{{preferredWorkoutStyle}}}
+  Edad: {{{age}}}
+  Peso (kg): {{{weight}}}
+  Estatura (cm): {{{height}}}
+  Plazo de la Meta: {{{goalTerm}}}
 
   Plan de Entrenamiento:`,
 });

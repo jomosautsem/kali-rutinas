@@ -42,6 +42,10 @@ const formSchema = z.object({
   currentFitnessLevel: z.enum(["principiante", "intermedio", "avanzado"]),
   daysPerWeek: z.coerce.number().min(1).max(7),
   preferredWorkoutStyle: z.string().min(3, "Por favor, especifica un estilo de entrenamiento."),
+  age: z.coerce.number().min(12, "La edad debe ser al menos 12.").max(100, "La edad no puede ser mayor a 100."),
+  weight: z.coerce.number().min(30, "Ingresa un peso válido en kg.").max(300),
+  height: z.coerce.number().min(100, "Ingresa una estatura válida en cm.").max(250),
+  goalTerm: z.enum(["corto", "mediano", "largo"]),
 })
 
 export function PlanGenerator() {
@@ -57,6 +61,10 @@ export function PlanGenerator() {
       currentFitnessLevel: "principiante",
       daysPerWeek: 3,
       preferredWorkoutStyle: "",
+      age: 18,
+      weight: 70,
+      height: 175,
+      goalTerm: "mediano",
     },
   })
 
@@ -95,7 +103,7 @@ export function PlanGenerator() {
           Generar Nuevo Plan
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="font-headline">Crea Tu Plan Personalizado</DialogTitle>
           <DialogDescription>
@@ -118,42 +126,46 @@ export function PlanGenerator() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="currentFitnessLevel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nivel de Condición Física</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <FormField
+                  control={form.control}
+                  name="currentFitnessLevel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nivel de Condición Física</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona tu nivel de condición física" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="principiante">Principiante</SelectItem>
+                          <SelectItem value="intermedio">Intermedio</SelectItem>
+                          <SelectItem value="avanzado">Avanzado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="daysPerWeek"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Días por semana</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona tu nivel de condición física" />
-                        </SelectTrigger>
+                        <Input type="number" min="1" max="7" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="principiante">Principiante</SelectItem>
-                        <SelectItem value="intermedio">Intermedio</SelectItem>
-                        <SelectItem value="avanzado">Avanzado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
                <FormField
-                control={form.control}
-                name="daysPerWeek"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Días por semana</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" max="7" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
                 control={form.control}
                 name="preferredWorkoutStyle"
                 render={({ field }) => (
@@ -166,6 +178,72 @@ export function PlanGenerator() {
                   </FormItem>
                 )}
               />
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="age"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Edad</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="weight"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Peso (kg)</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="height"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estatura (cm)</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="goalTerm"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Plazo de la Meta</FormLabel>
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un plazo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="corto">Corto Plazo</SelectItem>
+                        <SelectItem value="mediano">Mediano Plazo</SelectItem>
+                        <SelectItem value="largo">Largo Plazo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <DialogFooter>
                 <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? "Generando..." : "Generar Plan"}
@@ -173,7 +251,7 @@ export function PlanGenerator() {
               </DialogFooter>
             </form>
           </Form>
-          <div className="rounded-lg border bg-secondary p-4 space-y-2 overflow-auto max-h-[500px]">
+          <div className="rounded-lg border bg-secondary p-4 space-y-2 overflow-auto max-h-[500px] md:max-h-[600px]">
             <h3 className="font-semibold font-headline">Tu Plan Generado por IA</h3>
             {isLoading ? (
                <div className="space-y-3">
@@ -181,6 +259,8 @@ export function PlanGenerator() {
                  <Skeleton className="h-4 w-1/2" />
                  <Skeleton className="h-4 w-full" />
                  <Skeleton className="h-4 w-5/6" />
+                 <Skeleton className="h-4 w-3/4" />
+                 <Skeleton className="h-4 w-full" />
                </div>
             ) : generatedPlan ? (
               <div className="text-sm whitespace-pre-wrap">{generatedPlan}</div>
