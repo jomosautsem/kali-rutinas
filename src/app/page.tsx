@@ -1,25 +1,54 @@
 import Link from 'next/link';
-import { Dumbbell, Users, Activity, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+const OmIcon = () => (
+  <svg
+    width="1em"
+    height="1em"
+    viewBox="0 0 256 256"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M127.81,42.12a88,88,0,0,0-82.5,60.89,4,4,0,0,0,1,3.8,4.1,4.1,0,0,0,3.83.93,88,88,0,0,1,80.59-32.88c43.6,0,79.52,32.42,85.24,73.49,2.5,18-1.5,35.13-11.83,49.2-12,16.29-31.2,26.21-52,26.21-23.41,0-43.2-13.43-52.49-33.15a4,4,0,0,0-4.48-2.67,4,4,0,0,0-2.67,4.48c10.43,21.82,33.13,37.34,59.64,37.34,23.33,0,44.83-11.45,58.29-29.62s15.46-39.3,12.72-59.21C215.1,80,175.75,42.12,127.81,42.12Zm-29.17,90.2a28,28,0,1,1,32.26-27.64A28.1,28.1,0,0,1,98.64,132.32Zm8-52.54a20,20,0,1,0,22.7,20A20,20,0,0,0,106.67,79.78ZM59.4,70.52a4,4,0,0,0-5.46,1.44C33.5,104.1,38.63,143.5,59.4,70.52Z"
+    />
+  </svg>
+);
+
+const Logo = () => (
+  <div className="flex items-center justify-center bg-black rounded-full w-12 h-12 border-2 border-primary">
+    <div className="text-center text-primary font-bold">
+      <OmIcon />
+    </div>
+  </div>
+);
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className="px-4 lg:px-6 h-14 flex items-center bg-background/80 backdrop-blur-sm sticky top-0 z-50 border-b border-border">
+    <div className="relative flex flex-col min-h-screen bg-black text-white overflow-hidden">
+      <div
+        className="absolute inset-0 z-0 bg-no-repeat"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 15% 30%, hsla(var(--primary) / 0.3), transparent 30%),
+            radial-gradient(circle at 85% 65%, hsla(var(--primary) / 0.25), transparent 40%)
+          `,
+        }}
+      ></div>
+
+      <header className="px-4 lg:px-6 h-20 flex items-center z-10">
         <Link href="#" className="flex items-center justify-center" prefetch={false}>
-          <Dumbbell className="h-6 w-6 text-primary" />
-          <span className="ml-2 text-lg font-bold font-headline">Rutinas Kali</span>
+          <Logo />
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
+        <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
           <Link
             href="/login"
-            className="text-sm font-medium hover:underline underline-offset-4"
+            className="text-sm font-medium hover:text-primary transition-colors"
             prefetch={false}
           >
             Iniciar Sesión
           </Link>
-          <Button asChild>
+          <Button asChild className="rounded-full font-bold">
             <Link href="/register" prefetch={false}>
               Registrarse
             </Link>
@@ -27,102 +56,27 @@ export default function Home() {
         </nav>
       </header>
 
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline">
-                    Desbloquea tu Potencial con Entrenamiento Potenciado por IA
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Rutinas Kali crea planes de fitness personalizados que se adaptan a tus metas, nivel y preferencias.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button asChild size="lg">
-                    <Link href="/register" className="inline-flex items-center gap-2" prefetch={false}>
-                      Comienza tu Viaje <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-4 z-10">
+        <div className="relative mb-8">
+            <div className="absolute -top-12 -left-1/2 w-[200%] h-[200%] bg-primary/20 blur-3xl rounded-full"></div>
+            <div className="relative flex items-center justify-center bg-black rounded-full w-32 h-32 border-4 border-primary shadow-lg shadow-primary/20">
+              <div className="text-center text-primary">
+                  <span className="text-xs font-semibold tracking-wider">KALI</span>
+                  <OmIcon />
+                  <span className="text-xs font-semibold tracking-wider">DOJO</span>
               </div>
-              <img
-                src="https://placehold.co/600x600.png"
-                width="600"
-                height="600"
-                alt="Héroe"
-                data-ai-hint="fitness workout"
-                className="mx-auto aspect-square overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
-              />
             </div>
-          </div>
-        </section>
+        </div>
 
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-secondary">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Características Clave</div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">
-                  Entrena Más Inteligente, No Más Duro
-                </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Nuestra plataforma proporciona todo lo que necesitas para tener éxito, desde la generación inteligente de planes hasta el seguimiento del progreso.
-                </p>
-              </div>
-            </div>
-            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-lg font-medium font-headline">Generación de Planes con IA</CardTitle>
-                  <Sparkles className="w-6 h-6 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Nuestra IA avanzada crea planes de entrenamiento únicos basados en tus necesidades y objetivos individuales.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-lg font-medium font-headline">Panel del Cliente</CardTitle>
-                  <Activity className="w-6 h-6 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Un panel intuitivo para ver tu plan personalizado y seguir tu progreso a lo largo del tiempo.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-lg font-medium font-headline">Centro de Administración</CardTitle>
-                  <Users className="w-6 h-6 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Herramientas completas para que los administradores gestionen usuarios, plantillas y supervisen la salud del sistema.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
+
+        <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl font-headline text-shadow"
+            style={{ textShadow: '0 0 15px hsla(var(--primary) / 0.8)' }}>
+          FORJA TU MEJOR VERSIÓN
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg text-neutral-300">
+          Planes de entrenamiento y nutrición personalizados, alcanza tus metas de fitness con la guía experta de Kali Dojo Gym.
+        </p>
       </main>
-
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-muted-foreground">&copy; 2024 Rutinas Kali. Todos los derechos reservados.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link href="#" className="text-xs hover:underline underline-offset-4" prefetch={false}>
-            Términos de Servicio
-          </Link>
-          <Link href="#" className="text-xs hover:underline underline-offset-4" prefetch={false}>
-            Privacidad
-          </Link>
-        </nav>
-      </footer>
     </div>
   );
 }
