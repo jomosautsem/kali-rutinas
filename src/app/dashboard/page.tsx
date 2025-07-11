@@ -10,8 +10,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan } from "@/lib/types";
 
 const isVideo = (url: string) => {
-    return url.toLowerCase().endsWith(".mp4") || url.toLowerCase().endsWith(".webm");
-}
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.mov'];
+    const lowercasedUrl = url.toLowerCase();
+    return videoExtensions.some(ext => lowercasedUrl.includes(ext));
+};
+
 
 const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
     <div className="space-y-6">

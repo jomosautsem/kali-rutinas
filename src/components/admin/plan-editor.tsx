@@ -24,6 +24,14 @@ type PlanEditorProps = {
   onSaveAndApprove: (userId: string, plan: UserPlan) => void;
 };
 
+const isVideo = (url: string) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.mov'];
+    const lowercasedUrl = url.toLowerCase();
+    return videoExtensions.some(ext => lowercasedUrl.includes(ext));
+};
+
+
 export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEditorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -191,8 +199,6 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
         name: `weeklyPlan.${dayIndex}.exercises`
     });
     
-    const isVideo = (url: string) => url.toLowerCase().endsWith(".mp4") || url.toLowerCase().endsWith(".webm");
-
     const MediaPreview = ({ exerciseIndex }: { exerciseIndex: number }) => {
         const mediaUrl = useWatch({
             control,
