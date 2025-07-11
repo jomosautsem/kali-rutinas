@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import type { User, UserPlan } from "@/lib/types";
@@ -53,37 +53,48 @@ const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
 };
 
 const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
-    <Accordion type="multiple" defaultValue={plan.weeklyPlan.map((_, index) => `day-${index}`)} className="w-full">
-        {plan.weeklyPlan.map((dayPlan, dayIndex) => (
-            <AccordionItem key={dayIndex} value={`day-${dayIndex}`}>
-                <AccordionTrigger>
-                    <div className="flex items-center gap-4 w-full">
-                        <span className="font-bold w-32 text-left">{dayPlan.day}</span>
-                        <span className="text-base flex-1 text-left text-muted-foreground">{dayPlan.focus}</span>
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                    <div className="space-y-4 pl-4">
-                        {dayPlan.exercises.map((exercise, exerciseIndex) => (
-                            <div key={exerciseIndex} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-secondary/50">
-                                <div className="md:col-span-8 space-y-2">
-                                    <p className="font-semibold text-base">{exercise.name}</p>
-                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                                        <span>Series: <span className="font-medium text-foreground">{exercise.series}</span></span>
-                                        <span>Reps: <span className="font-medium text-foreground">{exercise.reps}</span></span>
-                                        <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
+    <div className="space-y-6">
+        {plan.recommendations && (
+            <Alert className="bg-primary/5 border-primary/20">
+                <Lightbulb className="h-5 w-5 text-primary" />
+                <AlertTitle className="font-headline text-primary">Recomendaciones del Entrenador</AlertTitle>
+                <AlertDescription className="text-foreground/80">
+                    {plan.recommendations}
+                </AlertDescription>
+            </Alert>
+        )}
+        <Accordion type="multiple" defaultValue={plan.weeklyPlan.map((_, index) => `day-${index}`)} className="w-full">
+            {plan.weeklyPlan.map((dayPlan, dayIndex) => (
+                <AccordionItem key={dayIndex} value={`day-${dayIndex}`}>
+                    <AccordionTrigger>
+                        <div className="flex items-center gap-4 w-full">
+                            <span className="font-bold w-32 text-left">{dayPlan.day}</span>
+                            <span className="text-base flex-1 text-left text-muted-foreground">{dayPlan.focus}</span>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <div className="space-y-4 pl-4">
+                            {dayPlan.exercises.map((exercise, exerciseIndex) => (
+                                <div key={exerciseIndex} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-secondary/50">
+                                    <div className="md:col-span-8 space-y-2">
+                                        <p className="font-semibold text-base">{exercise.name}</p>
+                                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                            <span>Series: <span className="font-medium text-foreground">{exercise.series}</span></span>
+                                            <span>Reps: <span className="font-medium text-foreground">{exercise.reps}</span></span>
+                                            <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-4 self-center">
+                                        <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
                                     </div>
                                 </div>
-                                <div className="md:col-span-4 self-center">
-                                     <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </AccordionContent>
-            </AccordionItem>
-        ))}
-    </Accordion>
+                            ))}
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+            ))}
+        </Accordion>
+    </div>
 )
 
 const PlanPendiente = () => (

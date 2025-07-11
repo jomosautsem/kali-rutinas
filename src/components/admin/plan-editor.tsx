@@ -12,11 +12,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon } from "lucide-react";
+import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
 import Link from "next/link";
+import { Textarea } from "../ui/textarea";
 
 type PlanEditorProps = {
   user: User | null;
@@ -46,6 +47,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
 
   const form = useForm<UserPlan>({
     defaultValues: {
+      recommendations: "",
       weeklyPlan: []
     }
   });
@@ -64,10 +66,10 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
           form.reset(JSON.parse(storedPlan));
         } catch (error) {
            console.error("Failed to parse stored plan:", error);
-           form.reset({ weeklyPlan: [] });
+           form.reset({ recommendations: "", weeklyPlan: [] });
         }
       } else {
-        form.reset({ weeklyPlan: [] });
+        form.reset({ recommendations: "", weeklyPlan: [] });
       }
       setIsLoading(false);
     }
@@ -139,6 +141,21 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                         {isGenerating ? "Generando..." : "Regenerar Plan con IA"}
                     </Button>
                 </div>
+
+                <div className="space-y-2 p-4 rounded-lg border bg-secondary/30">
+                  <Label htmlFor="recommendations" className="flex items-center gap-2 text-base font-semibold">
+                    <Lightbulb className="h-5 w-5 text-primary" />
+                    Recomendaciones Generales
+                  </Label>
+                  <Textarea
+                    id="recommendations"
+                    {...form.register(`recommendations`)}
+                    placeholder="Escribe aquí cualquier sugerencia, nota nutricional o recomendación general para el cliente..."
+                    rows={3}
+                    className="text-sm bg-card"
+                  />
+                </div>
+
                 {fields.length === 0 && !isGenerating && (
                     <div className="flex flex-col items-center justify-center h-full text-center p-8 border-2 border-dashed rounded-lg">
                         <p className="text-muted-foreground mb-4">Este usuario aún no tiene un plan.</p>

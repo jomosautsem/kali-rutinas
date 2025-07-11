@@ -17,6 +17,7 @@ export const DayPlanSchema = z.object({
 export type DayPlan = z.infer<typeof DayPlanSchema>;
 
 export const UserPlanSchema = z.object({
+  recommendations: z.string().optional().describe('Sugerencias generales o recomendaciones para el plan.'),
   weeklyPlan: z.array(DayPlanSchema).describe('Un plan de entrenamiento semanal completo, dividido por días.'),
 });
 export type UserPlan = z.infer<typeof UserPlanSchema>;
