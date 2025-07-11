@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { LogOut, User } from "lucide-react"
+import { LogOut, User, Home } from "lucide-react"
 
 type DashboardHeaderProps = {
   user: {
@@ -25,6 +25,12 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   return (
     <header className="flex h-16 items-center border-b bg-card px-4 md:px-6 sticky top-0 z-40">
       <div className="ml-auto flex items-center gap-4">
+        <Link href="/">
+          <Button variant="ghost" size="icon">
+            <Home className="h-5 w-5" />
+            <span className="sr-only">Inicio</span>
+          </Button>
+        </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
