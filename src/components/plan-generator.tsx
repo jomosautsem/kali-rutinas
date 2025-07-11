@@ -5,8 +5,8 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { generatePersonalizedTrainingPlan, GeneratePersonalizedTrainingPlanInputSchema } from "@/ai/flows/generate-personalized-training-plan"
-import type { GeneratePersonalizedTrainingPlanOutput } from "@/ai/flows/generate-personalized-training-plan"
+import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
+import { GeneratePersonalizedTrainingPlanInputSchema } from "@/lib/types"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -37,8 +37,6 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Sparkles, CheckCircle, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Skeleton } from "./ui/skeleton"
-import type { User } from "./admin/user-table-client"
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema;
 

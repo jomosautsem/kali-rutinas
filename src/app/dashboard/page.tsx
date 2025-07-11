@@ -6,8 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlanGenerator } from "@/components/plan-generator"
 import { CheckCircle, Dumbbell, Clock } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import type { User } from "@/components/admin/user-table-client";
-import type { UserPlan } from "@/components/admin/user-table-client";
+import type { User, UserPlan } from "@/lib/types";
 
 const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
     <div className="space-y-6">

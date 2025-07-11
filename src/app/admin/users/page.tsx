@@ -3,8 +3,9 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { User, UserTableClient, UserPlan } from "@/components/admin/user-table-client"
+import { UserTableClient } from "@/components/admin/user-table-client"
 import { PlusCircle } from "lucide-react"
+import type { User, UserPlan } from "@/lib/types";
 
 // In a real app, this data would be fetched from your database.
 const initialMockUsers: User[] = [

@@ -2,6 +2,7 @@
 "use client"
 
 import { useState } from "react"
+import type { User, UserPlan } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -33,34 +34,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { PlanEditor } from "./plan-editor"
-
-export type Exercise = {
-  name: string;
-  series: string;
-  reps: string;
-  rest: string;
-  mediaUrl: string;
-};
-
-export type DayPlan = {
-  day: string;
-  focus: string;
-  exercises: Exercise[];
-};
-
-export type UserPlan = {
-  weeklyPlan: DayPlan[];
-};
-
-export type User = {
-  id: string
-  name: string
-  email: string
-  role: "admin" | "client"
-  status: "activo" | "pendiente"
-  registeredAt: string
-  planStatus: "aprobado" | "pendiente" | "sin-plan" | "n/a"
-}
 
 type UserTableClientProps = {
   users: User[]

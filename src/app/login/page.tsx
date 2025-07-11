@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthCard } from "@/components/auth-card"
 import { useToast } from "@/hooks/use-toast"
-import type { User } from "@/components/admin/user-table-client"
+import type { User } from "@/lib/types";
 
 export default function LoginPage() {
   const router = useRouter()

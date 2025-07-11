@@ -4,14 +4,12 @@
 import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan";
-import type { GeneratePersonalizedTrainingPlanInput } from "@/ai/flows/generate-personalized-training-plan";
-import type { User, UserPlan, DayPlan, Exercise } from "./user-table-client";
+import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Trash2, PlusCircle, Sparkles, Loader2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
