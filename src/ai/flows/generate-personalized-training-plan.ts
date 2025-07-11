@@ -10,7 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const GeneratePersonalizedTrainingPlanInputSchema = z.object({
+export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   goals: z
     .string()
     .describe('Los objetivos de fitness del usuario, ej., pérdida de peso, ganancia muscular, mejora de la resistencia.'),

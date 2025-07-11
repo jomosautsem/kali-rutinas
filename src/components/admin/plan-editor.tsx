@@ -3,7 +3,8 @@
 
 import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { generatePersonalizedTrainingPlan, GeneratePersonalizedTrainingPlanInput } from "@/ai/flows/generate-personalized-training-plan";
+import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan";
+import type { GeneratePersonalizedTrainingPlanInput } from "@/ai/flows/generate-personalized-training-plan";
 import type { User, UserPlan, DayPlan, Exercise } from "./user-table-client";
 
 import { Button } from "@/components/ui/button";

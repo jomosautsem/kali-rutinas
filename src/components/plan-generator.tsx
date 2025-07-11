@@ -5,7 +5,8 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { generatePersonalizedTrainingPlan, GeneratePersonalizedTrainingPlanInputSchema, GeneratePersonalizedTrainingPlanOutput } from "@/ai/flows/generate-personalized-training-plan"
+import { generatePersonalizedTrainingPlan, GeneratePersonalizedTrainingPlanInputSchema } from "@/ai/flows/generate-personalized-training-plan"
+import type { GeneratePersonalizedTrainingPlanOutput } from "@/ai/flows/generate-personalized-training-plan"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -195,7 +196,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                             <FormItem>
                             <FormLabel>Días por semana</FormLabel>
                             <FormControl>
-                                <Input type="number" min="1" max="7" {...field} />
+                                <Input type="number" min="1" max="7" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -225,7 +226,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                             <FormItem>
                             <FormLabel>Edad</FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} />
+                                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -238,7 +239,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                             <FormItem>
                             <FormLabel>Peso (kg)</FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} />
+                                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -251,7 +252,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                             <FormItem>
                             <FormLabel>Estatura (cm)</FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} />
+                                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
