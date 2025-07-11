@@ -7,7 +7,7 @@ export default function AdminDashboardPage() {
   const stats = [
     { title: "Usuarios Totales", value: "1,254", icon: Users, color: "text-blue-500" },
     { title: "Planes Activos", value: "873", icon: FileText, color: "text-green-500" },
-    { title: "Nuevos Usuarios Hoy", value: "12", icon: Users, color: "text-purple-500" },
+    { title: "Nuevos Usuarios Hoy", value: "12", icon: Users, color: "text-primary" },
     { title: "Aprobaciones Pendientes", value: "3", icon: CheckCircle, color: "text-yellow-500" },
   ]
 
@@ -70,6 +70,11 @@ export default function AdminDashboardPage() {
               <FileText className="h-4 w-4 mr-2" />
               <p className="text-sm text-muted-foreground">Plan generado para 'John Smith'.</p>
               <p className="text-sm text-muted-foreground ml-auto">hace 15 min</p>
+            </div>
+             <div className="flex items-center">
+              <CheckCircle className="h-4 w-4 mr-2 text-yellow-500" />
+              <p className="text-sm text-muted-foreground">Plan de 'Charlie Brown' necesita aprobación.</p>
+              <p className="text-sm text-muted-foreground ml-auto">hace 30 min</p>
             </div>
           </CardContent>
         </Card>

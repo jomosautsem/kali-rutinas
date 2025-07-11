@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { cn } from "@/lib/utils"
 
 export type User = {
   id: string
@@ -38,11 +39,20 @@ export type User = {
   role: "admin" | "client"
   status: "activo" | "pendiente"
   registeredAt: string
+  planStatus: "aprobado" | "pendiente" | "sin-plan" | "n/a"
 }
 
 type UserTableClientProps = {
   users: User[]
 }
+
+const planStatusConfig = {
+    aprobado: { label: "Aprobado", icon: CheckCircle, className: "bg-green-500/20 text-green-700" },
+    pendiente: { label: "Pendiente", icon: Clock, className: "bg-yellow-500/20 text-yellow-700" },
+    "sin-plan": { label: "Sin Plan", icon: () => null, className: "bg-gray-500/20 text-gray-700" },
+    "n/a": { label: "N/A", icon: () => null, className: "bg-transparent text-muted-foreground" },
+};
+
 
 export function UserTableClient({ users }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -64,13 +74,14 @@ export function UserTableClient({ users }: UserTableClientProps) {
 
   return (
     <>
-      <div className="rounded-lg border">
+      <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Usuario</TableHead>
               <TableHead>Rol</TableHead>
-              <TableHead>Estado</TableHead>
+              <TableHead>Estado Usuario</TableHead>
+              <TableHead>Estado del Plan</TableHead>
               <TableHead>Registrado</TableHead>
               <TableHead>
                 <span className="sr-only">Acciones</span>
@@ -86,13 +97,28 @@ export function UserTableClient({ users }: UserTableClientProps) {
                 </TableCell>
                 <TableCell>
                   <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                    {user.role}
+                    {user.role === "admin" ? "Admin" : "Cliente"}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={user.status === "activo" ? "outline" : "destructive"}>
+                  <Badge variant={user.status === "activo" ? "outline" : "destructive"} className={cn(
+                      user.status === 'activo' && 'border-green-500 text-green-500',
+                      user.status === 'pendiente' && 'border-yellow-500 text-yellow-500'
+                  )}>
                     {user.status}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                    {(() => {
+                        const config = planStatusConfig[user.planStatus];
+                        const Icon = config.icon;
+                        return (
+                            <Badge variant="outline" className={cn("gap-1.5", config.className)}>
+                                <Icon className="h-3 w-3" />
+                                {config.label}
+                            </Badge>
+                        )
+                    })()}
                 </TableCell>
                 <TableCell>{user.registeredAt}</TableCell>
                 <TableCell>
@@ -105,11 +131,12 @@ export function UserTableClient({ users }: UserTableClientProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-                      <DropdownMenuItem>Confirmar usuario</DropdownMenuItem>
+                      <DropdownMenuItem>Ver detalles del usuario</DropdownMenuItem>
+                      <DropdownMenuItem>Ver plan de entrenamiento</DropdownMenuItem>
+                      <DropdownMenuItem className="text-green-600 focus:text-green-600">Aprobar Plan</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        className="text-destructive"
+                        className="text-destructive focus:text-destructive"
                         onClick={() => handleDeleteClick(user)}
                       >
                         Eliminar usuario

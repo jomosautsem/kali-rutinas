@@ -4,11 +4,11 @@ import { PlusCircle } from "lucide-react"
 
 // In a real app, this data would be fetched from your database.
 const mockUsers: User[] = [
-  { id: "1", name: "Alice Johnson", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01" },
-  { id: "2", name: "Bob Williams", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25" },
-  { id: "3", name: "Charlie Brown", email: "charlie@example.com", role: "client", status: "pendiente", registeredAt: "2023-10-05" },
-  { id: "4", name: "Diana Prince", email: "diana@example.com", role: "admin", status: "activo", registeredAt: "2023-01-15" },
-  { id: "5", name: "Ethan Hunt", email: "ethan@example.com", role: "client", status: "activo", registeredAt: "2023-08-11" },
+  { id: "1", name: "Alice Johnson", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado" },
+  { id: "2", name: "Bob Williams", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan" },
+  { id: "3", name: "Charlie Brown", email: "charlie@example.com", role: "client", status: "activo", registeredAt: "2023-10-05", planStatus: "pendiente" },
+  { id: "4", name: "Diana Prince", email: "diana@example.com", role: "admin", status: "activo", registeredAt: "2023-01-15", planStatus: "n/a" },
+  { id: "5", name: "Ethan Hunt", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan" },
 ];
 
 export default function AdminUsersPage() {

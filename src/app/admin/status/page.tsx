@@ -24,7 +24,7 @@ export default function SystemStatusPage() {
         <CardContent>
           <div className="space-y-4">
             {services.map((service, index) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-secondary">
+              <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-card">
                 <div className="flex items-center gap-4">
                   <service.icon className="h-6 w-6 text-muted-foreground" />
                   <span className="font-medium">{service.name}</span>
@@ -41,7 +41,7 @@ export default function SystemStatusPage() {
       
       <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Tiempo de Respuesta</CardTitle>
+            <CardTitle className="font-headline">Tiempo de Respuesta de la API</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
              <img src="https://placehold.co/800x250.png" alt="Gráfico de tiempo de respuesta" data-ai-hint="server response chart" className="rounded-lg w-full" />

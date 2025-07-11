@@ -22,7 +22,7 @@ export default function LoginPage() {
 
     // Credenciales de administrador (hardcoded)
     const adminEmail = "kalicentrodeportivotemixco@gmail.com"
-    const adminPassword = "1q2w3e"
+    const adminPassword = "123321qw"
 
     // Simulación de inicio de sesión
     // En una app real, aquí se llamaría a un servicio de autenticación.

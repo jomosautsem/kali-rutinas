@@ -11,24 +11,33 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { LogOut, User, Home } from "lucide-react"
+import { LogOut, User, Home, ShieldCheck } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 type DashboardHeaderProps = {
   user: {
     name: string
     email: string
     avatarUrl?: string
+    role?: 'admin' | 'client'
   }
 }
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // In a real app, you'd call an auth service here.
+    // For now, just redirect to login.
+    router.push('/login');
+  }
+
   return (
-    <header className="flex h-16 items-center border-b bg-card px-4 md:px-6 sticky top-0 z-40">
-      <div className="ml-auto flex items-center gap-4">
+    <>
+      <div className="flex items-center gap-4">
         <Link href="/">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label="Home">
             <Home className="h-5 w-5" />
-            <span className="sr-only">Inicio</span>
           </Button>
         </Link>
         <DropdownMenu>
@@ -51,17 +60,25 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             <DropdownMenuItem asChild>
               <Link href="/dashboard">
                 <User className="mr-2 h-4 w-4" />
-                <span>Perfil</span>
+                <span>Panel</span>
               </Link>
             </DropdownMenuItem>
+             {user.email === 'kalicentrodeportivotemixco@gmail.com' && (
+               <DropdownMenuItem asChild>
+                  <Link href="/admin/dashboard">
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    <span>Panel de Admin</span>
+                  </Link>
+                </DropdownMenuItem>
+             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Cerrar Sesión</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>
+    </>
   )
 }

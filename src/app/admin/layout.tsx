@@ -19,7 +19,6 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { Button } from "@/components/ui/button";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   // TODO: Add real authentication check here.
@@ -86,15 +85,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </SidebarFooter>
         </Sidebar>
         <div className="flex flex-col w-full">
-            <header className="flex h-16 items-center border-b bg-card px-4 md:px-6 sticky top-0 z-40">
+           <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 sticky top-0 z-40">
                 <div className="md:hidden">
                     <SidebarTrigger />
                 </div>
-                <div className="ml-auto">
-                    <DashboardHeader user={mockUser} />
+                <div className="ml-auto flex items-center gap-4">
+                  <DashboardHeader user={mockUser} />
                 </div>
             </header>
-          <main className="flex-1 overflow-auto p-4 md:p-8">
+          <main className="flex-1 overflow-auto p-4 md:p-8 bg-secondary/50">
             {children}
           </main>
         </div>
