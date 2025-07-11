@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthCard } from "@/components/auth-card"
 import { useToast } from "@/hooks/use-toast"
+import type { User } from "@/components/admin/user-table-client"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -22,17 +23,51 @@ export default function RegisterPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // En una aplicación real, aquí llamarías a tu servicio de autenticación.
-    // Para este prototipo, simularemos una creación de cuenta exitosa.
-    console.log("Registrando usuario:", { fullName, email, inviteCode })
+    // Simulate saving the new user to our mock database (localStorage)
+    try {
+      const storedUsers = localStorage.getItem("registeredUsers")
+      const users: User[] = storedUsers ? JSON.parse(storedUsers) : []
 
-    setTimeout(() => {
+      // Check if user already exists
+      if (users.some(user => user.email === email)) {
+        toast({
+          variant: "destructive",
+          title: "Error de Registro",
+          description: "Este correo electrónico ya ha sido registrado.",
+        })
+        setIsLoading(false)
+        return
+      }
+
+      const newUser: User = {
+        id: (users.length + 1).toString(),
+        name: fullName,
+        email: email,
+        // password should be hashed and not stored, but this is a prototype
+        role: "client",
+        status: "activo",
+        registeredAt: new Date().toISOString().split("T")[0],
+        planStatus: "sin-plan",
+      }
+
+      const updatedUsers = [...users, newUser]
+      localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers))
+
       toast({
         title: "Cuenta Creada Exitosamente",
         description: "Ahora puedes iniciar sesión con tus credenciales.",
       })
       router.push("/login")
-    }, 1500)
+
+    } catch (error) {
+      console.error("Registration failed:", error)
+      toast({
+        variant: "destructive",
+        title: "Error de Registro",
+        description: "No se pudo crear la cuenta. Por favor, inténtalo de nuevo.",
+      })
+      setIsLoading(false)
+    }
   }
 
   return (

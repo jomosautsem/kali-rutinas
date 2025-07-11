@@ -111,6 +111,7 @@ export function UserTableClient({ users }: UserTableClientProps) {
                 <TableCell>
                     {(() => {
                         const config = planStatusConfig[user.planStatus];
+                        if (!config) return null; // Defensive check
                         const Icon = config.icon;
                         return (
                             <Badge variant="outline" className={cn("gap-1.5", config.className)}>
