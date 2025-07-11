@@ -2,11 +2,16 @@
 "use client"
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { CheckCircle, Dumbbell, Clock } from "lucide-react"
+import { Clock, Dumbbell } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan } from "@/lib/types";
+
+const isVideo = (url: string) => {
+    return url.toLowerCase().endsWith(".mp4") || url.toLowerCase().endsWith(".webm");
+}
 
 const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
     <div className="space-y-6">
@@ -21,9 +26,26 @@ const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
             <div>
                 <h3 className="font-semibold">{dayPlan.focus}</h3>
                 <p className="text-sm text-muted-foreground">Día {index + 1}: {dayPlan.day}</p>
-                <ul className="mt-2 list-disc pl-5 text-sm space-y-1">
+                <ul className="mt-2 list-none pl-0 text-sm space-y-4">
                     {dayPlan.exercises.map((exercise, exIndex) => (
-                        <li key={exIndex}>{exercise.name}: {exercise.series} de {exercise.reps} reps, {exercise.rest} de descanso.</li>
+                        <li key={exIndex} className="p-3 rounded-lg bg-secondary/50">
+                            <p className="font-medium">{exercise.name}: <span className="font-normal text-muted-foreground">{exercise.series} de {exercise.reps} reps, {exercise.rest} de descanso.</span></p>
+                            {exercise.mediaUrl && (
+                                <div className="mt-2">
+                                    {isVideo(exercise.mediaUrl) ? (
+                                        <video src={exercise.mediaUrl} controls className="w-full rounded-md max-w-sm" />
+                                    ) : (
+                                        <Image 
+                                            src={exercise.mediaUrl} 
+                                            alt={`Visual de ${exercise.name}`} 
+                                            width={400} 
+                                            height={300} 
+                                            className="rounded-md object-cover"
+                                        />
+                                    )}
+                                </div>
+                            )}
+                        </li>
                     ))}
                 </ul>
             </div>

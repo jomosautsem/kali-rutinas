@@ -24,7 +24,7 @@ const prompt = ai.definePrompt({
 
   Crea un plan para el número de días especificado por el usuario. No crees más días de los solicitados.
   
-  Deja el campo 'mediaUrl' como una cadena vacía para cada ejercicio.
+  Deja el campo 'mediaUrl' como una cadena vacía para cada ejercicio. Este campo será completado manualmente más tarde.
 
   Objetivos: {{{goals}}}
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
