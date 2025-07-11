@@ -5,8 +5,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell } from "lucide-react"
+import { Clock, Dumbbell, Video, Image as ImageIcon } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import type { User, UserPlan } from "@/lib/types";
 
 const isVideo = (url: string) => {
@@ -16,46 +17,54 @@ const isVideo = (url: string) => {
     return videoExtensions.some(ext => lowercasedUrl.includes(ext));
 };
 
+const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+    if (!url) {
+        return (
+            <div className="w-full h-32 bg-secondary rounded-md flex items-center justify-center">
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            </div>
+        )
+    };
+
+    if (isVideo(url)) {
+        return <video src={url} controls className="w-full aspect-video rounded-md" />
+    }
+
+    return <Image src={url} alt={alt} width={200} height={150} className="w-full h-auto object-cover rounded-md" data-ai-hint="fitness exercise"/>
+};
 
 const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
-    <div className="space-y-6">
-      {plan.weeklyPlan.map((dayPlan, index) => (
-         <div key={index} className="flex items-start gap-4">
-            <div className="flex flex-col items-center gap-1 shrink-0">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <span className="font-bold">{dayPlan.day.charAt(0)}</span>
-                </div>
-                {index < plan.weeklyPlan.length - 1 && <div className="h-full w-px bg-border" />}
-            </div>
-            <div>
-                <h3 className="font-semibold">{dayPlan.focus}</h3>
-                <p className="text-sm text-muted-foreground">Día {index + 1}: {dayPlan.day}</p>
-                <ul className="mt-2 list-none pl-0 text-sm space-y-4">
-                    {dayPlan.exercises.map((exercise, exIndex) => (
-                        <li key={exIndex} className="p-3 rounded-lg bg-secondary/50">
-                            <p className="font-medium">{exercise.name}: <span className="font-normal text-muted-foreground">{exercise.series} de {exercise.reps} reps, {exercise.rest} de descanso.</span></p>
-                            {exercise.mediaUrl && (
-                                <div className="mt-2">
-                                    {isVideo(exercise.mediaUrl) ? (
-                                        <video src={exercise.mediaUrl} controls className="w-full rounded-md max-w-sm" />
-                                    ) : (
-                                        <Image 
-                                            src={exercise.mediaUrl} 
-                                            alt={`Visual de ${exercise.name}`} 
-                                            width={400} 
-                                            height={300} 
-                                            className="rounded-md object-cover"
-                                        />
-                                    )}
+    <Accordion type="multiple" defaultValue={plan.weeklyPlan.map((_, index) => `day-${index}`)} className="w-full">
+        {plan.weeklyPlan.map((dayPlan, dayIndex) => (
+            <AccordionItem key={dayIndex} value={`day-${dayIndex}`}>
+                <AccordionTrigger>
+                    <div className="flex items-center gap-4 w-full">
+                        <span className="font-bold w-32 text-left">{dayPlan.day}</span>
+                        <span className="text-base flex-1 text-left text-muted-foreground">{dayPlan.focus}</span>
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                    <div className="space-y-4 pl-4">
+                        {dayPlan.exercises.map((exercise, exerciseIndex) => (
+                            <div key={exerciseIndex} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-secondary/50">
+                                <div className="md:col-span-8 space-y-2">
+                                    <p className="font-semibold text-base">{exercise.name}</p>
+                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                        <span>Series: <span className="font-medium text-foreground">{exercise.series}</span></span>
+                                        <span>Reps: <span className="font-medium text-foreground">{exercise.reps}</span></span>
+                                        <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
+                                    </div>
                                 </div>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </div>
-      ))}
-    </div>
+                                <div className="md:col-span-4">
+                                     <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </AccordionContent>
+            </AccordionItem>
+        ))}
+    </Accordion>
 )
 
 const PlanPendiente = () => (
@@ -159,7 +168,7 @@ export default function DashboardPage() {
                 }
             </CardDescription>
           </CardHeader>
-          <CardContent className="pl-2">
+          <CardContent className="px-2 md:px-6">
             {renderPlanContent()}
           </CardContent>
         </Card>
