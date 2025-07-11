@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { User, UserTableClient } from "@/components/admin/user-table-client"
+import { User, UserTableClient, UserPlan } from "@/components/admin/user-table-client"
 import { PlusCircle } from "lucide-react"
 
 // In a real app, this data would be fetched from your database.
@@ -41,14 +41,24 @@ export default function AdminUsersPage() {
     const updatedUsers = users.filter(user => user.id !== userId);
     setUsers(updatedUsers);
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+     // Also remove the user's plan if it exists
+    const user = users.find(u => u.id === userId);
+    if (user) {
+        localStorage.removeItem(`userPlan_${user.email}`);
+    }
   };
   
-  const handleApprovePlan = (userId: string) => {
+  const handleSaveAndApprovePlan = (userId: string, plan: UserPlan) => {
     const updatedUsers = users.map(user => 
       user.id === userId ? { ...user, planStatus: 'aprobado' } : user
     );
     setUsers(updatedUsers);
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      localStorage.setItem(`userPlan_${user.email}`, JSON.stringify(plan));
+    }
   };
 
 
@@ -64,9 +74,7 @@ export default function AdminUsersPage() {
           Añadir Usuario
         </Button>
       </div>
-      <UserTableClient users={users} onDeleteUser={handleDeleteUser} onApprovePlan={handleApprovePlan} />
+      <UserTableClient users={users} onDeleteUser={handleDeleteUser} onSaveAndApprovePlan={handleSaveAndApprovePlan} />
     </div>
   )
 }
-
-    

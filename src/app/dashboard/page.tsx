@@ -7,58 +7,29 @@ import { PlanGenerator } from "@/components/plan-generator"
 import { CheckCircle, Dumbbell, Clock } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User } from "@/components/admin/user-table-client";
+import type { UserPlan } from "@/components/admin/user-table-client";
 
-// MOCK: In a real app, this would come from the user's data.
-// const planStatus: 'aprobado' | 'pendiente' | 'sin-plan' = 'pendiente'; 
-// const planStatus: 'aprobado' | 'pendiente' | 'sin-plan' = 'aprobado'; 
-// const planStatus: 'aprobado' | 'pendiente' | 'sin-plan' = 'sin-plan'; 
-
-const PlanAprobado = () => (
+const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
     <div className="space-y-6">
-      {/* This is mock data. In a real app, you'd fetch this. */}
-      <div className="flex items-start gap-4">
-        <div className="flex flex-col items-center gap-1">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Dumbbell className="h-5 w-5" />
-          </div>
-          <div className="h-full w-px bg-border" />
+      {plan.weeklyPlan.map((dayPlan, index) => (
+         <div key={index} className="flex items-start gap-4">
+            <div className="flex flex-col items-center gap-1 shrink-0">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <span className="font-bold">{dayPlan.day.charAt(0)}</span>
+                </div>
+                {index < plan.weeklyPlan.length - 1 && <div className="h-full w-px bg-border" />}
+            </div>
+            <div>
+                <h3 className="font-semibold">{dayPlan.focus}</h3>
+                <p className="text-sm text-muted-foreground">Día {index + 1}: {dayPlan.day}</p>
+                <ul className="mt-2 list-disc pl-5 text-sm space-y-1">
+                    {dayPlan.exercises.map((exercise, exIndex) => (
+                        <li key={exIndex}>{exercise.name}: {exercise.series} de {exercise.reps} reps, {exercise.rest} de descanso.</li>
+                    ))}
+                </ul>
+            </div>
         </div>
-        <div>
-          <h3 className="font-semibold">Día 1: Fuerza de Tren Superior</h3>
-          <p className="text-sm text-muted-foreground">Enfoque en pecho, hombros y tríceps.</p>
-          <ul className="mt-2 list-disc pl-5 text-sm space-y-1">
-            <li>Press de Banca: 4 series de 8-12 repeticiones</li>
-            <li>Press Militar: 3 series de 10-15 repeticiones</li>
-            <li>Fondos de Tríceps: 3 series al fallo</li>
-          </ul>
-        </div>
-      </div>
-      <div className="flex items-start gap-4">
-        <div className="flex flex-col items-center gap-1">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/80 text-primary-foreground">
-            <Dumbbell className="h-5 w-5" />
-          </div>
-            <div className="h-full w-px bg-border" />
-        </div>
-        <div>
-          <h3 className="font-semibold">Día 2: Tren Inferior y Core</h3>
-          <p className="text-sm text-muted-foreground">Desarrolla potencia en tus piernas y estabiliza tu core.</p>
-            <ul className="mt-2 list-disc pl-5 text-sm space-y-1">
-            <li>Sentadillas: 4 series de 8-12 repeticiones</li>
-            <li>Peso Muerto: 3 series de 6-8 repeticiones</li>
-            <li>Plancha: 3 series, 60 segundos de aguante</li>
-            </ul>
-        </div>
-      </div>
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-card text-muted-foreground border">
-            <CheckCircle className="h-5 w-5" />
-          </div>
-        <div>
-          <h3 className="font-semibold">Día 3: Descanso y Recuperación</h3>
-          <p className="text-sm text-muted-foreground">Recuperación activa y estiramientos.</p>
-        </div>
-      </div>
+      ))}
     </div>
 )
 
@@ -84,6 +55,7 @@ const SinPlan = () => (
 
 export default function DashboardPage() {
   const [planStatus, setPlanStatus] = useState<'aprobado' | 'pendiente' | 'sin-plan' | null>(null);
+  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
 
   useEffect(() => {
     // This simulates fetching the current user's plan status after they log in.
@@ -95,6 +67,12 @@ export default function DashboardPage() {
         const currentUser = users.find(u => u.email === loggedInUserEmail);
         if (currentUser) {
           setPlanStatus(currentUser.planStatus as any);
+          if (currentUser.planStatus === 'aprobado') {
+              const storedPlan = localStorage.getItem(`userPlan_${currentUser.email}`);
+              if (storedPlan) {
+                  setUserPlan(JSON.parse(storedPlan));
+              }
+          }
         } else {
           setPlanStatus('sin-plan');
         }
@@ -126,7 +104,7 @@ export default function DashboardPage() {
     }
     switch(planStatus) {
       case 'aprobado':
-        return <PlanAprobado />;
+        return userPlan ? <PlanAprobado plan={userPlan} /> : <p>Cargando plan...</p>;
       case 'pendiente':
         return <PlanPendiente />;
       case 'sin-plan':
@@ -140,7 +118,9 @@ export default function DashboardPage() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl md:text-3xl font-bold font-headline">Tu Panel</h1>
-        <PlanGenerator onPlanGenerated={handlePlanGenerated} />
+        {planStatus !== 'pendiente' && planStatus !== 'aprobado' && (
+          <PlanGenerator onPlanGenerated={handlePlanGenerated} />
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
@@ -170,5 +150,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    

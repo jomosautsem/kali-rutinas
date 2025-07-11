@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, CheckCircle, Clock } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock, FileEdit } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,25 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
+import { PlanEditor } from "./plan-editor"
+
+export type Exercise = {
+  name: string;
+  series: string;
+  reps: string;
+  rest: string;
+  mediaUrl: string;
+};
+
+export type DayPlan = {
+  day: string;
+  focus: string;
+  exercises: Exercise[];
+};
+
+export type UserPlan = {
+  weeklyPlan: DayPlan[];
+};
 
 export type User = {
   id: string
@@ -46,7 +65,7 @@ export type User = {
 type UserTableClientProps = {
   users: User[]
   onDeleteUser: (userId: string) => void;
-  onApprovePlan: (userId: string) => void;
+  onSaveAndApprovePlan: (userId: string, plan: UserPlan) => void;
 }
 
 const planStatusConfig = {
@@ -57,8 +76,9 @@ const planStatusConfig = {
 };
 
 
-export function UserTableClient({ users, onDeleteUser, onApprovePlan }: UserTableClientProps) {
+export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isPlanEditorOpen, setIsPlanEditorOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   const handleDeleteClick = (user: User) => {
@@ -72,6 +92,16 @@ export function UserTableClient({ users, onDeleteUser, onApprovePlan }: UserTabl
       setIsDeleteDialogOpen(false)
       setSelectedUser(null)
     }
+  }
+
+  const handlePlanEditorOpen = (user: User) => {
+    setSelectedUser(user);
+    setIsPlanEditorOpen(true);
+  }
+
+  const handlePlanEditorClose = () => {
+    setIsPlanEditorOpen(false);
+    setSelectedUser(null);
   }
 
   return (
@@ -134,14 +164,10 @@ export function UserTableClient({ users, onDeleteUser, onApprovePlan }: UserTabl
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      <DropdownMenuItem>Ver detalles del usuario</DropdownMenuItem>
-                      <DropdownMenuItem>Ver plan de entrenamiento</DropdownMenuItem>
-                      {user.planStatus === 'pendiente' && (
-                        <DropdownMenuItem 
-                            className="text-green-600 focus:text-green-600"
-                            onClick={() => onApprovePlan(user.id)}
-                        >
-                            Aprobar Plan
+                      {user.role === 'client' && (
+                        <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)}>
+                            <FileEdit className="mr-2 h-4 w-4" />
+                            Ver/Editar Plan
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -177,8 +203,15 @@ export function UserTableClient({ users, onDeleteUser, onApprovePlan }: UserTabl
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {selectedUser && (
+         <PlanEditor 
+            user={selectedUser} 
+            isOpen={isPlanEditorOpen}
+            onClose={handlePlanEditorClose}
+            onSaveAndApprove={onSaveAndApprovePlan}
+          />
+      )}
     </>
   )
 }
-
-    
