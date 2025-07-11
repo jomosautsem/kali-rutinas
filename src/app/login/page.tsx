@@ -20,19 +20,28 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Hardcoded admin credentials
+    // Credenciales de administrador (hardcoded)
     const adminEmail = "kalicentrodeportivotemixco@gmail.com"
     const adminPassword = "1q2w3e"
 
+    // Simulación de inicio de sesión
+    // En una app real, aquí se llamaría a un servicio de autenticación.
     if (email === adminEmail && password === adminPassword) {
+      // Es el administrador
       toast({
         title: "Inicio de Sesión Exitoso",
         description: "Redirigiendo al panel de administrador...",
       })
-      // In a real app, you'd set a session token here.
-      // For this prototype, we'll just redirect.
       router.push("/admin/dashboard")
+    } else if (email && password) {
+      // Se asume que es un cliente
+      toast({
+        title: "Inicio de Sesión Exitoso",
+        description: "Redirigiendo a tu panel...",
+      })
+      router.push("/dashboard")
     } else {
+      // Error
       toast({
         variant: "destructive",
         title: "Inicio de Sesión Fallido",
