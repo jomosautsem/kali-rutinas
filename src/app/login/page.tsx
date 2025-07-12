@@ -25,8 +25,8 @@ export default function LoginPage() {
 
     const adminEmail = "kalicentrodeportivotemixco@gmail.com"
     const adminPassword = "123321qw"
-    const requiredInviteCode = "KALI2024"
-
+    
+    // Check for admin credentials first
     if (email === adminEmail && password === adminPassword) {
       toast({
         title: "Inicio de Sesión Exitoso",
@@ -36,6 +36,9 @@ export default function LoginPage() {
       router.push("/admin/dashboard")
       return;
     }
+
+    // If not admin, proceed with client login logic
+    const requiredInviteCode = "KALI2024"
 
     try {
         const storedUsers = localStorage.getItem("registeredUsers");
@@ -127,11 +130,10 @@ export default function LoginPage() {
           />
         </div>
         <div className="space-y-2">
-            <Label htmlFor="inviteCode">Código de Invitación</Label>
+            <Label htmlFor="inviteCode">Código de Invitación (solo clientes)</Label>
             <Input 
                 id="inviteCode" 
                 placeholder="Ingresa tu código de invitación" 
-                required 
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 disabled={isLoading}
