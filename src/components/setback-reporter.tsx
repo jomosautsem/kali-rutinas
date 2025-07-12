@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -30,6 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LifeBuoy, Sparkles, Loader2, Quote, Lightbulb } from "lucide-react";
+import type { GenerateMotivationOutput } from "@/lib/types";
+
 
 const formSchema = z.object({
   reason: z.string().min(1, "Por favor, selecciona un motivo."),
@@ -43,10 +46,7 @@ const reasons = {
   other: "Otro motivo",
 };
 
-type MotivationResponse = {
-  recommendation: string;
-  motivation: string;
-};
+type MotivationResponse = GenerateMotivationOutput;
 
 export function SetbackReporter() {
   const [isOpen, setIsOpen] = useState(false);

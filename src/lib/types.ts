@@ -64,3 +64,15 @@ export type GeneratePersonalizedTrainingPlanInput = z.infer<typeof GeneratePerso
 
 export const GeneratePersonalizedTrainingPlanOutputSchema = UserPlanSchema;
 export type GeneratePersonalizedTrainingPlanOutput = z.infer<typeof GeneratePersonalizedTrainingPlanOutputSchema>;
+
+
+export const GenerateMotivationInputSchema = z.object({
+  reason: z.string().describe("The reason the user missed their workout. Can be 'no_time', 'too_tired', 'not_motivated', 'injury_concern', or 'other'."),
+});
+export type GenerateMotivationInput = z.infer<typeof GenerateMotivationInputSchema>;
+
+export const GenerateMotivationOutputSchema = z.object({
+  recommendation: z.string().describe("Una recomendación concisa y útil para ayudar al usuario a volver a la normalidad."),
+  motivation: z.string().describe("Una frase motivacional corta e inspiradora relacionada con el motivo del contratiempo."),
+});
+export type GenerateMotivationOutput = z.infer<typeof GenerateMotivationOutputSchema>;

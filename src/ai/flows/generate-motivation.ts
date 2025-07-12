@@ -1,26 +1,15 @@
+
 'use server';
 
 /**
  * @fileOverview AI agent that generates motivation and recommendations for workout setbacks.
  *
  * - generateMotivation - A function that handles the motivation generation process.
- * - GenerateMotivationInput - The input type for the generateMotivation function.
- * - GenerateMotivationOutput - The return type for the generateMotivation function.
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
-
-export const GenerateMotivationInputSchema = z.object({
-  reason: z.string().describe("The reason the user missed their workout. Can be 'no_time', 'too_tired', 'not_motivated', 'injury_concern', or 'other'."),
-});
-export type GenerateMotivationInput = z.infer<typeof GenerateMotivationInputSchema>;
-
-export const GenerateMotivationOutputSchema = z.object({
-  recommendation: z.string().describe("Una recomendación concisa y útil para ayudar al usuario a volver a la normalidad."),
-  motivation: z.string().describe("Una frase motivacional corta e inspiradora relacionada con el motivo del contratiempo."),
-});
-export type GenerateMotivationOutput = z.infer<typeof GenerateMotivationOutputSchema>;
+import type { GenerateMotivationInput, GenerateMotivationOutput } from '@/lib/types';
+import { GenerateMotivationInputSchema, GenerateMotivationOutputSchema } from '@/lib/types';
 
 
 export async function generateMotivation(input: GenerateMotivationInput): Promise<GenerateMotivationOutput> {
