@@ -125,3 +125,4 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
       </DialogContent>
     </Dialog>
   );
+}
