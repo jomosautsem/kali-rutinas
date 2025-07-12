@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -16,19 +17,16 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [inviteCode, setInviteCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate saving the new user to our mock database (localStorage)
     try {
       const storedUsers = localStorage.getItem("registeredUsers")
       const users: User[] = storedUsers ? JSON.parse(storedUsers) : []
 
-      // Check if user already exists
       if (users.some(user => user.email === email)) {
         toast({
           variant: "destructive",
@@ -43,9 +41,8 @@ export default function RegisterPage() {
         id: (users.length + 1).toString(),
         name: fullName,
         email: email,
-        // password should be hashed and not stored, but this is a prototype
         role: "client",
-        status: "activo",
+        status: "pendiente", // New users start as pending
         registeredAt: new Date().toISOString().split("T")[0],
         planStatus: "sin-plan",
       }
@@ -54,8 +51,8 @@ export default function RegisterPage() {
       localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers))
 
       toast({
-        title: "Cuenta Creada Exitosamente",
-        description: "Ahora puedes iniciar sesión con tus credenciales.",
+        title: "Registro Enviado",
+        description: "Tu cuenta ha sido creada y está pendiente de aprobación por un administrador.",
       })
       router.push("/login")
 
@@ -115,17 +112,6 @@ export default function RegisterPage() {
             required 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="inviteCode">Código de Invitación</Label>
-          <Input 
-            id="inviteCode" 
-            placeholder="Ingresa tu código de invitación" 
-            required 
-            value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
             disabled={isLoading}
           />
         </div>

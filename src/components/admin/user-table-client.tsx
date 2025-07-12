@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, CheckCircle, Clock, FileEdit } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +39,7 @@ type UserTableClientProps = {
   users: User[]
   onDeleteUser: (userId: string) => void;
   onSaveAndApprovePlan: (userId: string, plan: UserPlan) => void;
+  onApproveUser: (userId: string) => void;
 }
 
 const planStatusConfig = {
@@ -49,7 +50,7 @@ const planStatusConfig = {
 };
 
 
-export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan }: UserTableClientProps) {
+export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onApproveUser }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPlanEditorOpen, setIsPlanEditorOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
@@ -110,7 +111,7 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan }: U
                       user.status === 'activo' && 'border-green-500 text-green-500',
                       user.status === 'pendiente' && 'border-yellow-500 text-yellow-500'
                   )}>
-                    {user.status}
+                    {user.status === 'activo' ? 'Activo' : 'Pendiente'}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -137,7 +138,13 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan }: U
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      {user.role === 'client' && (
+                      {user.role === 'client' && user.status === 'pendiente' && (
+                        <DropdownMenuItem onClick={() => onApproveUser(user.id)}>
+                            <UserCheck className="mr-2 h-4 w-4" />
+                            Aprobar Usuario
+                        </DropdownMenuItem>
+                      )}
+                      {user.role === 'client' && user.status === 'activo' && (
                         <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)}>
                             <FileEdit className="mr-2 h-4 w-4" />
                             Ver/Editar Plan

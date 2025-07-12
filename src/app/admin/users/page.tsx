@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { UserTableClient } from "@/components/admin/user-table-client"
 import type { User, UserPlan } from "@/lib/types";
 import { AddUserDialog } from "@/components/admin/add-user-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 // In a real app, this data would be fetched from your database.
 const initialMockUsers: User[] = [
@@ -17,6 +18,7 @@ const initialMockUsers: User[] = [
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     // This is a client-side only effect to load users from localStorage
@@ -75,6 +77,18 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleApproveUser = (userId: string) => {
+    const updatedUsers = users.map(user =>
+      user.id === userId ? { ...user, status: 'activo' } : user
+    );
+    setUsers(updatedUsers);
+    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+    toast({
+      title: "Usuario Aprobado",
+      description: `El usuario ahora puede iniciar sesión con el código de invitación.`,
+    });
+  };
+
 
   return (
     <div className="space-y-6">
@@ -85,7 +99,12 @@ export default function AdminUsersPage() {
         </div>
         <AddUserDialog onAddUser={handleAddUser} />
       </div>
-      <UserTableClient users={users} onDeleteUser={handleDeleteUser} onSaveAndApprovePlan={handleSaveAndApprovePlan} />
+      <UserTableClient 
+        users={users} 
+        onDeleteUser={handleDeleteUser} 
+        onSaveAndApprovePlan={handleSaveAndApprovePlan}
+        onApproveUser={handleApproveUser}
+      />
     </div>
   )
 }

@@ -16,6 +16,7 @@ export default function LoginPage() {
   const { toast } = useToast()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [inviteCode, setInviteCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,6 +25,7 @@ export default function LoginPage() {
 
     const adminEmail = "kalicentrodeportivotemixco@gmail.com"
     const adminPassword = "123321qw"
+    const requiredInviteCode = "KALI2024"
 
     if (email === adminEmail && password === adminPassword) {
       toast({
@@ -41,6 +43,26 @@ export default function LoginPage() {
         const user = users.find(u => u.email === email);
 
         if (user) {
+            if (user.status === 'pendiente') {
+                toast({
+                    variant: "destructive",
+                    title: "Cuenta Pendiente",
+                    description: "Tu cuenta aún no ha sido aprobada por un administrador.",
+                });
+                setIsLoading(false);
+                return;
+            }
+
+            if (inviteCode !== requiredInviteCode) {
+                 toast({
+                    variant: "destructive",
+                    title: "Código de Invitación Inválido",
+                    description: "Por favor, verifica tu código de invitación.",
+                });
+                setIsLoading(false);
+                return;
+            }
+            
             // In a real app, you would verify the password hash here
             toast({
                 title: "Inicio de Sesión Exitoso",
@@ -104,6 +126,17 @@ export default function LoginPage() {
             disabled={isLoading}
           />
         </div>
+        <div className="space-y-2">
+            <Label htmlFor="inviteCode">Código de Invitación</Label>
+            <Input 
+                id="inviteCode" 
+                placeholder="Ingresa tu código de invitación" 
+                required 
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                disabled={isLoading}
+            />
+        </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
         </Button>
@@ -111,5 +144,3 @@ export default function LoginPage() {
     </AuthCard>
   )
 }
-
-    
