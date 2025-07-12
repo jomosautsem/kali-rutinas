@@ -1,9 +1,10 @@
 "use client"
 
-import { Dumbbell, Home } from "lucide-react"
+import { Home } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "./ui/button"
 import Link from "next/link"
+import { Logo } from "./logo"
 
 type AuthCardProps = {
   title: string
@@ -24,7 +25,7 @@ export function AuthCard({ title, description, children, footer }: AuthCardProps
             </Button>
         </div>
         <CardHeader className="text-center pt-12">
-          <Dumbbell className="mx-auto h-10 w-10 text-primary" />
+           <Logo className="mx-auto h-16 w-16 text-primary" />
           <CardTitle className="mt-4 text-2xl font-bold font-headline">{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
