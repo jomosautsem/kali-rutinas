@@ -23,10 +23,16 @@ const isVideo = (url: string) => {
     return videoExtensions.some(ext => lowercasedUrl.includes(ext));
 };
 
+const getYoutubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
 const isYoutubeUrl = (url: string) => {
     if (!url) return false;
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
-    return youtubeRegex.test(url);
+    return getYoutubeVideoId(url) !== null;
 }
 
 const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
@@ -37,15 +43,20 @@ const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
             </div>
         )
     };
-
-    if (isYoutubeUrl(url)) {
+    
+    const youtubeId = getYoutubeVideoId(url);
+    if (youtubeId) {
         return (
-            <Button asChild variant="secondary" className="w-full">
-                <Link href={url} target="_blank" rel="noopener noreferrer">
-                    <Youtube className="mr-2 h-5 w-5" />
-                    Ver Video en YouTube
-                </Link>
-            </Button>
+            <div className="aspect-video w-full">
+                <iframe
+                    className="w-full h-full rounded-md"
+                    src={`https://www.youtube.com/embed/${youtubeId}`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                ></iframe>
+            </div>
         )
     }
 
