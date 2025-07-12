@@ -28,7 +28,7 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
-  digits: z.string().length(2, "Debes ingresar exactamente 2 dígitos numéricos.").regex(/^\d{2}$/, "Solo se permiten números."),
+  digits: z.string().length(4, "Debes ingresar exactamente 4 dígitos numéricos.").regex(/^\d{4}$/, "Solo se permiten números."),
 });
 
 type GenerateInviteCodeDialogProps = {
@@ -38,13 +38,10 @@ type GenerateInviteCodeDialogProps = {
   onApprove: (userId: string, inviteCode: string) => void;
 };
 
-function getInitials(name: string): string {
-    return name
-        .split(' ')
-        .map(word => word.charAt(0))
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
+function getCodePrefix(name: string, email: string): string {
+    const namePart = name.replace(/\s/g, '').slice(0, 2).toUpperCase();
+    const emailPart = email.split('@')[0].slice(0, 2).toUpperCase();
+    return `${namePart}${emailPart}`;
 }
 
 
@@ -60,11 +57,11 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
 
   const { isSubmitting } = form.formState;
 
-  const initials = useMemo(() => (user ? getInitials(user.name) : ''), [user]);
+  const prefix = useMemo(() => (user ? getCodePrefix(user.name, user.email) : ''), [user]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) return;
-    const finalInviteCode = `${initials}${values.digits}`;
+    const finalInviteCode = `${prefix}${values.digits}`;
     onApprove(user.id, finalInviteCode);
     toast({
       title: "Usuario Aprobado y Código Generado",
@@ -82,14 +79,14 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
         <DialogHeader>
           <DialogTitle>Aprobar Usuario y Generar Código</DialogTitle>
           <DialogDescription>
-            Genera un código de invitación único para <span className="font-bold">{user.name}</span>.
+            Genera un código de invitación único de 8 caracteres para <span className="font-bold">{user.name}</span>.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
-            <p className="text-sm text-muted-foreground">El código se formará con las iniciales del usuario y dos dígitos que elijas.</p>
+            <p className="text-sm text-muted-foreground">El código se formará con 4 letras (nombre y email) y 4 dígitos que elijas.</p>
             <div className="mt-2 flex items-center gap-2">
-                <div className="flex h-10 w-16 items-center justify-center rounded-md border bg-muted font-mono text-lg">
-                    {initials}
+                <div className="flex h-10 w-24 items-center justify-center rounded-md border bg-muted font-mono text-lg">
+                    {prefix}
                 </div>
                 <span className="text-muted-foreground">+</span>
                 <Form {...form}>
@@ -101,9 +98,9 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
                             <FormItem>
                             <FormControl>
                                 <Input 
-                                    className="w-20 text-center font-mono text-lg" 
-                                    maxLength={2} 
-                                    placeholder="00" 
+                                    className="w-24 text-center font-mono text-lg" 
+                                    maxLength={4} 
+                                    placeholder="0000" 
                                     {...field} 
                                 />
                             </FormControl>
