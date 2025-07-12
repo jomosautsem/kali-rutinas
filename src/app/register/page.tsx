@@ -49,12 +49,13 @@ export default function RegisterPage() {
 
       const updatedUsers = [...users, newUser]
       localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers))
+      sessionStorage.setItem("onboardingUserEmail", email);
 
       toast({
-        title: "Registro Enviado",
-        description: "Tu cuenta ha sido creada y está pendiente de aprobación por un administrador.",
+        title: "Registro Exitoso",
+        description: "Ahora, cuéntanos un poco sobre tus metas.",
       })
-      router.push("/login")
+      router.push("/onboarding")
 
     } catch (error) {
       console.error("Registration failed:", error)
@@ -116,7 +117,7 @@ export default function RegisterPage() {
           />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+          {isLoading ? "Creando cuenta..." : "Crear Cuenta y Continuar"}
         </Button>
       </form>
     </AuthCard>

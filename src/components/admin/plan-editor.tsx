@@ -18,6 +18,7 @@ import { Label } from "../ui/label";
 import Link from "next/link";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 type PlanEditorProps = {
   user: User | null;
@@ -64,6 +65,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
+  const [onboardingData, setOnboardingData] = useState<GeneratePersonalizedTrainingPlanInput | null>(null);
   const { toast } = useToast();
 
   const form = useForm<UserPlan>({
@@ -87,6 +89,8 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     if (user && isOpen) {
       setIsLoading(true);
       setActiveDayIndex(0);
+      
+      // Load existing plan
       const storedPlan = localStorage.getItem(`userPlan_${user.email}`);
       if (storedPlan) {
         try {
@@ -98,6 +102,20 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
       } else {
         form.reset({ recommendations: "", weeklyPlan: [] });
       }
+
+      // Load onboarding data
+      const storedOnboardingData = localStorage.getItem(`onboardingData_${user.email}`);
+      if (storedOnboardingData) {
+        try {
+          setOnboardingData(JSON.parse(storedOnboardingData));
+        } catch (error) {
+           console.error("Failed to parse onboarding data:", error);
+           setOnboardingData(null);
+        }
+      } else {
+        setOnboardingData(null);
+      }
+
       setIsLoading(false);
     }
   }, [user, isOpen, form]);
@@ -106,7 +124,8 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     if (!user) return;
     setIsGenerating(true);
     try {
-        const generationInput: GeneratePersonalizedTrainingPlanInput = {
+        const generationInput: GeneratePersonalizedTrainingPlanInput = onboardingData || {
+            // Default values if no onboarding data is found
             goals: "Ganancia muscular y fuerza",
             currentFitnessLevel: "intermedio",
             daysPerWeek: 4,
@@ -175,6 +194,21 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                         {isGenerating ? "Generando..." : "Regenerar Plan con IA"}
                     </Button>
                 </div>
+
+                {onboardingData && (
+                  <Alert variant="default" className="bg-blue-500/10 border-blue-500/20">
+                    <Lightbulb className="h-5 w-5 text-blue-500" />
+                    <AlertTitle className="text-blue-600 font-semibold">Datos del Cliente</AlertTitle>
+                    <AlertDescription>
+                      <ul className="text-sm space-y-1 mt-2 text-blue-700/80">
+                        <li><strong>Metas:</strong> {onboardingData.goals}</li>
+                        <li><strong>Nivel:</strong> {onboardingData.currentFitnessLevel}</li>
+                        <li><strong>Días/Semana:</strong> {onboardingData.daysPerWeek}</li>
+                        <li><strong>Estilo:</strong> {onboardingData.preferredWorkoutStyle}</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 <div className="space-y-2 p-4 rounded-lg border bg-secondary/30">
                   <Label htmlFor="recommendations" className="flex items-center gap-2 text-base font-semibold">

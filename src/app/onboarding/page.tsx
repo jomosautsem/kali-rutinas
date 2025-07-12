@@ -1,0 +1,251 @@
+
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { GeneratePersonalizedTrainingPlanInputSchema } from "@/lib/types"
+
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Loader2, CheckCircle } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { AuthCard } from "@/components/auth-card"
+
+const formSchema = GeneratePersonalizedTrainingPlanInputSchema;
+
+export default function OnboardingPage() {
+  const router = useRouter()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+  
+  useEffect(() => {
+    const email = sessionStorage.getItem("onboardingUserEmail");
+    if (!email) {
+      // If no email is found, redirect to register
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se encontró usuario para el onboarding. Por favor, regístrate primero.",
+      });
+      router.push("/register");
+    }
+  }, [router, toast]);
+
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      goals: "",
+      currentFitnessLevel: "principiante",
+      daysPerWeek: 3,
+      preferredWorkoutStyle: "",
+      age: 18,
+      weight: 70,
+      height: 175,
+      goalTerm: "mediano",
+    },
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    const email = sessionStorage.getItem("onboardingUserEmail");
+    if (!email) {
+      // This should ideally not happen due to the useEffect check
+      toast({ variant: "destructive", title: "Error fatal", description: "Se perdió la sesión de usuario." });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      localStorage.setItem(`onboardingData_${email}`, JSON.stringify(values));
+      toast({
+        title: "¡Información Guardada!",
+        description: "Tus datos han sido enviados al administrador para su revisión.",
+      });
+      setIsSuccess(true);
+      sessionStorage.removeItem("onboardingUserEmail");
+      setTimeout(() => router.push("/login"), 3000); // Redirect after a delay
+    } catch (error) {
+      console.error("Failed to save onboarding data:", error);
+      toast({ variant: "destructive", title: "Error", description: "No se pudieron guardar tus datos." });
+      setIsLoading(false);
+    }
+  }
+
+  if (isSuccess) {
+    return (
+      <AuthCard title="¡Todo Listo!" description="Gracias por completar tu información." footer={<></>}>
+        <div className="text-center space-y-4 py-8">
+            <CheckCircle className="h-16 w-16 mx-auto text-green-500" />
+            <p className="text-muted-foreground">Tu cuenta está ahora pendiente de aprobación. Serás redirigido a la página de inicio de sesión en unos segundos.</p>
+        </div>
+      </AuthCard>
+    )
+  }
+
+  return (
+    <AuthCard
+      title="Casi Hemos Terminado..."
+      description="Cuéntanos sobre ti para que podamos crear el plan perfecto."
+      footer={<p className="text-xs text-muted-foreground">Esta información será revisada por tu entrenador.</p>}
+    >
+       <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+                control={form.control}
+                name="goals"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Metas de Fitness</FormLabel>
+                    <FormControl>
+                    <Textarea placeholder="ej., perder 5 kilos, ganar músculo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                control={form.control}
+                name="currentFitnessLevel"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Nivel de Condición Física</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecciona tu nivel de condición física" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        <SelectItem value="principiante">Principiante</SelectItem>
+                        <SelectItem value="intermedio">Intermedio</SelectItem>
+                        <SelectItem value="avanzado">Avanzado</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="daysPerWeek"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Días por semana</FormLabel>
+                    <FormControl>
+                        <Input type="number" min="1" max="7" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </div>
+
+            <FormField
+                control={form.control}
+                name="preferredWorkoutStyle"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
+                    <FormControl>
+                    <Input placeholder="ej., Levantamiento de pesas, Cardio, HIIT" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <FormField
+                control={form.control}
+                name="age"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Edad</FormLabel>
+                    <FormControl>
+                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="weight"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Peso (kg)</FormLabel>
+                    <FormControl>
+                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="height"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Estatura (cm)</FormLabel>
+                    <FormControl>
+                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </div>
+
+            <FormField
+                control={form.control}
+                name="goalTerm"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Plazo de la Meta</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un plazo" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        <SelectItem value="corto">Corto Plazo</SelectItem>
+                        <SelectItem value="mediano">Mediano Plazo</SelectItem>
+                        <SelectItem value="largo">Largo Plazo</SelectItem>
+                    </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Enviar Información y Finalizar"}
+            </Button>
+            </form>
+        </Form>
+    </AuthCard>
+  )
+}
