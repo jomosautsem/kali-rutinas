@@ -41,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
-              <Logo className="w-12 h-12 text-primary" />
+              <Logo className="h-12 w-12 text-primary" width={48} height={48} />
               <span className="text-lg font-bold font-headline">Rutinas Kali</span>
             </div>
           </SidebarHeader>

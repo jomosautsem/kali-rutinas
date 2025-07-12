@@ -17,7 +17,7 @@ export default function Home() {
 
       <header className="px-4 lg:px-6 h-20 flex items-center z-10">
         <Link href="#" className="flex items-center justify-center" prefetch={false}>
-          <Logo className="h-16 w-16" />
+          <Logo className="h-16 w-16" width={64} height={64} />
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
           <Link
@@ -39,7 +39,7 @@ export default function Home() {
         <div className="relative mb-8">
             <div className="absolute -top-12 -left-1/2 w-[200%] h-[200%] bg-primary/20 blur-3xl rounded-full"></div>
              <div className="relative flex items-center justify-center w-40 h-40 md:w-48 md:h-48">
-                 <Logo className="h-full w-full" />
+                 <Logo className="h-full w-full" width={192} height={192} />
             </div>
         </div>
 
