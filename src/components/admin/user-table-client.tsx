@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -34,12 +33,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { PlanEditor } from "./plan-editor"
+import { GenerateInviteCodeDialog } from "./generate-invite-code-dialog";
 
 type UserTableClientProps = {
   users: User[]
   onDeleteUser: (userId: string) => void;
   onSaveAndApprovePlan: (userId: string, plan: UserPlan) => void;
-  onApproveUser: (userId: string) => void;
+  onApproveUser: (userId: string, inviteCode: string) => void;
 }
 
 const planStatusConfig = {
@@ -53,6 +53,7 @@ const planStatusConfig = {
 export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onApproveUser }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPlanEditorOpen, setIsPlanEditorOpen] = useState(false)
+  const [isInviteCodeDialogOpen, setIsInviteCodeDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   const handleDeleteClick = (user: User) => {
@@ -77,6 +78,12 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
     setIsPlanEditorOpen(false);
     setSelectedUser(null);
   }
+
+  const handleApproveClick = (user: User) => {
+    setSelectedUser(user);
+    setIsInviteCodeDialogOpen(true);
+  };
+
 
   return (
     <>
@@ -139,7 +146,7 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                       {user.role === 'client' && user.status === 'pendiente' && (
-                        <DropdownMenuItem onClick={() => onApproveUser(user.id)}>
+                        <DropdownMenuItem onClick={() => handleApproveClick(user)}>
                             <UserCheck className="mr-2 h-4 w-4" />
                             Aprobar Usuario
                         </DropdownMenuItem>
@@ -191,6 +198,18 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
             onClose={handlePlanEditorClose}
             onSaveAndApprove={onSaveAndApprovePlan}
           />
+      )}
+
+      {selectedUser && (
+        <GenerateInviteCodeDialog
+            user={selectedUser}
+            isOpen={isInviteCodeDialogOpen}
+            onClose={() => {
+                setIsInviteCodeDialogOpen(false);
+                setSelectedUser(null);
+            }}
+            onApprove={onApproveUser}
+        />
       )}
     </>
   )

@@ -38,8 +38,6 @@ export default function LoginPage() {
     }
 
     // If not admin, proceed with client login logic
-    const requiredInviteCode = "KALI2024"
-
     try {
         const storedUsers = localStorage.getItem("registeredUsers");
         const users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
@@ -55,8 +53,10 @@ export default function LoginPage() {
                 setIsLoading(false);
                 return;
             }
-
-            if (inviteCode !== requiredInviteCode) {
+            
+            // In a real app, you would verify the password hash here
+            
+            if (user.inviteCode !== inviteCode) {
                  toast({
                     variant: "destructive",
                     title: "Código de Invitación Inválido",
@@ -66,7 +66,6 @@ export default function LoginPage() {
                 return;
             }
             
-            // In a real app, you would verify the password hash here
             toast({
                 title: "Inicio de Sesión Exitoso",
                 description: "Redirigiendo a tu panel...",
@@ -89,6 +88,9 @@ export default function LoginPage() {
             description: "Ocurrió un error al intentar iniciar sesión.",
         });
         setIsLoading(false);
+    } finally {
+      // This part was removed to keep the loading state until redirection is complete
+      // setIsLoading(false);
     }
   }
 

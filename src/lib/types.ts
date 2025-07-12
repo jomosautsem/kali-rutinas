@@ -31,6 +31,7 @@ export type User = {
   status: "activo" | "pendiente"
   registeredAt: string
   planStatus: "aprobado" | "pendiente" | "sin-plan" | "n/a"
+  inviteCode?: string;
 }
 
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
@@ -45,11 +46,19 @@ export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
     .describe('El número de días a la semana que el usuario puede dedicar al entrenamiento.'),
   preferredWorkoutStyle: z
     .string()
-    .describe('El estilo de entrenamiento preferido del usuario, ej., levantamiento de pesas, cardio, calistenia.'),
-  age: z.number().describe('La edad del usuario.'),
-  weight: z.number().describe('El peso del usuario en kilogramos.'),
-  height: z.number().describe('La estatura del usuario en centímetros.'),
-  goalTerm: z.string().describe('El plazo para alcanzar la meta: corto, mediano o largo plazo.'),
+    .describe('El estilo de entrenamiento preferido por el usuario, ej., levantamiento de pesas, cardio, HIIT, yoga.'),
+  age: z
+    .number()
+    .describe('La edad del usuario.'),
+  weight: z
+    .number()
+    .describe('El peso del usuario en kilogramos.'),
+  height: z
+    .number()
+    .describe('La estatura del usuario en centímetros.'),
+  goalTerm: z
+    .string()
+    .describe('El plazo en el que el usuario espera alcanzar sus metas, ej., corto, mediano, largo plazo.'),
 });
 export type GeneratePersonalizedTrainingPlanInput = z.infer<typeof GeneratePersonalizedTrainingPlanInputSchema>;
 

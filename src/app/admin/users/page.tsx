@@ -9,9 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 
 // In a real app, this data would be fetched from your database.
 const initialMockUsers: User[] = [
-  { id: "1", name: "Alice Johnson", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado" },
-  { id: "2", name: "Bob Williams", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan" },
-  { id: "3", name: "Charlie Brown", email: "charlie@example.com", role: "client", status: "activo", registeredAt: "2023-10-05", planStatus: "pendiente" },
+  { id: "1", name: "Alice Johnson", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado", inviteCode: "AJ23" },
+  { id: "2", name: "Bob Williams", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan", inviteCode: "BW45" },
+  { id: "3", name: "Charlie Brown", email: "charlie@example.com", role: "client", status: "pendiente", registeredAt: "2023-10-05", planStatus: "sin-plan" },
   { id: "4", name: "Diana Prince", email: "kalicentrodeportivotemixco@gmail.com", role: "admin", status: "activo", registeredAt: "2023-01-15", planStatus: "n/a" },
   { id: "5", name: "Ethan Hunt", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan" },
 ];
@@ -77,15 +77,15 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleApproveUser = (userId: string) => {
+  const handleApproveUser = (userId: string, inviteCode: string) => {
     const updatedUsers = users.map(user =>
-      user.id === userId ? { ...user, status: 'activo' } : user
+      user.id === userId ? { ...user, status: 'activo', inviteCode } : user
     );
     setUsers(updatedUsers);
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
     toast({
       title: "Usuario Aprobado",
-      description: `El usuario ahora puede iniciar sesión con el código de invitación.`,
+      description: `El código de invitación se ha generado y guardado.`,
     });
   };
 
