@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String? // Assuming password might not be stored directly if using OAuth
+  role          Role      @default(CLIENT)
+  status        Status    @default(PENDIENTE)
+  inviteCode    String?   @unique
+  registeredAt  DateTime  @default(now())
+  plan          UserPlan?
+}
+
+model UserPlan {
+  id              String        @id @default(cuid())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String        @unique
+  status          PlanStatus    @default(SIN_PLAN)
+  recommendations String?
+  weeklyPlan      Json
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum Status {
+  ACTIVO
+  PENDIENTE
+}
+
+enum PlanStatus {
+  APROBADO
+  PENDIENTE
+  SIN_PLAN
+  NA
+}
