@@ -1,16 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
-
-const Logo = () => (
-    <Image 
-        src="/logo.png" 
-        alt="Kali Dojo Gimnasio Logo" 
-        width={48} 
-        height={48} 
-        className="rounded-full"
-    />
-);
+import { Logo } from '@/components/logo';
 
 export default function Home() {
   return (
@@ -27,7 +17,7 @@ export default function Home() {
 
       <header className="px-4 lg:px-6 h-20 flex items-center z-10">
         <Link href="#" className="flex items-center justify-center" prefetch={false}>
-          <Logo />
+          <Logo className="h-12 w-12" />
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
           <Link
@@ -49,13 +39,7 @@ export default function Home() {
         <div className="relative mb-8">
             <div className="absolute -top-12 -left-1/2 w-[200%] h-[200%] bg-primary/20 blur-3xl rounded-full"></div>
              <div className="relative flex items-center justify-center w-32 h-32">
-                 <Image 
-                    src="/logo.png" 
-                    alt="Kali Dojo Gimnasio Logo" 
-                    width={128} 
-                    height={128} 
-                    className="rounded-full border-4 border-primary shadow-lg shadow-primary/20"
-                />
+                 <Logo className="h-32 w-32" />
             </div>
         </div>
 
