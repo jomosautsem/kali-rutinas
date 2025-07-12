@@ -17,7 +17,11 @@ export function Logo({
       alt="Kali Dojo Logo"
       width={width}
       height={height}
-      className={cn('object-contain', className)}
+      className={cn(
+        'object-contain transition-all duration-300 ease-in-out',
+        '[filter:drop-shadow(0_0_8px_hsl(var(--primary)/0.7))] hover:[filter:drop-shadow(0_0_12px_hsl(var(--primary)/0.9))]',
+        className
+        )}
       priority
       {...props}
     />
