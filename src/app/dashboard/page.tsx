@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlanGenerator } from "@/components/plan-generator"
 import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import type { User, UserPlan } from "@/lib/types";
+import type { User, UserPlan, Exercise } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -63,7 +63,7 @@ const MediaDisplay = ({ url, alt }: { url: string, alt: string }) => {
 };
 
 
-const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+const MediaPreview = ({ url, alt, onPreviewClick }: { url: string, alt: string, onPreviewClick: () => void }) => {
     if (!url) {
         return (
             <div className="w-full h-32 bg-secondary rounded-md flex items-center justify-center">
@@ -75,7 +75,7 @@ const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
     const youtubeId = getYoutubeVideoId(url);
 
     return (
-        <div className="relative group w-full h-32 bg-secondary rounded-md flex items-center justify-center cursor-pointer overflow-hidden">
+        <div onClick={onPreviewClick} className="relative group w-full h-32 bg-secondary rounded-md flex items-center justify-center cursor-pointer overflow-hidden">
             {youtubeId ? (
                 <Image 
                     src={`https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`} 
@@ -111,9 +111,17 @@ const dayButtonColors = [
 
 const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; completedDays: string[]; onToggleDay: (day: string) => void; }) => {
     const [activeDayIndex, setActiveDayIndex] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedMedia, setSelectedMedia] = useState<{ url: string; name: string } | null>(null);
+
+    const handlePreviewClick = (exercise: Exercise) => {
+        setSelectedMedia({ url: exercise.mediaUrl, name: exercise.name });
+        setIsModalOpen(true);
+    };
+
 
     return (
-        <Dialog>
+        <>
             <div className="space-y-6">
                 {plan.recommendations && (
                     <Alert className="bg-primary/5 border-primary/20">
@@ -178,19 +186,11 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; co
                                                     </div>
                                                 </div>
                                                 <div className="md:col-span-4 self-center">
-                                                    <DialogTrigger asChild>
-                                                        <div>
-                                                            <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
-                                                        </div>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="max-w-3xl">
-                                                        <DialogHeader>
-                                                            <DialogTitle>{exercise.name}</DialogTitle>
-                                                        </DialogHeader>
-                                                        <div className="flex justify-center items-center py-4">
-                                                            <MediaDisplay url={exercise.mediaUrl} alt={exercise.name} />
-                                                        </div>
-                                                    </DialogContent>
+                                                    <MediaPreview 
+                                                        url={exercise.mediaUrl} 
+                                                        alt={`Visual de ${exercise.name}`}
+                                                        onPreviewClick={() => handlePreviewClick(exercise)}
+                                                    />
                                                 </div>
                                             </div>
                                         ))}
@@ -201,7 +201,18 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; co
                     </div>
                 )}
             </div>
-        </Dialog>
+
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>{selectedMedia?.name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex justify-center items-center py-4">
+                        {selectedMedia && <MediaDisplay url={selectedMedia.url} alt={selectedMedia.name} />}
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
     )
 }
 
