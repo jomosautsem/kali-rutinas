@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SetbackReporter } from "@/components/setback-reporter";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const isVideo = (url: string) => {
     if (!url) return false;
@@ -30,11 +30,11 @@ const getYoutubeVideoId = (url: string): string | null => {
     return (match && match[2].length === 11) ? match[2] : null;
 }
 
-const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+const MediaDisplay = ({ url, alt }: { url: string, alt: string }) => {
     if (!url) {
         return (
-            <div className="w-full h-32 bg-secondary rounded-md flex items-center justify-center">
-                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            <div className="w-full h-full bg-secondary rounded-md flex items-center justify-center">
+                <ImageIcon className="h-16 w-16 text-muted-foreground" />
             </div>
         )
     };
@@ -56,10 +56,46 @@ const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
     }
 
     if (isVideo(url)) {
-        return <video src={url} controls className="w-full aspect-video rounded-md" />
+        return <video src={url} controls className="w-full max-h-[80vh] rounded-md" />
     }
 
-    return <Image src={url} alt={alt} width={200} height={150} className="w-full h-auto object-cover rounded-md" data-ai-hint="fitness exercise"/>
+    return <Image src={url} alt={alt} width={800} height={600} className="w-auto h-auto max-w-full max-h-[80vh] object-contain rounded-md" data-ai-hint="fitness exercise"/>
+};
+
+
+const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+    if (!url) {
+        return (
+            <div className="w-full h-32 bg-secondary rounded-md flex items-center justify-center">
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            </div>
+        )
+    };
+    
+    const youtubeId = getYoutubeVideoId(url);
+
+    return (
+        <div className="relative group w-full h-32 bg-secondary rounded-md flex items-center justify-center cursor-pointer overflow-hidden">
+            {youtubeId ? (
+                <Image 
+                    src={`https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`} 
+                    alt={alt} 
+                    fill 
+                    className="object-cover" 
+                    data-ai-hint="fitness exercise"
+                />
+            ) : isVideo(url) ? (
+                <div className="w-full h-full flex items-center justify-center bg-black">
+                    <Youtube className="h-10 w-10 text-white" />
+                </div>
+            ) : (
+                <Image src={url} alt={alt} fill className="object-cover" data-ai-hint="fitness exercise"/>
+            )}
+             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Expand className="h-8 w-8 text-white" />
+            </div>
+        </div>
+    )
 };
 
 
@@ -77,81 +113,95 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; co
     const [activeDayIndex, setActiveDayIndex] = useState(0);
 
     return (
-        <div className="space-y-6">
-            {plan.recommendations && (
-                <Alert className="bg-primary/5 border-primary/20">
-                    <Lightbulb className="h-5 w-5 text-primary" />
-                    <AlertTitle className="font-headline text-primary">Recomendaciones del Entrenador</AlertTitle>
-                    <AlertDescription className="text-foreground/80">
-                        {plan.recommendations}
-                    </AlertDescription>
-                </Alert>
-            )}
+        <Dialog>
+            <div className="space-y-6">
+                {plan.recommendations && (
+                    <Alert className="bg-primary/5 border-primary/20">
+                        <Lightbulb className="h-5 w-5 text-primary" />
+                        <AlertTitle className="font-headline text-primary">Recomendaciones del Entrenador</AlertTitle>
+                        <AlertDescription className="text-foreground/80">
+                            {plan.recommendations}
+                        </AlertDescription>
+                    </Alert>
+                )}
 
-            {plan.weeklyPlan.length > 0 && (
-                 <div className="space-y-4">
-                    <div className="flex flex-wrap items-center gap-2 border-b pb-4">
+                {plan.weeklyPlan.length > 0 && (
+                     <div className="space-y-4">
+                        <div className="flex flex-wrap items-center gap-2 border-b pb-4">
+                            {plan.weeklyPlan.map((dayPlan, index) => (
+                                <Button
+                                    key={index}
+                                    type="button"
+                                    onClick={() => setActiveDayIndex(index)}
+                                    className={cn(
+                                        "text-white transition-all",
+                                        activeDayIndex === index 
+                                            ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
+                                            : "bg-gray-600/50 hover:bg-gray-600",
+                                         completedDays.includes(dayPlan.day) && "ring-2 ring-offset-2 ring-offset-background ring-green-400"
+                                    )}
+                                >
+                                    {completedDays.includes(dayPlan.day) && <Check className="mr-2 h-5 w-5" />}
+                                    {dayPlan.day}
+                                </Button>
+                            ))}
+                        </div>
+
                         {plan.weeklyPlan.map((dayPlan, index) => (
-                            <Button
-                                key={index}
-                                type="button"
-                                onClick={() => setActiveDayIndex(index)}
-                                className={cn(
-                                    "text-white transition-all",
-                                    activeDayIndex === index 
-                                        ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
-                                        : "bg-gray-600/50 hover:bg-gray-600",
-                                     completedDays.includes(dayPlan.day) && "ring-2 ring-offset-2 ring-offset-background ring-green-400"
-                                )}
-                            >
-                                {completedDays.includes(dayPlan.day) && <Check className="mr-2 h-5 w-5" />}
-                                {dayPlan.day}
-                            </Button>
-                        ))}
-                    </div>
-
-                    {plan.weeklyPlan.map((dayPlan, index) => (
-                       <div key={index} className={cn(activeDayIndex === index ? "block" : "hidden")}>
-                           <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
-                                <div className="flex items-center justify-between gap-4">
-                                  <div className="flex-1">
-                                    <h3 className="font-bold text-lg">{dayPlan.day}</h3>
-                                    <p className="text-base text-muted-foreground">{dayPlan.focus}</p>
-                                  </div>
-                                  <div className="flex items-center space-x-2 bg-card p-3 rounded-lg">
-                                    <Checkbox 
-                                      id={`complete-${dayPlan.day}`} 
-                                      checked={completedDays.includes(dayPlan.day)}
-                                      onCheckedChange={() => onToggleDay(dayPlan.day)}
-                                    />
-                                    <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
-                                      Marcar como completado
-                                    </Label>
-                                  </div>
-                                </div>
-                                <div className="space-y-4 pt-4">
-                                    {dayPlan.exercises.map((exercise, exerciseIndex) => (
-                                        <div key={exerciseIndex} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-card/50">
-                                            <div className="md:col-span-8 space-y-2">
-                                                <p className="font-semibold text-base">{exercise.name}</p>
-                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                                                    <span>Series: <span className="font-medium text-foreground">{exercise.series}</span></span>
-                                                    <span>Reps: <span className="font-medium text-foreground">{exercise.reps}</span></span>
-                                                    <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
+                           <div key={index} className={cn(activeDayIndex === index ? "block" : "hidden")}>
+                               <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <div className="flex-1">
+                                        <h3 className="font-bold text-lg">{dayPlan.day}</h3>
+                                        <p className="text-base text-muted-foreground">{dayPlan.focus}</p>
+                                      </div>
+                                      <div className="flex items-center space-x-2 bg-card p-3 rounded-lg">
+                                        <Checkbox 
+                                          id={`complete-${dayPlan.day}`} 
+                                          checked={completedDays.includes(dayPlan.day)}
+                                          onCheckedChange={() => onToggleDay(dayPlan.day)}
+                                        />
+                                        <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
+                                          Marcar como completado
+                                        </Label>
+                                      </div>
+                                    </div>
+                                    <div className="space-y-4 pt-4">
+                                        {dayPlan.exercises.map((exercise, exerciseIndex) => (
+                                            <div key={exerciseIndex} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-card/50">
+                                                <div className="md:col-span-8 space-y-2">
+                                                    <p className="font-semibold text-base">{exercise.name}</p>
+                                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                                        <span>Series: <span className="font-medium text-foreground">{exercise.series}</span></span>
+                                                        <span>Reps: <span className="font-medium text-foreground">{exercise.reps}</span></span>
+                                                        <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
+                                                    </div>
+                                                </div>
+                                                <div className="md:col-span-4 self-center">
+                                                    <DialogTrigger asChild>
+                                                        <div>
+                                                            <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
+                                                        </div>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="max-w-3xl">
+                                                        <DialogHeader>
+                                                            <DialogTitle>{exercise.name}</DialogTitle>
+                                                        </DialogHeader>
+                                                        <div className="flex justify-center items-center py-4">
+                                                            <MediaDisplay url={exercise.mediaUrl} alt={exercise.name} />
+                                                        </div>
+                                                    </DialogContent>
                                                 </div>
                                             </div>
-                                            <div className="md:col-span-4 self-center">
-                                                <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </Dialog>
     )
 }
 
@@ -349,5 +399,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
