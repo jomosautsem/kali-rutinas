@@ -11,13 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb } from "lucide-react";
+import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
 import Link from "next/link";
 import { Textarea } from "../ui/textarea";
+import { cn } from "@/lib/utils";
 
 type PlanEditorProps = {
   user: User | null;
@@ -39,10 +39,21 @@ const isYoutubeUrl = (url: string) => {
     return youtubeRegex.test(url);
 }
 
+const dayButtonColors = [
+    "bg-red-500/80 hover:bg-red-500",
+    "bg-blue-500/80 hover:bg-blue-500",
+    "bg-green-500/80 hover:bg-green-500",
+    "bg-purple-500/80 hover:bg-purple-500",
+    "bg-orange-500/80 hover:bg-orange-500",
+    "bg-pink-500/80 hover:bg-pink-500",
+    "bg-teal-500/80 hover:bg-teal-500",
+]
+
 
 export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEditorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
   const { toast } = useToast();
 
   const form = useForm<UserPlan>({
@@ -56,10 +67,16 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     control: form.control,
     name: "weeklyPlan"
   });
+  
+  const weeklyPlanValues = useWatch({
+    control: form.control,
+    name: "weeklyPlan",
+  });
 
   useEffect(() => {
     if (user && isOpen) {
       setIsLoading(true);
+      setActiveDayIndex(0);
       const storedPlan = localStorage.getItem(`userPlan_${user.email}`);
       if (storedPlan) {
         try {
@@ -79,7 +96,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     if (!user) return;
     setIsGenerating(true);
     try {
-        // This is mock data, in a real app you'd get this from the user profile
         const generationInput: GeneratePersonalizedTrainingPlanInput = {
             goals: "Ganancia muscular y fuerza",
             currentFitnessLevel: "intermedio",
@@ -92,6 +108,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
         };
         const newPlan = await generatePersonalizedTrainingPlan(generationInput);
         form.reset(newPlan);
+        setActiveDayIndex(0);
         toast({
             title: "Plan Generado",
             description: "Se ha generado un nuevo plan. Revísalo y apruébalo."
@@ -119,6 +136,13 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
         onClose();
     }
   };
+
+  const removeDay = (index: number) => {
+    remove(index);
+    if (activeDayIndex >= index) {
+      setActiveDayIndex(prev => Math.max(0, prev - 1));
+    }
+  }
 
   if (!user) return null;
 
@@ -173,33 +197,62 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                     </div>
                 )}
                 
-                <Accordion type="multiple" defaultValue={fields.map((_, index) => `day-${index}`)} className="w-full">
-                    {fields.map((field, dayIndex) => (
-                        <AccordionItem key={field.id} value={`day-${dayIndex}`}>
-                            <AccordionTrigger>
-                                <div className="flex items-center gap-4 w-full">
-                                     <Input
-                                        {...form.register(`weeklyPlan.${dayIndex}.day`)}
-                                        className="w-32 font-bold"
-                                        placeholder="Día"
-                                     />
-                                     <Input
-                                        {...form.register(`weeklyPlan.${dayIndex}.focus`)}
-                                        className="text-base flex-1"
-                                        placeholder="Enfoque del día"
-                                     />
+                {fields.length > 0 && (
+                    <div className="space-y-4">
+                        <div className="flex flex-wrap items-center gap-2 border-b pb-4">
+                            {fields.map((field, index) => (
+                                <Button
+                                    key={field.id}
+                                    type="button"
+                                    onClick={() => setActiveDayIndex(index)}
+                                    className={cn(
+                                        "text-white transition-all",
+                                        activeDayIndex === index 
+                                            ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
+                                            : "bg-gray-600/50 hover:bg-gray-600"
+                                    )}
+                                >
+                                    {weeklyPlanValues?.[index]?.day || `Día ${index + 1}`}
+                                </Button>
+                            ))}
+                        </div>
+
+                        {fields.map((field, index) => (
+                           <div key={field.id} className={cn(activeDayIndex === index ? "block" : "hidden")}>
+                                <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
+                                    <div className="flex items-center gap-4">
+                                        <Input
+                                            {...form.register(`weeklyPlan.${index}.day`)}
+                                            className="w-40 font-bold"
+                                            placeholder="Día"
+                                        />
+                                        <Input
+                                            {...form.register(`weeklyPlan.${index}.focus`)}
+                                            className="text-base flex-1"
+                                            placeholder="Enfoque del día"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => removeDay(index)}
+                                            className="text-destructive hover:bg-destructive/10"
+                                        >
+                                            <XCircle className="h-5 w-5" />
+                                        </Button>
+                                    </div>
+                                    <ExercisesFieldArray dayIndex={index} form={form} />
                                 </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                                <ExercisesFieldArray dayIndex={dayIndex} form={form} />
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+
                  <Button
                     type="button"
                     variant="outline"
-                    onClick={() => append({ day: "Nuevo Día", focus: "Enfoque", exercises: [] })}
+                    onClick={() => append({ day: `Día ${fields.length + 1}`, focus: "Enfoque", exercises: [] })}
                 >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Añadir Día
@@ -257,13 +310,13 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
             return <video src={mediaUrl} controls className="w-full aspect-video rounded-md" />
         }
 
-        return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-auto object-cover rounded-md" />
+        return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-auto object-cover rounded-md" data-ai-hint="fitness exercise"/>
     };
 
     return (
-        <div className="space-y-4 pl-4">
+        <div className="space-y-4 pt-4">
             {fields.map((field, exerciseIndex) => (
-                <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-secondary/50">
+                <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-card/50">
                     <div className="md:col-span-8 space-y-2">
                         <Input
                             {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
