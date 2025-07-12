@@ -88,9 +88,6 @@ export default function LoginPage() {
             description: "Ocurrió un error al intentar iniciar sesión.",
         });
         setIsLoading(false);
-    } finally {
-      // This part was removed to keep the loading state until redirection is complete
-      // setIsLoading(false);
     }
   }
 
