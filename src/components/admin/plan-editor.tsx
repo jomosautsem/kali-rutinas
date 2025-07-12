@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle } from "lucide-react";
+import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
@@ -38,6 +38,16 @@ const isYoutubeUrl = (url: string) => {
     const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
     return youtubeRegex.test(url);
 }
+
+const isValidUrl = (url: string): boolean => {
+    if (!url) return false;
+    try {
+        new URL(url);
+        return true;
+    } catch (_) {
+        return false;
+    }
+};
 
 const dayButtonColors = [
     "bg-red-500/80 hover:bg-red-500",
@@ -308,6 +318,15 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
 
         if (isVideo(mediaUrl)) {
             return <video src={mediaUrl} controls className="w-full aspect-video rounded-md" />
+        }
+
+        if (!isValidUrl(mediaUrl)) {
+             return (
+                <div className="w-full h-32 bg-destructive/10 rounded-md flex flex-col items-center justify-center text-center p-2">
+                    <AlertTriangle className="h-6 w-6 text-destructive" />
+                    <p className="text-xs text-destructive font-semibold mt-1">URL Inválida</p>
+                </div>
+            )
         }
 
         return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-auto object-cover rounded-md" data-ai-hint="fitness exercise"/>
