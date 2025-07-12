@@ -2,10 +2,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { UserTableClient } from "@/components/admin/user-table-client"
-import { PlusCircle } from "lucide-react"
 import type { User, UserPlan } from "@/lib/types";
+import { AddUserDialog } from "@/components/admin/add-user-dialog";
 
 // In a real app, this data would be fetched from your database.
 const initialMockUsers: User[] = [
@@ -37,6 +36,20 @@ export default function AdminUsersPage() {
       }
     }
   }, []);
+
+  const handleAddUser = (newUser: Omit<User, 'id' | 'role' | 'status' | 'registeredAt' | 'planStatus'>) => {
+    const userWithDefaults: User = {
+        ...newUser,
+        id: (users.length + 1).toString(),
+        role: "client",
+        status: "activo",
+        registeredAt: new Date().toISOString().split("T")[0],
+        planStatus: "sin-plan",
+    };
+    const updatedUsers = [...users, userWithDefaults];
+    setUsers(updatedUsers);
+    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+  }
 
   const handleDeleteUser = (userId: string) => {
     const updatedUsers = users.filter(user => user.id !== userId);
@@ -70,10 +83,7 @@ export default function AdminUsersPage() {
           <h1 className="text-3xl font-bold font-headline">Gestión de Usuarios</h1>
           <p className="text-muted-foreground">Ver, gestionar y confirmar cuentas de usuario.</p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Añadir Usuario
-        </Button>
+        <AddUserDialog onAddUser={handleAddUser} />
       </div>
       <UserTableClient users={users} onDeleteUser={handleDeleteUser} onSaveAndApprovePlan={handleSaveAndApprovePlan} />
     </div>
