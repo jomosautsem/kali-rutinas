@@ -5,12 +5,15 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 
 const isVideo = (url: string) => {
     if (!url) return false;
@@ -63,7 +66,7 @@ const dayButtonColors = [
     "bg-teal-500/80 hover:bg-teal-500",
 ]
 
-const PlanAprobado = ({ plan }: { plan: UserPlan }) => {
+const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; completedDays: string[]; onToggleDay: (day: string) => void; }) => {
     const [activeDayIndex, setActiveDayIndex] = useState(0);
 
     return (
@@ -90,9 +93,11 @@ const PlanAprobado = ({ plan }: { plan: UserPlan }) => {
                                     "text-white transition-all",
                                     activeDayIndex === index 
                                         ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
-                                        : "bg-gray-600/50 hover:bg-gray-600"
+                                        : "bg-gray-600/50 hover:bg-gray-600",
+                                     completedDays.includes(dayPlan.day) && "ring-2 ring-offset-2 ring-offset-background ring-green-400"
                                 )}
                             >
+                                {completedDays.includes(dayPlan.day) && <Check className="mr-2 h-5 w-5" />}
                                 {dayPlan.day}
                             </Button>
                         ))}
@@ -101,9 +106,21 @@ const PlanAprobado = ({ plan }: { plan: UserPlan }) => {
                     {plan.weeklyPlan.map((dayPlan, index) => (
                        <div key={index} className={cn(activeDayIndex === index ? "block" : "hidden")}>
                            <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
-                                <div className="flex items-center gap-4">
-                                    <span className="w-40 font-bold text-lg">{dayPlan.day}</span>
-                                    <span className="text-base flex-1 text-muted-foreground">{dayPlan.focus}</span>
+                                <div className="flex items-center justify-between gap-4">
+                                  <div className="flex-1">
+                                    <h3 className="font-bold text-lg">{dayPlan.day}</h3>
+                                    <p className="text-base text-muted-foreground">{dayPlan.focus}</p>
+                                  </div>
+                                  <div className="flex items-center space-x-2 bg-card p-3 rounded-lg">
+                                    <Checkbox 
+                                      id={`complete-${dayPlan.day}`} 
+                                      checked={completedDays.includes(dayPlan.day)}
+                                      onCheckedChange={() => onToggleDay(dayPlan.day)}
+                                    />
+                                    <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
+                                      Marcar como completado
+                                    </Label>
+                                  </div>
                                 </div>
                                 <div className="space-y-4 pt-4">
                                     {dayPlan.exercises.map((exercise, exerciseIndex) => (
@@ -151,9 +168,52 @@ const SinPlan = () => (
     </Alert>
 )
 
+const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; completedDays: number; }) => {
+    const progressPercentage = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
+
+    return (
+        <div className="flex flex-col items-center justify-center h-full p-6 text-center space-y-4">
+            <div className="relative h-40 w-40">
+                <svg className="h-full w-full" viewBox="0 0 36 36">
+                    <path
+                        className="text-secondary"
+                        d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                    />
+                    <path
+                        className="text-primary"
+                        d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeDasharray={`${progressPercentage}, 100`}
+                        strokeLinecap="round"
+                    />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-3xl font-bold font-headline">{completedDays}</span>
+                    <span className="text-sm text-muted-foreground">de {totalDays}</span>
+                </div>
+            </div>
+            <p className="font-semibold">Días Completados</p>
+            <p className="text-xs text-muted-foreground">
+                ¡Sigue así para alcanzar tus metas!
+            </p>
+        </div>
+    );
+};
+
+
 export default function DashboardPage() {
   const [planStatus, setPlanStatus] = useState<'aprobado' | 'pendiente' | 'sin-plan' | null>(null);
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
+  const [completedDays, setCompletedDays] = useState<string[]>([]);
 
   useEffect(() => {
     // This simulates fetching the current user's plan status after they log in.
@@ -169,6 +229,10 @@ export default function DashboardPage() {
               const storedPlan = localStorage.getItem(`userPlan_${currentUser.email}`);
               if (storedPlan) {
                   setUserPlan(JSON.parse(storedPlan));
+              }
+              const storedCompletedDays = localStorage.getItem(`completedDays_${currentUser.email}`);
+              if(storedCompletedDays) {
+                  setCompletedDays(JSON.parse(storedCompletedDays));
               }
           }
         } else {
@@ -191,9 +255,23 @@ export default function DashboardPage() {
         users = users.map(u => u.email === loggedInUserEmail ? { ...u, planStatus: 'pendiente' } : u);
         localStorage.setItem("registeredUsers", JSON.stringify(users));
         setPlanStatus('pendiente');
+        // Reset progress when a new plan is generated
+        localStorage.removeItem(`completedDays_${loggedInUserEmail}`);
+        setCompletedDays([]);
       }
     }
   };
+
+  const handleToggleDay = (day: string) => {
+      const newCompletedDays = completedDays.includes(day)
+          ? completedDays.filter(d => d !== day)
+          : [...completedDays, day];
+      setCompletedDays(newCompletedDays);
+      const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
+      if (loggedInUserEmail) {
+          localStorage.setItem(`completedDays_${loggedInUserEmail}`, JSON.stringify(newCompletedDays));
+      }
+  }
 
 
   const renderPlanContent = () => {
@@ -202,7 +280,7 @@ export default function DashboardPage() {
     }
     switch(planStatus) {
       case 'aprobado':
-        return userPlan ? <PlanAprobado plan={userPlan} /> : <p>Cargando plan...</p>;
+        return userPlan ? <PlanAprobado plan={userPlan} completedDays={completedDays} onToggleDay={handleToggleDay} /> : <p>Cargando plan...</p>;
       case 'pendiente':
         return <PlanPendiente />;
       case 'sin-plan':
@@ -240,11 +318,22 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="font-headline">Resumen de Progreso</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-center h-5/6">
-             <img src="https://placehold.co/400x300.png" alt="Gráfico de progreso" data-ai-hint="fitness chart" className="rounded-lg" />
+          <CardContent className="h-[calc(100%_-_4rem)]">
+              {planStatus === 'aprobado' && userPlan ? (
+                <ProgressSummary 
+                    totalDays={userPlan.weeklyPlan.length} 
+                    completedDays={completedDays.length}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                    <p className="text-muted-foreground">Tu progreso aparecerá aquí una vez que empieces a entrenar.</p>
+                </div>
+              )}
           </CardContent>
         </Card>
       </div>
     </>
   )
 }
+
+    
