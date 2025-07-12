@@ -7,16 +7,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlanGenerator } from "@/components/plan-generator"
 import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import type { User, UserPlan } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const isVideo = (url: string) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.mov'];
     const lowercasedUrl = url.toLowerCase();
-    return videoExtensions.some(ext => lowercasedUrl.endsWith(ext));
+    return videoExtensions.some(ext => lowercasedUrl.includes(ext));
 };
 
 const isYoutubeUrl = (url: string) => {
@@ -52,50 +52,84 @@ const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
     return <Image src={url} alt={alt} width={200} height={150} className="w-full h-auto object-cover rounded-md" data-ai-hint="fitness exercise"/>
 };
 
-const PlanAprobado = ({ plan }: { plan: UserPlan }) => (
-    <div className="space-y-6">
-        {plan.recommendations && (
-            <Alert className="bg-primary/5 border-primary/20">
-                <Lightbulb className="h-5 w-5 text-primary" />
-                <AlertTitle className="font-headline text-primary">Recomendaciones del Entrenador</AlertTitle>
-                <AlertDescription className="text-foreground/80">
-                    {plan.recommendations}
-                </AlertDescription>
-            </Alert>
-        )}
-        <Accordion type="multiple" defaultValue={plan.weeklyPlan.map((_, index) => `day-${index}`)} className="w-full">
-            {plan.weeklyPlan.map((dayPlan, dayIndex) => (
-                <AccordionItem key={dayIndex} value={`day-${dayIndex}`}>
-                    <AccordionTrigger>
-                        <div className="flex items-center gap-4 w-full">
-                            <span className="font-bold w-32 text-left">{dayPlan.day}</span>
-                            <span className="text-base flex-1 text-left text-muted-foreground">{dayPlan.focus}</span>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <div className="space-y-4 pl-4">
-                            {dayPlan.exercises.map((exercise, exerciseIndex) => (
-                                <div key={exerciseIndex} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-secondary/50">
-                                    <div className="md:col-span-8 space-y-2">
-                                        <p className="font-semibold text-base">{exercise.name}</p>
-                                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                                            <span>Series: <span className="font-medium text-foreground">{exercise.series}</span></span>
-                                            <span>Reps: <span className="font-medium text-foreground">{exercise.reps}</span></span>
-                                            <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
-                                        </div>
-                                    </div>
-                                    <div className="md:col-span-4 self-center">
-                                        <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
-                                    </div>
+
+const dayButtonColors = [
+    "bg-red-500/80 hover:bg-red-500",
+    "bg-blue-500/80 hover:bg-blue-500",
+    "bg-green-500/80 hover:bg-green-500",
+    "bg-purple-500/80 hover:bg-purple-500",
+    "bg-orange-500/80 hover:bg-orange-500",
+    "bg-pink-500/80 hover:bg-pink-500",
+    "bg-teal-500/80 hover:bg-teal-500",
+]
+
+const PlanAprobado = ({ plan }: { plan: UserPlan }) => {
+    const [activeDayIndex, setActiveDayIndex] = useState(0);
+
+    return (
+        <div className="space-y-6">
+            {plan.recommendations && (
+                <Alert className="bg-primary/5 border-primary/20">
+                    <Lightbulb className="h-5 w-5 text-primary" />
+                    <AlertTitle className="font-headline text-primary">Recomendaciones del Entrenador</AlertTitle>
+                    <AlertDescription className="text-foreground/80">
+                        {plan.recommendations}
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            {plan.weeklyPlan.length > 0 && (
+                 <div className="space-y-4">
+                    <div className="flex flex-wrap items-center gap-2 border-b pb-4">
+                        {plan.weeklyPlan.map((dayPlan, index) => (
+                            <Button
+                                key={index}
+                                type="button"
+                                onClick={() => setActiveDayIndex(index)}
+                                className={cn(
+                                    "text-white transition-all",
+                                    activeDayIndex === index 
+                                        ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
+                                        : "bg-gray-600/50 hover:bg-gray-600"
+                                )}
+                            >
+                                {dayPlan.day}
+                            </Button>
+                        ))}
+                    </div>
+
+                    {plan.weeklyPlan.map((dayPlan, index) => (
+                       <div key={index} className={cn(activeDayIndex === index ? "block" : "hidden")}>
+                           <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
+                                <div className="flex items-center gap-4">
+                                    <span className="w-40 font-bold text-lg">{dayPlan.day}</span>
+                                    <span className="text-base flex-1 text-muted-foreground">{dayPlan.focus}</span>
                                 </div>
-                            ))}
+                                <div className="space-y-4 pt-4">
+                                    {dayPlan.exercises.map((exercise, exerciseIndex) => (
+                                        <div key={exerciseIndex} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-card/50">
+                                            <div className="md:col-span-8 space-y-2">
+                                                <p className="font-semibold text-base">{exercise.name}</p>
+                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                                    <span>Series: <span className="font-medium text-foreground">{exercise.series}</span></span>
+                                                    <span>Reps: <span className="font-medium text-foreground">{exercise.reps}</span></span>
+                                                    <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
+                                                </div>
+                                            </div>
+                                            <div className="md:col-span-4 self-center">
+                                                <MediaPreview url={exercise.mediaUrl} alt={`Visual de ${exercise.name}`} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    </AccordionContent>
-                </AccordionItem>
-            ))}
-        </Accordion>
-    </div>
-)
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
 
 const PlanPendiente = () => (
     <Alert className="border-yellow-500/50 text-yellow-700 bg-yellow-500/10">
