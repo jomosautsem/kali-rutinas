@@ -19,6 +19,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { Logo } from "@/components/logo";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   // TODO: Add real authentication check here.
@@ -40,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
-              <Dumbbell className="w-8 h-8 text-primary" />
+              <Logo className="w-12 h-12 text-primary" />
               <span className="text-lg font-bold font-headline">Rutinas Kali</span>
             </div>
           </SidebarHeader>

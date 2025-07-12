@@ -25,7 +25,7 @@ export function AuthCard({ title, description, children, footer }: AuthCardProps
             </Button>
         </div>
         <CardHeader className="text-center pt-12">
-           <Logo className="mx-auto h-16 w-16 text-primary" />
+           <Logo className="mx-auto h-24 w-24 text-primary" />
           <CardTitle className="mt-4 text-2xl font-bold font-headline">{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
