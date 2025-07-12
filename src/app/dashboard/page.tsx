@@ -13,7 +13,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
+import { SetbackReporter } from "@/components/setback-reporter";
+
 
 const isVideo = (url: string) => {
     if (!url) return false;
@@ -170,9 +171,10 @@ const SinPlan = () => (
 
 const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; completedDays: number; }) => {
     const progressPercentage = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
+    const allDaysCompleted = totalDays > 0 && completedDays === totalDays;
 
     return (
-        <div className="flex flex-col items-center justify-center h-full p-6 text-center space-y-4">
+        <div className="flex flex-col items-center justify-between h-full p-6 text-center space-y-4">
             <div className="relative h-40 w-40">
                 <svg className="h-full w-full" viewBox="0 0 36 36">
                     <path
@@ -185,7 +187,7 @@ const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; comp
                         strokeWidth="3"
                     />
                     <path
-                        className="text-primary"
+                        className={cn(allDaysCompleted ? "text-green-500" : "text-primary")}
                         d="M18 2.0845
                           a 15.9155 15.9155 0 0 1 0 31.831
                           a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -201,10 +203,16 @@ const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; comp
                     <span className="text-sm text-muted-foreground">de {totalDays}</span>
                 </div>
             </div>
-            <p className="font-semibold">Días Completados</p>
-            <p className="text-xs text-muted-foreground">
-                ¡Sigue así para alcanzar tus metas!
-            </p>
+            <div>
+              <p className="font-semibold">Días Completados</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                  {allDaysCompleted ? "¡Felicidades, completaste la semana!" : "¡Sigue así para alcanzar tus metas!"}
+              </p>
+            </div>
+            
+            {!allDaysCompleted && totalDays > 0 && (
+                <SetbackReporter />
+            )}
         </div>
     );
 };
@@ -294,7 +302,7 @@ export default function DashboardPage() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl md:text-3xl font-bold font-headline">Tu Panel</h1>
-        {planStatus !== 'pendiente' && planStatus !== 'aprobado' && (
+        {planStatus !== 'pendiente' && (
           <PlanGenerator onPlanGenerated={handlePlanGenerated} />
         )}
       </div>
