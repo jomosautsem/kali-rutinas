@@ -305,21 +305,45 @@ export default function OnboardingPage() {
                          <FormField control={form.control} name="age" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Edad</FormLabel>
-                                <FormControl><Input type="number" placeholder="Tu edad" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} /></FormControl>
+                                <FormControl>
+                                    <Input 
+                                        type="number" 
+                                        placeholder="Tu edad" 
+                                        {...field} 
+                                        value={field.value ?? ''}
+                                        onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="weight" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Peso (kg)</FormLabel>
-                                <FormControl><Input type="number" placeholder="Tu peso en kg" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} /></FormControl>
+                                <FormControl>
+                                    <Input 
+                                        type="number" 
+                                        placeholder="Tu peso en kg" 
+                                        {...field} 
+                                        value={field.value ?? ''}
+                                        onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="height" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Estatura (cm)</FormLabel>
-                                <FormControl><Input type="number" placeholder="Tu altura en cm" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} /></FormControl>
+                                <FormControl>
+                                    <Input 
+                                        type="number" 
+                                        placeholder="Tu altura en cm" 
+                                        {...field} 
+                                        value={field.value ?? ''}
+                                        onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
