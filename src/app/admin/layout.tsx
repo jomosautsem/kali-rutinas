@@ -1,3 +1,4 @@
+import '@/ai/genkit';
 import Link from "next/link";
 import {
   Activity,
