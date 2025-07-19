@@ -58,13 +58,19 @@ export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
     .optional()
     .describe('Los grupos musculares específicos en los que el usuario quiere enfocarse.'),
   age: z
-    .number()
+    .number({ required_error: "La edad es requerida." })
+    .int("La edad debe ser un número entero.")
+    .positive("La edad debe ser un número positivo.")
     .describe('La edad del usuario.'),
   weight: z
-    .number()
+    .number({ required_error: "El peso es requerido." })
+    .int("El peso debe ser un número entero.")
+    .positive("El peso debe ser un número positivo.")
     .describe('El peso del usuario en kilogramos.'),
   height: z
-    .number()
+    .number({ required_error: "La estatura es requerida." })
+    .int("La estatura debe ser un número entero.")
+    .positive("La estatura debe ser un número positivo.")
     .describe('La estatura del usuario en centímetros.'),
   goalTerm: z
     .string()
@@ -96,3 +102,5 @@ export const GenerateTrainingTemplateInputSchema = z.object({
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres.").describe("Una descripción detallada de la plantilla de entrenamiento deseada."),
 });
 export type GenerateTrainingTemplateInput = z.infer<typeof GenerateTrainingTemplateInputSchema>;
+
+    

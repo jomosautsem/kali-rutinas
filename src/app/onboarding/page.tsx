@@ -123,9 +123,9 @@ export default function OnboardingPage() {
       preferredWorkoutStyle: "fuerza",
       muscleFocus: [],
       otherWorkoutStyle: "",
-      age: 18,
-      weight: 70,
-      height: 175,
+      age: undefined,
+      weight: undefined,
+      height: undefined,
       goalTerm: "mediano",
       injuriesOrConditions: "",
     },
@@ -211,7 +211,7 @@ export default function OnboardingPage() {
             <StepsIndicator steps={steps} currentStep={currentStep} />
             <AnimatePresence mode="wait">
               <motion.div key={currentStep} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }}>
-                 <div className="min-h-[360px] flex flex-col">
+                 <div className="min-h-[350px] flex flex-col">
                   {currentStep === 0 && (
                      <Step title={steps[0].title} icon={steps[0].icon}>
                          <FormField control={form.control} name="goals" render={({ field }) => (
@@ -295,21 +295,21 @@ export default function OnboardingPage() {
                          <FormField control={form.control} name="age" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Edad</FormLabel>
-                                <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                <FormControl><Input type="number" placeholder="Tu edad" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="weight" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Peso (kg)</FormLabel>
-                                <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                <FormControl><Input type="number" placeholder="Tu peso en kg" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="height" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Estatura (cm)</FormLabel>
-                                <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                <FormControl><Input type="number" placeholder="Tu altura en cm" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -342,3 +342,5 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
+
+    
