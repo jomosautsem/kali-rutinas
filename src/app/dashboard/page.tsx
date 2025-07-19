@@ -3,9 +3,10 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 const isVideo = (url: string) => {
@@ -503,42 +505,67 @@ export default function DashboardPage() {
           <PlanGenerator onPlanGenerated={handlePlanGenerated} />
         )}
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle className="font-headline">Tu Plan Semanal</CardTitle>
-            <CardDescription>
-                {planStatus === 'aprobado' 
-                    ? "Este es tu horario de entrenamiento personalizado para la semana."
-                    : "Tu plan de entrenamiento aparecerá aquí una vez que sea aprobado."
-                }
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-2 md:px-6">
-            {renderPlanContent()}
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="font-headline">Resumen de Progreso</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[calc(100%_-_4rem)]">
-              {planStatus === 'aprobado' && userPlan ? (
-                <ProgressSummary 
-                    totalDays={userPlan.weeklyPlan.length} 
-                    completedDays={completedDays.length}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                    <p className="text-muted-foreground">Tu progreso aparecerá aquí una vez que empieces a entrenar.</p>
-                </div>
-              )}
-          </CardContent>
-        </Card>
-      </div>
+      
+      <Tabs defaultValue="plan">
+        <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="plan">Tu Plan Semanal</TabsTrigger>
+            <TabsTrigger value="progress">Resumen de Progreso</TabsTrigger>
+        </TabsList>
+        <TabsContent value="plan">
+             <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Tu Plan de Entrenamiento</CardTitle>
+                    <CardDescription>
+                        {planStatus === 'aprobado' 
+                            ? "Este es tu horario de entrenamiento personalizado para la semana."
+                            : "Tu plan de entrenamiento aparecerá aquí una vez que sea aprobado."
+                        }
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="px-2 md:px-6">
+                    {renderPlanContent()}
+                </CardContent>
+            </Card>
+        </TabsContent>
+        <TabsContent value="progress">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Tu Progreso</CardTitle>
+                    <CardDescription>
+                        Visualiza tus logros y mantente motivado.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {planStatus === 'aprobado' && userPlan ? (
+                         <div className="grid gap-6 md:grid-cols-2">
+                             <div className="md:col-span-2 flex flex-col items-center justify-center p-8 text-center bg-secondary/50 rounded-lg">
+                                <h3 className="text-xl font-semibold">Analiza tu Rendimiento</h3>
+                                <p className="text-muted-foreground mt-2 mb-4 max-w-md">
+                                    Explora gráficos detallados y descubre tus récords personales para optimizar tu entrenamiento.
+                                </p>
+                                <Button asChild>
+                                    <Link href="/dashboard/progress">
+                                        <TrendingUp className="mr-2 h-5 w-5" />
+                                        Ver mi Progreso Detallado
+                                    </Link>
+                                </Button>
+                             </div>
+                             <div className="h-[400px] flex items-center justify-center">
+                                <ProgressSummary 
+                                    totalDays={userPlan.weeklyPlan.length} 
+                                    completedDays={completedDays.length}
+                                />
+                             </div>
+                         </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-64 text-center">
+                            <p className="text-muted-foreground">Tu progreso aparecerá aquí una vez que empieces a entrenar.</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
     </>
   )
 }
-
-    
