@@ -72,6 +72,16 @@ const workoutStyleOptions = [
     { value: "otro", label: "Otro (especificar)" },
 ]
 
+const muscleFocusOptions = [
+    { value: "pecho", label: "Pecho" },
+    { value: "espalda", label: "Espalda" },
+    { value: "pierna", label: "Pierna (Cuádriceps/Femoral/Pantorrilla)" },
+    { value: "gluteos y esquiotibiales", label: "Glúteos e Isquiotibiales" },
+    { value: "hombros", label: "Hombros" },
+    { value: "brazos", label: "Brazos (Bíceps/Tríceps/Antebrazos)" },
+    { value: "abdomen", label: "Abdomen" },
+]
+
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -99,6 +109,7 @@ export default function OnboardingPage() {
       currentFitnessLevel: "principiante",
       trainingDays: [],
       preferredWorkoutStyle: "fuerza",
+      muscleFocus: [],
       otherWorkoutStyle: "",
       age: 18,
       weight: 70,
@@ -228,6 +239,25 @@ export default function OnboardingPage() {
                 />
             </div>
 
+             <FormField
+              control={form.control}
+              name="muscleFocus"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Enfoque Muscular (Opcional)</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      options={muscleFocusOptions}
+                      selected={field.value || []}
+                      onChange={field.onChange}
+                      placeholder="Selecciona grupos musculares..."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="preferredWorkoutStyle"
@@ -340,5 +370,3 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
-
-    

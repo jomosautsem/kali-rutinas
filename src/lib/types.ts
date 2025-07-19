@@ -53,6 +53,10 @@ export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   preferredWorkoutStyle: z
     .string()
     .describe('El estilo de entrenamiento preferido por el usuario, ej., levantamiento de pesas, cardio, HIIT, yoga.'),
+  muscleFocus: z
+    .array(z.string())
+    .optional()
+    .describe('Los grupos musculares específicos en los que el usuario quiere enfocarse.'),
   age: z
     .number()
     .describe('La edad del usuario.'),
