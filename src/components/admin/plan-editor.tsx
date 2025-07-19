@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useForm, useFieldArray, useWatch, Control, UseFormRegister } from "react-hook-form";
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan";
-import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan, DayPlan, Exercise } from "@/lib/types";
+import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan, DayPlan, Exercise, Set as SetType } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -19,7 +19,6 @@ import Link from "next/link";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
 type PlanEditorProps = {
   user: User | null;
@@ -314,7 +313,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                                             <XCircle className="h-5 w-5" />
                                         </Button>
                                     </div>
-                                    <ExercisesFieldArray dayIndex={index} control={form.control} register={form.register} />
+                                    <ExercisesFieldArray dayIndex={index} control={form.control} register={form.register} getValues={form.getValues} setValue={form.setValue} />
                                 </div>
                             </div>
                         ))}
@@ -338,60 +337,104 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
 }
 
 
-function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number; control: Control<UserPlan>; register: UseFormRegister<UserPlan> }) {
+function ExercisesFieldArray({ dayIndex, control, register, getValues, setValue }: { dayIndex: number; control: Control<UserPlan>; register: UseFormRegister<UserPlan>; getValues: any, setValue: any }) {
     const { fields, append, remove } = useFieldArray({
         control,
         name: `weeklyPlan.${dayIndex}.exercises`
     });
 
+    const handleSetCountChange = (exerciseIndex: number, count: number) => {
+        const currentSets = getValues(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets`);
+        const newSets = Array.from({ length: count }, (_, i) => {
+            return currentSets[i] || { id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "8-12", weight: "", completed: false };
+        });
+        setValue(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets`, newSets, { shouldValidate: true });
+    };
+
     return (
         <div className="space-y-4 pt-4">
-            {fields.map((field, exerciseIndex) => (
-                <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-card/50">
-                    <div className="md:col-span-8 space-y-4">
-                        <div className="flex items-center gap-2">
-                             <Input
-                                {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
-                                placeholder="Nombre del Ejercicio"
-                                className="font-semibold text-lg flex-1"
-                            />
-                             <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => remove(exerciseIndex)}
-                                className="text-muted-foreground hover:text-destructive"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+            {fields.map((field, exerciseIndex) => {
+                const sets = getValues(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets`) || [];
+                return (
+                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-card/50">
+                        <div className="md:col-span-8 space-y-4">
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
+                                    placeholder="Nombre del Ejercicio"
+                                    className="font-semibold text-lg flex-1 bg-secondary/30 border-secondary"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => remove(exerciseIndex)}
+                                    className="text-muted-foreground hover:text-destructive"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+
+                            <div className="space-y-3 p-3 bg-secondary/30 rounded-md">
+                                <div className="flex items-center gap-4">
+                                    <Label className="font-semibold">Series</Label>
+                                    <div className="flex items-center gap-1.5">
+                                        {[1, 2, 3, 4, 5, 6].map(num => (
+                                            <Button
+                                                key={num}
+                                                type="button"
+                                                variant={sets.length === num ? 'default' : 'outline'}
+                                                size="sm"
+                                                className="w-10"
+                                                onClick={() => handleSetCountChange(exerciseIndex, num)}
+                                            >
+                                                {num}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">Reps Objetivo</Label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {sets.map((set: SetType, setIndex: number) => (
+                                            <div key={set.id} className="flex items-center gap-2">
+                                                <span className="text-sm font-medium text-muted-foreground">{setIndex + 1}.</span>
+                                                <Input
+                                                    {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets.${setIndex}.reps`)}
+                                                    placeholder="Ej. 8-12"
+                                                    className="h-9"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 items-end">
+                                <div className="space-y-1">
+                                    <Label htmlFor={`rest-${dayIndex}-${exerciseIndex}`} className="text-xs">Descanso</Label>
+                                    <Input
+                                        id={`rest-${dayIndex}-${exerciseIndex}`}
+                                        {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
+                                        placeholder="Ej. 60s"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor={`mediaUrl-${dayIndex}-${exerciseIndex}`} className="text-xs">URL de Imagen/Video</Label>
+                                    <Input
+                                        id={`mediaUrl-${dayIndex}-${exerciseIndex}`}
+                                        {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
+                                        placeholder="https://www.youtube.com/watch?v=..."
+                                    />
+                                </div>
+                            </div>
                         </div>
-                       
-                        <SetsFieldArray dayIndex={dayIndex} exerciseIndex={exerciseIndex} control={control} register={register} />
-                         
-                         <div className="grid grid-cols-2 gap-4 items-end">
-                            <div className="space-y-1">
-                                <Label htmlFor={`rest-${dayIndex}-${exerciseIndex}`} className="text-xs">Descanso</Label>
-                                <Input
-                                    id={`rest-${dayIndex}-${exerciseIndex}`}
-                                    {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
-                                    placeholder="Ej. 60s"
-                                />
-                            </div>
-                             <div className="space-y-1">
-                                <Label htmlFor={`mediaUrl-${dayIndex}-${exerciseIndex}`} className="text-xs">URL de Imagen/Video</Label>
-                                <Input
-                                    id={`mediaUrl-${dayIndex}-${exerciseIndex}`}
-                                    {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
-                                    placeholder="https://www.youtube.com/watch?v=..."
-                                />
-                            </div>
+                        <div className="md:col-span-4 self-center">
+                            <MediaPreview dayIndex={dayIndex} exerciseIndex={exerciseIndex} control={control} />
                         </div>
                     </div>
-                    <div className="md:col-span-4 self-center">
-                         <MediaPreview dayIndex={dayIndex} exerciseIndex={exerciseIndex} control={control} />
-                    </div>
-                </div>
-            ))}
+                )
+            })}
             <Button
                 type="button"
                 variant="outline"
@@ -400,59 +443,6 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
             >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Añadir Ejercicio
-            </Button>
-        </div>
-    )
-}
-
-function SetsFieldArray({ dayIndex, exerciseIndex, control, register }: { dayIndex: number; exerciseIndex: number; control: Control<UserPlan>; register: UseFormRegister<UserPlan> }) {
-    const { fields, append, remove } = useFieldArray({
-        control,
-        name: `weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets`
-    });
-
-    return (
-        <div className="space-y-2 p-3 bg-secondary/30 rounded-md">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[80px]">Serie</TableHead>
-                        <TableHead>Reps Objetivo</TableHead>
-                        <TableHead className="w-[80px]"></TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {fields.map((field, setIndex) => (
-                        <TableRow key={field.id}>
-                            <TableCell className="font-medium">{setIndex + 1}</TableCell>
-                            <TableCell>
-                                <Input
-                                    {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets.${setIndex}.reps`)}
-                                    placeholder="Ej. 8-12"
-                                />
-                            </TableCell>
-                            <TableCell>
-                                 <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => remove(setIndex)}
-                                >
-                                    <XCircle className="h-4 w-4" />
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-            <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => append({ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "8-12", weight: "", completed: false })}
-            >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Añadir Serie
             </Button>
         </div>
     )
@@ -498,5 +488,7 @@ const MediaPreview = ({ dayIndex, exerciseIndex, control }: { dayIndex: number, 
 
     return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-32 object-cover rounded-md" data-ai-hint="fitness exercise"/>
 };
+
+    
 
     
