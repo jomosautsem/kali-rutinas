@@ -31,17 +31,20 @@ export const UserPlanSchema = z.object({
 export type UserPlan = z.infer<typeof UserPlanSchema>;
 
 export type User = {
-  id: string
-  name: string
-  email: string
-  role: "admin" | "client"
-  status: "activo" | "pendiente"
-  registeredAt: string
-  planStatus: "aprobado" | "pendiente" | "sin-plan" | "n/a"
+  id: string;
+  firstName: string;
+  paternalLastName: string;
+  maternalLastName: string;
+  name: string; // Full name, derived from the other three
+  email: string;
+  role: "admin" | "client";
+  status: "activo" | "pendiente";
+  registeredAt: string;
+  planStatus: "aprobado" | "pendiente" | "sin-plan" | "n/a";
   inviteCode?: string;
   avatarUrl?: string;
   password?: string;
-}
+};
 
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   goals: z

@@ -14,7 +14,9 @@ import type { User } from "@/lib/types";
 export default function RegisterPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const [fullName, setFullName] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [paternalLastName, setPaternalLastName] = useState("")
+  const [maternalLastName, setMaternalLastName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -39,7 +41,10 @@ export default function RegisterPage() {
 
       const newUser: User = {
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        name: fullName,
+        firstName,
+        paternalLastName,
+        maternalLastName,
+        name: `${firstName} ${paternalLastName} ${maternalLastName}`.trim(),
         email: email,
         role: "client",
         status: "pendiente", // New users start as pending
@@ -83,13 +88,35 @@ export default function RegisterPage() {
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="fullName">Nombre Completo</Label>
+          <Label htmlFor="firstName">Nombre(s)</Label>
           <Input 
-            id="fullName" 
-            placeholder="John Doe" 
+            id="firstName" 
+            placeholder="Juan" 
             required 
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
+         <div className="space-y-2">
+          <Label htmlFor="paternalLastName">Apellido Paterno</Label>
+          <Input 
+            id="paternalLastName" 
+            placeholder="Pérez" 
+            required 
+            value={paternalLastName}
+            onChange={(e) => setPaternalLastName(e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
+         <div className="space-y-2">
+          <Label htmlFor="maternalLastName">Apellido Materno</Label>
+          <Input 
+            id="maternalLastName" 
+            placeholder="García" 
+            required 
+            value={maternalLastName}
+            onChange={(e) => setMaternalLastName(e.target.value)}
             disabled={isLoading}
           />
         </div>

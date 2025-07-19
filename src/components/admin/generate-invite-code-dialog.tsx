@@ -20,7 +20,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -28,7 +27,7 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
-  digits: z.string().length(4, "Debes ingresar exactamente 4 dígitos numéricos.").regex(/^\d{4}$/, "Solo se permiten números."),
+  digits: z.string().length(2, "Debes ingresar exactamente 2 dígitos numéricos.").regex(/^\d{2}$/, "Solo se permiten números."),
 });
 
 type GenerateInviteCodeDialogProps = {
@@ -38,10 +37,11 @@ type GenerateInviteCodeDialogProps = {
   onApprove: (userId: string, inviteCode: string) => void;
 };
 
-function getCodePrefix(name: string, email: string): string {
-    const namePart = name.replace(/\s/g, '').slice(0, 2).toUpperCase();
-    const emailPart = email.split('@')[0].slice(0, 2).toUpperCase();
-    return `${namePart}${emailPart}`;
+function getCodePrefix(firstName: string, paternalLastName: string, maternalLastName: string): string {
+    const first = firstName.slice(0, 2).toUpperCase();
+    const paternal = paternalLastName.slice(0, 2).toUpperCase();
+    const maternal = maternalLastName.slice(0, 2).toUpperCase();
+    return `${first}${paternal}${maternal}`;
 }
 
 
@@ -57,7 +57,7 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
 
   const { isSubmitting } = form.formState;
 
-  const prefix = useMemo(() => (user ? getCodePrefix(user.name, user.email) : ''), [user]);
+  const prefix = useMemo(() => (user ? getCodePrefix(user.firstName, user.paternalLastName, user.maternalLastName) : ''), [user]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) return;
@@ -83,9 +83,9 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
-            <p className="text-sm text-muted-foreground">El código se formará con 4 letras (nombre y email) y 4 dígitos que elijas.</p>
+            <p className="text-sm text-muted-foreground">El código se formará con 6 letras (nombre y apellidos) y 2 dígitos que elijas.</p>
             <div className="mt-2 flex items-center gap-2">
-                <div className="flex h-10 w-24 items-center justify-center rounded-md border bg-muted font-mono text-lg">
+                <div className="flex h-10 w-32 items-center justify-center rounded-md border bg-muted font-mono text-lg">
                     {prefix}
                 </div>
                 <span className="text-muted-foreground">+</span>
@@ -98,9 +98,9 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
                             <FormItem>
                             <FormControl>
                                 <Input 
-                                    className="w-24 text-center font-mono text-lg" 
-                                    maxLength={4} 
-                                    placeholder="0000" 
+                                    className="w-16 text-center font-mono text-lg" 
+                                    maxLength={2} 
+                                    placeholder="00" 
                                     {...field} 
                                 />
                             </FormControl>

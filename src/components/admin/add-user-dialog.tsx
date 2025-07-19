@@ -29,14 +29,16 @@ import { PlusCircle, Loader2 } from "lucide-react";
 import type { User } from "@/lib/types";
 
 const formSchema = z.object({
-  name: z.string().min(2, "El nombre completo es requerido."),
+  firstName: z.string().min(2, "El nombre es requerido."),
+  paternalLastName: z.string().min(2, "El apellido paterno es requerido."),
+  maternalLastName: z.string().min(2, "El apellido materno es requerido."),
   email: z.string().email("Por favor, ingresa un correo electrónico válido."),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
   avatarUrl: z.string().url("Por favor, ingresa una URL de imagen válida.").optional().or(z.literal("")),
 });
 
 type AddUserDialogProps = {
-  onAddUser: (user: Omit<User, 'id' | 'role' | 'status' | 'registeredAt' | 'planStatus'>) => void;
+  onAddUser: (user: Omit<User, 'id' | 'role' | 'status' | 'registeredAt' | 'planStatus' | 'name'>) => void;
 };
 
 export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
@@ -46,7 +48,9 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      paternalLastName: "",
+      maternalLastName: "",
       email: "",
       password: "",
       avatarUrl: "",
@@ -70,9 +74,10 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
       }
       
       onAddUser(values);
+      const fullName = `${values.firstName} ${values.paternalLastName}`.trim();
       toast({
         title: "Usuario Añadido",
-        description: `El usuario ${values.name} ha sido creado exitosamente.`,
+        description: `El usuario ${fullName} ha sido creado exitosamente.`,
       });
       setIsOpen(false);
       form.reset();
@@ -105,12 +110,38 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre Completo</FormLabel>
+                  <FormLabel>Nombre(s)</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="Juan" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="paternalLastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apellido Paterno</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Pérez" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="maternalLastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apellido Materno</FormLabel>
+                  <FormControl>
+                    <Input placeholder="García" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
