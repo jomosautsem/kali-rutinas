@@ -444,19 +444,29 @@ export default function DashboardPage() {
   }
 
   const handleProgressChange = (day: string, exerciseName: string, setId: string, field: 'weight' | 'reps' | 'completed', value: string | boolean) => {
-      setProgress(prevProgress => {
-        const newProgress = JSON.parse(JSON.stringify(prevProgress));
-        if (!newProgress[day]) newProgress[day] = {};
-        if (!newProgress[day][exerciseName]) newProgress[day][exerciseName] = {};
-        if (!newProgress[day][exerciseName][setId]) newProgress[day][exerciseName][setId] = { weight: '', reps: '', completed: false };
-        
-        (newProgress[day][exerciseName][setId] as any)[field] = value;
-        
+    setProgress(prev => {
+        const newProgress: ProgressData = {
+            ...prev,
+            [day]: {
+                ...prev[day],
+                [exerciseName]: {
+                    ...prev[day]?.[exerciseName],
+                    [setId]: {
+                        ...prev[day]?.[exerciseName]?.[setId],
+                        weight: prev[day]?.[exerciseName]?.[setId]?.weight ?? '',
+                        reps: prev[day]?.[exerciseName]?.[setId]?.reps ?? '',
+                        completed: prev[day]?.[exerciseName]?.[setId]?.completed ?? false,
+                        [field]: value
+                    }
+                }
+            }
+        };
+
         if (userEmail) {
             localStorage.setItem(`progress_${userEmail}`, JSON.stringify(newProgress));
         }
         return newProgress;
-      });
+    });
   };
 
 
@@ -521,3 +531,6 @@ export default function DashboardPage() {
     </>
   )
 }
+
+
+    

@@ -498,3 +498,5 @@ const MediaPreview = ({ dayIndex, exerciseIndex, control }: { dayIndex: number, 
 
     return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-32 object-cover rounded-md" data-ai-hint="fitness exercise"/>
 };
+
+    
