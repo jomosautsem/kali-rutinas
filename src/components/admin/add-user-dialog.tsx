@@ -178,9 +178,9 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
               name="avatarUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL de la Imagen de Perfil</FormLabel>
+                  <FormLabel>URL de la Imagen de Perfil (Opcional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.png" {...field} />
+                    <Input placeholder="https://ejemplo.com/imagen.png" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
