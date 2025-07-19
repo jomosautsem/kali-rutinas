@@ -93,7 +93,7 @@ export default function Home() {
               Forja tu Mejor Versión
             </h1>
             <p className="mt-6 max-w-3xl text-lg text-muted-foreground">
-              Planes de entrenamiento inteligentes y personalizados. Deja que nuestra IA y entrenadores expertos te guíen hacia tus metas.
+              Planes de entrenamiento inteligentes y personalizados por Kali Gym e impulsados por nuestra IA.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
                 <Button asChild size="lg" className="rounded-full font-bold text-base">
