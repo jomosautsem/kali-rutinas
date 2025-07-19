@@ -1,8 +1,8 @@
 
 "use client"
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import type { User } from "@/lib/types";
+import { AvatarSelector } from "./avatar-selector";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "El nombre es requerido."),
@@ -66,7 +67,7 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
         avatarUrl: user.avatarUrl || "",
       });
     }
-  }, [user, form]);
+  }, [user, form, isOpen]);
 
   const { isSubmitting } = form.formState;
 
@@ -159,14 +160,14 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
                 </FormItem>
               )}
             />
-            <FormField
+            <Controller
               control={form.control}
               name="avatarUrl"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL de la Imagen de Perfil</FormLabel>
+                 <FormItem>
+                  <FormLabel>Seleccionar Avatar</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://ejemplo.com/imagen.png" {...field} />
+                    <AvatarSelector value={field.value || ''} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

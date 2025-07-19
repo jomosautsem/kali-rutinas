@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Loader2 } from "lucide-react";
 import type { User } from "@/lib/types";
+import { AvatarSelector } from "./avatar-selector";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "El nombre es requerido."),
@@ -34,7 +35,7 @@ const formSchema = z.object({
   maternalLastName: z.string().min(2, "El apellido materno es requerido."),
   email: z.string().email("Por favor, ingresa un correo electrónico válido."),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
-  avatarUrl: z.string().url("Por favor, ingresa una URL de imagen válida.").optional().or(z.literal("")),
+  avatarUrl: z.string().optional().or(z.literal("")),
 });
 
 type AddUserDialogProps = {
@@ -53,7 +54,7 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
       maternalLastName: "",
       email: "",
       password: "",
-      avatarUrl: "",
+      avatarUrl: "/images/avatars/avatar-01.png",
     },
   });
 
@@ -173,14 +174,14 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
                 </FormItem>
               )}
             />
-            <FormField
+             <Controller
               control={form.control}
               name="avatarUrl"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL de la Imagen de Perfil (Opcional)</FormLabel>
+                 <FormItem>
+                  <FormLabel>Seleccionar Avatar</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://ejemplo.com/imagen.png" {...field} />
+                    <AvatarSelector value={field.value || ''} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
