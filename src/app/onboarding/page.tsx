@@ -3,9 +3,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { motion, AnimatePresence } from "framer-motion"
 import { GeneratePersonalizedTrainingPlanInputSchema } from "@/lib/types"
 
 import { Button } from "@/components/ui/button"
@@ -25,11 +26,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, CheckCircle } from "lucide-react"
+import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User, Trophy, Scale, Ruler } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Textarea } from "@/components/ui/textarea"
+import { StepsIndicator } from "@/components/onboarding/steps-indicator"
+import { FormNavigation } from "@/components/onboarding/form-navigation"
+import { Step } from "@/components/onboarding/step"
+
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
     otherWorkoutStyle: z.string().optional()
@@ -43,6 +48,7 @@ const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
     }
 });
 
+type OnboardingFormValues = z.infer<typeof formSchema>;
 
 const fitnessGoalsOptions = [
     { value: "perder peso/definicion", label: "Perder peso/Definición" },
@@ -83,10 +89,17 @@ const muscleFocusOptions = [
     { value: "abdomen", label: "Abdomen" },
 ]
 
+const steps = [
+    { id: "step-1", title: "Tus Metas", fields: ["goals", "goalTerm"], icon: Trophy },
+    { id: "step-2", title: "Tu Estilo", fields: ["currentFitnessLevel", "trainingDays", "preferredWorkoutStyle", "otherWorkoutStyle", "muscleFocus"], icon: Dumbbell },
+    { id: "step-3", title: "Tus Datos", fields: ["age", "weight", "height"], icon: User },
+    { id: "step-4", title: "Salud", fields: ["injuriesOrConditions"], icon: HeartPulse }
+];
 
 export default function OnboardingPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   
@@ -102,8 +115,7 @@ export default function OnboardingPage() {
     }
   }, [router, toast]);
 
-
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<OnboardingFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       goals: [],
@@ -118,11 +130,30 @@ export default function OnboardingPage() {
       goalTerm: "mediano",
       injuriesOrConditions: "",
     },
-  })
+  });
 
   const watchedWorkoutStyle = form.watch("preferredWorkoutStyle");
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const processStep = async (values: OnboardingFormValues) => {
+    const fieldsToValidate = steps[currentStep].fields as (keyof OnboardingFormValues)[];
+    const isValid = await form.trigger(fieldsToValidate, { shouldFocus: true });
+    
+    if (!isValid) return;
+
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      await onSubmit(values);
+    }
+  }
+
+  const prevStep = () => {
+    if(currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  }
+
+  async function onSubmit(values: OnboardingFormValues) {
     setIsLoading(true);
     const email = sessionStorage.getItem("onboardingUserEmail");
     if (!email) {
@@ -132,7 +163,6 @@ export default function OnboardingPage() {
     }
 
     try {
-      // Prepare data for saving. If 'otro' is selected, use the custom value.
       const finalWorkoutStyle = values.preferredWorkoutStyle === 'otro' 
         ? values.otherWorkoutStyle
         : values.preferredWorkoutStyle;
@@ -141,9 +171,7 @@ export default function OnboardingPage() {
         ...values,
         preferredWorkoutStyle: finalWorkoutStyle,
       };
-      // remove otherWorkoutStyle from the object to save
       delete (dataToSave as any).otherWorkoutStyle;
-
 
       localStorage.setItem(`onboardingData_${email}`, JSON.stringify(dataToSave));
       toast({
@@ -159,6 +187,7 @@ export default function OnboardingPage() {
       setIsLoading(false);
     }
   }
+  
 
   if (isSuccess) {
     return (
@@ -177,215 +206,139 @@ export default function OnboardingPage() {
       description="Cuéntanos sobre ti para que podamos crear el plan perfecto."
       footer={<p className="text-xs text-muted-foreground">Esta información será revisada por tu entrenador.</p>}
     >
-       <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="goals"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Metas de Fitness</FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={fitnessGoalsOptions}
-                      selected={field.value}
-                      onChange={field.onChange}
-                      placeholder="Selecciona una o más metas..."
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                control={form.control}
-                name="currentFitnessLevel"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Nivel de Condición Física</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecciona tu nivel de condición física" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                        <SelectItem value="principiante">Principiante</SelectItem>
-                        <SelectItem value="intermedio">Intermedio</SelectItem>
-                        <SelectItem value="avanzado">Avanzado</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="trainingDays"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Días de Entrenamiento</FormLabel>
-                      <FormControl>
-                        <MultiSelect
-                          options={trainingDaysOptions}
-                          selected={field.value}
-                          onChange={field.onChange}
-                          placeholder="Selecciona los días..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+       <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(processStep)} className="space-y-6">
+            <StepsIndicator steps={steps} currentStep={currentStep} />
+            <AnimatePresence mode="wait">
+              <motion.div key={currentStep} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }}>
+                 <div className="min-h-[360px] flex flex-col">
+                  {currentStep === 0 && (
+                     <Step title={steps[0].title} icon={steps[0].icon}>
+                         <FormField control={form.control} name="goals" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Metas Principales</FormLabel>
+                                <MultiSelect options={fitnessGoalsOptions} selected={field.value} onChange={field.onChange} placeholder="Selecciona una o más metas..." />
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="goalTerm" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Plazo de la Meta</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Selecciona un plazo" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="corto">Corto Plazo (1-3 meses)</SelectItem>
+                                        <SelectItem value="mediano">Mediano Plazo (3-6 meses)</SelectItem>
+                                        <SelectItem value="largo">Largo Plazo (6+ meses)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </Step>
                   )}
-                />
-            </div>
-
-             <FormField
-              control={form.control}
-              name="muscleFocus"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Enfoque Muscular (Opcional)</FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={muscleFocusOptions}
-                      selected={field.value || []}
-                      onChange={field.onChange}
-                      placeholder="Selecciona grupos musculares..."
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+                  {currentStep === 1 && (
+                    <Step title={steps[1].title} icon={steps[1].icon}>
+                      <FormField control={form.control} name="currentFitnessLevel" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nivel de Condición Física</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Selecciona tu nivel" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="principiante">Principiante</SelectItem>
+                              <SelectItem value="intermedio">Intermedio</SelectItem>
+                              <SelectItem value="avanzado">Avanzado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="trainingDays" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Días de Entrenamiento</FormLabel>
+                          <MultiSelect options={trainingDaysOptions} selected={field.value} onChange={field.onChange} placeholder="Selecciona los días..." />
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="preferredWorkoutStyle" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
+                           <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Selecciona un estilo" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {workoutStyleOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                       {watchedWorkoutStyle === 'otro' && (
+                          <FormField control={form.control} name="otherWorkoutStyle" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Especifica tu estilo</FormLabel>
+                              <FormControl><Input placeholder="Ej. CrossFit, Powerlifting" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                        )}
+                        <FormField control={form.control} name="muscleFocus" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Enfoque Muscular (Opcional)</FormLabel>
+                                <MultiSelect options={muscleFocusOptions} selected={field.value || []} onChange={field.onChange} placeholder="Selecciona grupos musculares..." />
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </Step>
+                  )}
+                  {currentStep === 2 && (
+                    <Step title={steps[2].title} icon={steps[2].icon}>
+                         <FormField control={form.control} name="age" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Edad</FormLabel>
+                                <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="weight" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Peso (kg)</FormLabel>
+                                <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="height" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Estatura (cm)</FormLabel>
+                                <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </Step>
+                  )}
+                   {currentStep === 3 && (
+                    <Step title={steps[3].title} icon={steps[3].icon}>
+                        <FormField control={form.control} name="injuriesOrConditions" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Lesiones o Condiciones Médicas (Opcional)</FormLabel>
+                                <FormControl>
+                                    <Textarea placeholder="Ej. Dolor lumbar crónico, tendinitis en el hombro derecho..." {...field} rows={6} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </Step>
+                   )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+            <FormNavigation 
+                currentStep={currentStep}
+                totalSteps={steps.length}
+                isLoading={isLoading}
+                onBack={prevStep}
             />
-
-            <FormField
-              control={form.control}
-              name="preferredWorkoutStyle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un estilo de entrenamiento" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {workoutStyleOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {watchedWorkoutStyle === 'otro' && (
-              <FormField
-                control={form.control}
-                name="otherWorkoutStyle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Especifica tu estilo de entrenamiento</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ej. CrossFit, Powerlifting, etc." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <FormField
-                control={form.control}
-                name="age"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Edad</FormLabel>
-                    <FormControl>
-                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="weight"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Peso (kg)</FormLabel>
-                    <FormControl>
-                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="height"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Estatura (cm)</FormLabel>
-                    <FormControl>
-                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </div>
-
-            <FormField
-                control={form.control}
-                name="injuriesOrConditions"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Lesiones o Condiciones Médicas (Opcional)</FormLabel>
-                    <FormControl>
-                        <Textarea 
-                            placeholder="Ej. Dolor lumbar crónico, tendinitis en el hombro derecho." 
-                            {...field}
-                        />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-
-            <FormField
-                control={form.control}
-                name="goalTerm"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Plazo de la Meta</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un plazo" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        <SelectItem value="corto">Corto Plazo</SelectItem>
-                        <SelectItem value="mediano">Mediano Plazo</SelectItem>
-                        <SelectItem value="largo">Largo Plazo</SelectItem>
-                    </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Enviar Información y Finalizar"}
-            </Button>
-            </form>
-        </Form>
+        </form>
+       </FormProvider>
     </AuthCard>
   )
 }
