@@ -244,7 +244,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
-                                                                {exercise.sets.map((set, setIndex) => {
+                                                                {Array.isArray(exercise.sets) && exercise.sets.map((set, setIndex) => {
                                                                     const setProgress = exerciseProgress[set.id] || { weight: '', reps: '', completed: false };
                                                                     return (
                                                                         <TableRow key={set.id}>
