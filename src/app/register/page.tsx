@@ -38,7 +38,7 @@ export default function RegisterPage() {
       }
 
       const newUser: User = {
-        id: (users.length + 1).toString(),
+        id: `${Date.now()}-${Math.random()}`, // Use a more robust unique ID
         name: fullName,
         email: email,
         role: "client",
