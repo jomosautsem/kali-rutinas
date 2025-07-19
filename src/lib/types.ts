@@ -48,6 +48,18 @@ export type User = {
   password?: string;
 };
 
+export type ProgressData = {
+    [day: string]: {
+        [exerciseName: string]: {
+            [setIndex: number]: {
+                weight: string;
+                reps: string;
+                completed: boolean;
+            }
+        }
+    }
+}
+
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   goals: z
     .array(z.string())

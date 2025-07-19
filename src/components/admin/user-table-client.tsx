@@ -1,8 +1,8 @@
 
 "use client"
 
-import { useState } from "react"
-import type { User, UserPlan } from "@/lib/types";
+import { useState, useEffect } from "react"
+import type { User, UserPlan, ProgressData } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils"
 import { PlanEditor } from "./plan-editor"
 import { GenerateInviteCodeDialog } from "./generate-invite-code-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { ProgressAnalytics } from "./progress-analytics";
 
 type UserTableClientProps = {
   users: User[]
@@ -56,7 +57,9 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPlanEditorOpen, setIsPlanEditorOpen] = useState(false)
   const [isInviteCodeDialogOpen, setIsInviteCodeDialogOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedUserProgress, setSelectedUserProgress] = useState<ProgressData | null>(null);
 
   const handleDeleteClick = (user: User) => {
     setSelectedUser(user)
@@ -85,6 +88,21 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
     setSelectedUser(user);
     setIsInviteCodeDialogOpen(true);
   };
+  
+  const handleAnalyticsOpen = (user: User) => {
+    const progressData = localStorage.getItem(`progress_${user.email}`);
+    const planData = localStorage.getItem(`userPlan_${user.email}`);
+    if (progressData && planData) {
+        setSelectedUserProgress({
+            progress: JSON.parse(progressData),
+            plan: JSON.parse(planData)
+        });
+    } else {
+        setSelectedUserProgress(null);
+    }
+    setSelectedUser(user);
+    setIsAnalyticsOpen(true);
+  }
 
 
   return (
@@ -166,10 +184,16 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
                         </DropdownMenuItem>
                       )}
                       {user.role === 'client' && user.status === 'activo' && (
-                        <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)}>
-                            <FileEdit className="mr-2 h-4 w-4" />
-                            Ver/Editar Plan
-                        </DropdownMenuItem>
+                        <>
+                          <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)}>
+                              <FileEdit className="mr-2 h-4 w-4" />
+                              Ver/Editar Plan
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleAnalyticsOpen(user)}>
+                              <BarChart2 className="mr-2 h-4 w-4" />
+                              Ver Progreso
+                          </DropdownMenuItem>
+                        </>
                       )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -212,6 +236,15 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
             onClose={handlePlanEditorClose}
             onSaveAndApprove={onSaveAndApprovePlan}
           />
+      )}
+      
+      {selectedUser && (
+        <ProgressAnalytics
+          user={selectedUser}
+          data={selectedUserProgress}
+          isOpen={isAnalyticsOpen}
+          onClose={() => setIsAnalyticsOpen(false)}
+        />
       )}
 
       {selectedUser && (

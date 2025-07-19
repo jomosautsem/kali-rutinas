@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlanGenerator } from "@/components/plan-generator"
 import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import type { User, UserPlan, Exercise, Set as SetType } from "@/lib/types";
+import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,17 +17,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
-type ProgressData = {
-    [day: string]: {
-        [exerciseName: string]: {
-            [setIndex: number]: {
-                weight: string;
-                reps: string;
-                completed: boolean;
-            }
-        }
-    }
-}
 
 const isVideo = (url: string) => {
     if (!url) return false;
@@ -527,6 +516,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-
-    
