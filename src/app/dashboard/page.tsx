@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -141,6 +141,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
     const [activeDayIndex, setActiveDayIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState<{ url: string; name: string } | null>(null);
+    const [extraSets, setExtraSets] = useState<Record<string, number>>({});
 
     const handlePreviewClick = (exercise: Exercise) => {
         if (isYoutubeSearchUrl(exercise.mediaUrl)) {
@@ -150,6 +151,14 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
         setSelectedMedia({ url: exercise.mediaUrl, name: exercise.name });
         setIsModalOpen(true);
     };
+
+    const handleAddSet = (day: string, exerciseName: string) => {
+        const key = `${day}-${exerciseName}`;
+        setExtraSets(prev => ({
+            ...prev,
+            [key]: (prev[key] || 0) + 1
+        }));
+    }
 
     const activeDay = plan.weeklyPlan[activeDayIndex]?.day;
     const activeDayProgress = progress[activeDay] || {};
@@ -211,7 +220,8 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                     <div className="space-y-8 pt-4">
                                         {(dayPlan.exercises || []).map((exercise, exerciseIndex) => {
                                             const exerciseProgress = activeDayProgress[exercise.name] || {};
-                                            const numberOfSets = parseInt(exercise.series) || 0;
+                                            const numberOfSets = (parseInt(exercise.series) || 0) + (extraSets[`${dayPlan.day}-${exercise.name}`] || 0);
+
                                             return (
                                                 <div key={exerciseIndex} className="p-4 rounded-lg bg-card/50">
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
@@ -242,9 +252,10 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                             <TableBody>
                                                                 {Array.from({ length: numberOfSets }).map((_, setIndex) => {
                                                                     const setProgress = exerciseProgress[setIndex] || { weight: '', reps: '', completed: false };
+                                                                    const isExtraSet = setIndex >= (parseInt(exercise.series) || 0);
                                                                     return (
                                                                         <TableRow key={setIndex}>
-                                                                            <TableCell className="font-medium">{setIndex + 1}</TableCell>
+                                                                            <TableCell className="font-medium">{setIndex + 1} {isExtraSet && <span className="text-primary text-xs">(Extra)</span>}</TableCell>
                                                                             <TableCell>
                                                                                 <Input 
                                                                                     type="number"
@@ -274,6 +285,15 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                                 })}
                                                             </TableBody>
                                                         </Table>
+                                                        <div className="mt-2">
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm" 
+                                                                onClick={() => handleAddSet(dayPlan.day, exercise.name)}>
+                                                                <PlusCircle className="mr-2 h-4 w-4" />
+                                                                Añadir Set
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )
