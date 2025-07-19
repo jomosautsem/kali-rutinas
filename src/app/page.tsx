@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
-import { ArrowRight, BarChart2, Sparkles, UserCheck } from 'lucide-react';
+import { ArrowRight, BarChart2, Sparkles, UserCheck, Instagram } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 
@@ -44,6 +44,26 @@ const testimonials = [
         avatar: "https://placehold.co/100x100.png"
     }
 ];
+
+const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M9 18v-5l6-3v5l-6 3z" />
+        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+    </svg>
+);
+
+const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M16.5 6.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zM7.5 15.5v-7h3" />
+        <path d="M16.5 11.5a5 5 0 1 1-5-5" />
+    </svg>
+);
+
+const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+);
 
 
 export default function Home() {
@@ -171,12 +191,21 @@ export default function Home() {
                 <Logo className="h-12 w-12" width={48} height={48} />
                 <span className="font-bold text-lg font-headline">Dojo Dynamics</span>
             </div>
-            <nav className="flex gap-6 text-sm text-muted-foreground">
-                <Link href="#features" className="hover:text-primary transition-colors">Características</Link>
-                <Link href="#testimonials" className="hover:text-primary transition-colors">Testimonios</Link>
-                <Link href="/login" className="hover:text-primary transition-colors">Iniciar Sesión</Link>
-            </nav>
-            <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Dojo Dynamics. Todos los derechos reservados.</p>
+             <div className="flex gap-4">
+                <Link href="https://open.spotify.com/playlist/3Rj37VchWdvhhl1cPhQDs3?si=X6Ke0olDSQaT4h0SigrkEw&pi=nhfWs-OpSeiJV" target="_blank" rel="noopener noreferrer" aria-label="Spotify" className="text-muted-foreground hover:text-primary transition-colors">
+                    <SpotifyIcon className="h-6 w-6" />
+                </Link>
+                <Link href="https://tiktok.com/@kali.centro.depor" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="text-muted-foreground hover:text-primary transition-colors">
+                    <TikTokIcon className="h-6 w-6" />
+                </Link>
+                <Link href="https://www.instagram.com/invites/contact/?utm_source=ig_contact_invite&utm_medium=copy_link&utm_content=v1925ys" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors">
+                    <Instagram className="h-6 w-6" />
+                </Link>
+                <Link href="https://www.facebook.com/share/1C82N1B6yk/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted-foreground hover:text-primary transition-colors">
+                    <FacebookIcon className="h-6 w-6" />
+                </Link>
+            </div>
+            <p className="text-sm text-muted-foreground">&copy; 2025 Copyright Desarrollado por KaliTeamDeveloper.</p>
         </div>
       </footer>
     </div>
