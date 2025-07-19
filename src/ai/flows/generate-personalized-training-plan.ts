@@ -29,7 +29,7 @@ const prompt = ai.definePrompt({
   
   Deja el campo 'mediaUrl' como una cadena vacía para cada ejercicio. Este campo será completado manualmente más tarde.
 
-  Objetivos: {{{goals}}}
+  Objetivos: {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
   Días por Semana: {{{daysPerWeek}}}
   Estilo de Entrenamiento Preferido: {{{preferredWorkoutStyle}}}

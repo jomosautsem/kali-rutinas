@@ -29,8 +29,19 @@ import { Textarea } from "@/components/ui/textarea"
 import { Loader2, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
+import { MultiSelect } from "@/components/ui/multi-select"
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema;
+
+const fitnessGoalsOptions = [
+    { value: "perder peso/definicion", label: "Perder peso/Definición" },
+    { value: "ganar masa muscular", label: "Ganar masa muscular" },
+    { value: "recomposicion corporal", label: "Recomposición corporal" },
+    { value: "ganar fuerza", label: "Ganar fuerza" },
+    { value: "mejorar salud general", label: "Mejorar salud general" },
+    { value: "rendimiento deportivo", label: "Rendimiento deportivo" },
+];
+
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -55,7 +66,7 @@ export default function OnboardingPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      goals: "",
+      goals: [],
       currentFitnessLevel: "principiante",
       daysPerWeek: 3,
       preferredWorkoutStyle: "",
@@ -112,17 +123,22 @@ export default function OnboardingPage() {
        <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
-                control={form.control}
-                name="goals"
-                render={({ field }) => (
+              control={form.control}
+              name="goals"
+              render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Metas de Fitness</FormLabel>
-                    <FormControl>
-                    <Textarea placeholder="ej., perder 5 kilos, ganar músculo" {...field} />
-                    </FormControl>
-                    <FormMessage />
+                  <FormLabel>Metas de Fitness</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      options={fitnessGoalsOptions}
+                      selected={field.value}
+                      onChange={field.onChange}
+                      placeholder="Selecciona una o más metas..."
+                    />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
-                )}
+              )}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

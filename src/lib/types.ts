@@ -36,8 +36,11 @@ export type User = {
 
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   goals: z
-    .string()
-    .describe('Los objetivos de fitness del usuario, ej., pérdida de peso, ganancia muscular, mejora de la resistencia.'),
+    .array(z.string())
+    .refine((value) => value.some((item) => item), {
+      message: "Debes seleccionar al menos una meta.",
+    })
+    .describe('Los objetivos de fitness del usuario.'),
   currentFitnessLevel: z
     .string()
     .describe('El nivel de fitness actual del usuario, ej., principiante, intermedio, avanzado.'),
