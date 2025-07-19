@@ -1,7 +1,6 @@
-import { TemplateSuggester } from "@/components/template-suggester";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { TemplateGenerator } from "@/components/template-generator";
 
 export default function AdminTemplatesPage() {
     return (
@@ -9,12 +8,8 @@ export default function AdminTemplatesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Gestión de Plantillas</h1>
-                    <p className="text-muted-foreground">Crea, edita y gestiona plantillas de entrenamiento.</p>
+                    <p className="text-muted-foreground">Revisa las plantillas existentes o genera nuevas ideas con IA.</p>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Nueva Plantilla
-                </Button>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-3">
@@ -47,7 +42,7 @@ export default function AdminTemplatesPage() {
                 </Card>
             </div>
 
-            <TemplateSuggester />
+            <TemplateGenerator />
 
         </div>
     )

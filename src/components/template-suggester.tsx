@@ -18,7 +18,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Sparkles } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card"
 import { Skeleton } from "./ui/skeleton"
 
 const formSchema = z.object({
@@ -58,13 +58,14 @@ export function TemplateSuggester() {
   }
 
   return (
-     <div className="grid md:grid-cols-2 gap-8">
-        <Card className="shadow-none border-0 md:border md:shadow-sm">
-            <CardHeader>
-                <CardTitle className="font-headline">Generar Ideas de Plantillas</CardTitle>
-            </CardHeader>
-            <CardContent>
-                 <Form {...form}>
+     <Card>
+        <CardHeader>
+            <CardTitle className="font-headline">Generador de Ideas de Plantillas</CardTitle>
+            <CardDescription>Obtén sugerencias de nuevas plantillas basadas en los comentarios de los usuarios.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <div className="grid md:grid-cols-2 gap-8 items-start">
+                <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
                         control={form.control}
@@ -94,35 +95,35 @@ export function TemplateSuggester() {
                     />
                     <Button type="submit" disabled={isLoading}>
                         <Sparkles className="mr-2 h-4 w-4" />
-                        {isLoading ? "Generando..." : "Generar Sugerencias"}
+                        {isLoading ? "Generando..." : "Sugerir Ideas"}
                     </Button>
                     </form>
                 </Form>
-            </CardContent>
-        </Card>
-        <div className="rounded-lg border bg-card p-6">
-            <h3 className="font-semibold mb-4 font-headline">Sugerencias Generadas por IA</h3>
-             {isLoading ? (
-               <div className="space-y-4">
-                 <Skeleton className="h-8 w-full" />
-                 <Skeleton className="h-8 w-5/6" />
-                 <Skeleton className="h-8 w-full" />
-               </div>
-            ) : suggestions.length > 0 ? (
-              <ul className="space-y-3">
-                {suggestions.map((s, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <Sparkles className="h-4 w-4 mt-1 text-accent flex-shrink-0" />
-                    <span>{s}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
-                Las sugerencias aparecerán aquí...
-              </div>
-            )}
-        </div>
-     </div>
+                <div className="rounded-lg border bg-secondary/50 p-6 h-full">
+                    <h3 className="font-semibold mb-4">Sugerencias por IA</h3>
+                    {isLoading ? (
+                    <div className="space-y-4">
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-5/6" />
+                        <Skeleton className="h-8 w-full" />
+                    </div>
+                    ) : suggestions.length > 0 ? (
+                    <ul className="space-y-3">
+                        {suggestions.map((s, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                            <Sparkles className="h-4 w-4 mt-1 text-primary flex-shrink-0" />
+                            <span>{s}</span>
+                        </li>
+                        ))}
+                    </ul>
+                    ) : (
+                    <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
+                        Las sugerencias aparecerán aquí...
+                    </div>
+                    )}
+                </div>
+            </div>
+        </CardContent>
+    </Card>
   )
 }
