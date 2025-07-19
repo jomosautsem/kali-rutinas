@@ -20,6 +20,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PlanDownloader } from "@/components/plan-downloader";
 
 
 const isVideo = (url: string) => {
@@ -130,13 +131,14 @@ const dayButtonColors = [
     "bg-teal-500/80 hover:bg-teal-500",
 ]
 
-const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressChange, onSaveChanges }: { 
+const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressChange, onSaveChanges, user }: { 
     plan: UserPlan; 
     completedDays: string[]; 
     onToggleDay: (day: string) => void;
     progress: ProgressData;
     onProgressChange: (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => void;
     onSaveChanges: () => void;
+    user: User | null;
 }) => {
     const [activeDayIndex, setActiveDayIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -196,6 +198,10 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                     {dayPlan.day}
                                 </Button>
                             ))}
+                        </div>
+                        
+                        <div className="pt-2">
+                             {user && <PlanDownloader user={user} plan={plan} />}
                         </div>
 
                         {plan.weeklyPlan.map((dayPlan, index) => (
@@ -501,7 +507,7 @@ export default function DashboardPage() {
     }
     switch(planStatus) {
       case 'aprobado':
-        return userPlan ? <PlanAprobado plan={userPlan} completedDays={completedDays} onToggleDay={handleToggleDay} progress={progress} onProgressChange={handleProgressChange} onSaveChanges={handleSaveChanges} /> : <p>Cargando plan...</p>;
+        return userPlan ? <PlanAprobado plan={userPlan} user={user} completedDays={completedDays} onToggleDay={handleToggleDay} progress={progress} onProgressChange={handleProgressChange} onSaveChanges={handleSaveChanges} /> : <p>Cargando plan...</p>;
       case 'pendiente':
         return <PlanPendiente />;
       case 'sin-plan':
