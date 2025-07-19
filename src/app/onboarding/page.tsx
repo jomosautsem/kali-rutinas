@@ -25,13 +25,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { Loader2, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { MultiSelect } from "@/components/ui/multi-select"
 
-const formSchema = GeneratePersonalizedTrainingPlanInputSchema;
+const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
+    otherWorkoutStyle: z.string().optional()
+}).superRefine((data, ctx) => {
+    if (data.preferredWorkoutStyle === 'otro' && (!data.otherWorkoutStyle || data.otherWorkoutStyle.trim() === '')) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['otherWorkoutStyle'],
+            message: 'Por favor, especifica el estilo de entrenamiento.',
+        });
+    }
+});
+
 
 const fitnessGoalsOptions = [
     { value: "perder peso/definicion", label: "Perder peso/Definición" },
@@ -52,6 +62,16 @@ const trainingDaysOptions = [
     { value: "domingo", label: "Domingo" },
 ];
 
+const workoutStyleOptions = [
+    { value: "fuerza", label: "Fuerza" },
+    { value: "resistencia", label: "Resistencia" },
+    { value: "hipertrofia", label: "Hipertrofia" },
+    { value: "cardio", label: "Cardio" },
+    { value: "hiit", label: "HIIT (Entrenamiento de Intervalos de Alta Intensidad)" },
+    { value: "nucleus overload", label: "Nucleus Overload (método no probado)" },
+    { value: "otro", label: "Otro (especificar)" },
+]
+
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -62,7 +82,6 @@ export default function OnboardingPage() {
   useEffect(() => {
     const email = sessionStorage.getItem("onboardingUserEmail");
     if (!email) {
-      // If no email is found, redirect to register
       toast({
         variant: "destructive",
         title: "Error",
@@ -79,7 +98,8 @@ export default function OnboardingPage() {
       goals: [],
       currentFitnessLevel: "principiante",
       trainingDays: [],
-      preferredWorkoutStyle: "",
+      preferredWorkoutStyle: "fuerza",
+      otherWorkoutStyle: "",
       age: 18,
       weight: 70,
       height: 175,
@@ -87,25 +107,39 @@ export default function OnboardingPage() {
     },
   })
 
+  const watchedWorkoutStyle = form.watch("preferredWorkoutStyle");
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     const email = sessionStorage.getItem("onboardingUserEmail");
     if (!email) {
-      // This should ideally not happen due to the useEffect check
       toast({ variant: "destructive", title: "Error fatal", description: "Se perdió la sesión de usuario." });
       setIsLoading(false);
       return;
     }
 
     try {
-      localStorage.setItem(`onboardingData_${email}`, JSON.stringify(values));
+      // Prepare data for saving. If 'otro' is selected, use the custom value.
+      const finalWorkoutStyle = values.preferredWorkoutStyle === 'otro' 
+        ? values.otherWorkoutStyle
+        : values.preferredWorkoutStyle;
+
+      const dataToSave = {
+        ...values,
+        preferredWorkoutStyle: finalWorkoutStyle,
+      };
+      // remove otherWorkoutStyle from the object to save
+      delete (dataToSave as any).otherWorkoutStyle;
+
+
+      localStorage.setItem(`onboardingData_${email}`, JSON.stringify(dataToSave));
       toast({
         title: "¡Información Guardada!",
         description: "Tus datos han sido enviados al administrador para su revisión.",
       });
       setIsSuccess(true);
       sessionStorage.removeItem("onboardingUserEmail");
-      setTimeout(() => router.push("/login"), 3000); // Redirect after a delay
+      setTimeout(() => router.push("/login"), 3000); 
     } catch (error) {
       console.error("Failed to save onboarding data:", error);
       toast({ variant: "destructive", title: "Error", description: "No se pudieron guardar tus datos." });
@@ -195,18 +229,44 @@ export default function OnboardingPage() {
             </div>
 
             <FormField
-                control={form.control}
-                name="preferredWorkoutStyle"
-                render={({ field }) => (
+              control={form.control}
+              name="preferredWorkoutStyle"
+              render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
+                  <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                    <Input placeholder="ej., Levantamiento de pesas, Cardio, HIIT" {...field} />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un estilo de entrenamiento" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {workoutStyleOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {watchedWorkoutStyle === 'otro' && (
+              <FormField
+                control={form.control}
+                name="otherWorkoutStyle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Especifica tu estilo de entrenamiento</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. CrossFit, Powerlifting, etc." {...field} />
                     </FormControl>
                     <FormMessage />
-                </FormItem>
+                  </FormItem>
                 )}
-            />
+              />
+            )}
+
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <FormField
@@ -280,3 +340,5 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
+
+    
