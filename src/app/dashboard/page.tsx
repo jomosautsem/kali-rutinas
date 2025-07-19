@@ -223,7 +223,9 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                                                         <div className="md:col-span-2 space-y-2">
                                                             <p className="font-semibold text-lg">{exercise.name}</p>
-                                                            <p className="text-sm text-muted-foreground">Descanso entre series: {exercise.rest}</p>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                <span className="font-medium text-primary">{exercise.reps}</span> | Descanso: {exercise.rest}
+                                                            </p>
                                                         </div>
                                                         <div className="self-center">
                                                             <MediaPreview 
@@ -238,7 +240,6 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                             <TableHeader>
                                                                 <TableRow>
                                                                     <TableHead className="w-16">Set</TableHead>
-                                                                    <TableHead>Reps Objetivo</TableHead>
                                                                     <TableHead>Peso (kg)</TableHead>
                                                                     <TableHead>Reps Hechas</TableHead>
                                                                     <TableHead className="w-16 text-center">Hecho</TableHead>
@@ -250,7 +251,6 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                                     return (
                                                                         <TableRow key={setIndex}>
                                                                             <TableCell className="font-medium">{setIndex + 1}</TableCell>
-                                                                            <TableCell>{exercise.reps}</TableCell>
                                                                             <TableCell>
                                                                                 <Input 
                                                                                     type="number"
