@@ -76,7 +76,7 @@ export default function RegisterPage() {
   return (
     <AuthCard
       title="Crear una Cuenta"
-      description="Completa los detalles a continuación para unirte a Rutinas Kali."
+      description="Completa los detalles a continuación para unirte a Dojo Dynamics."
       footer={
         <p className="text-muted-foreground">
           ¿Ya tienes una cuenta?{" "}

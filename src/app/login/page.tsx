@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import Link from "next/link"
@@ -28,8 +29,8 @@ export default function LoginPage() {
       sessionStorage.clear();
     }
 
-    const adminEmail = "kalicentrodeportivotemixco@gmail.com"
-    const adminPassword = "123321qw"
+    const adminEmail = "admin@dojodynamics.com"
+    const adminPassword = "password123"
     
     // Check for admin credentials first
     if (email === adminEmail && password === adminPassword) {
@@ -134,13 +135,15 @@ export default function LoginPage() {
           />
         </div>
         <div className="space-y-2">
-            <Label htmlFor="inviteCode">KaliCodigo</Label>
+            <Label htmlFor="inviteCode">Código de Invitación</Label>
             <Input 
                 id="inviteCode" 
                 placeholder="Ingresa tu código de invitación" 
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 disabled={isLoading}
+                // Admin doesn't need an invite code, but for simplicity we show it.
+                // In a real app, this field might be conditionally shown.
             />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>

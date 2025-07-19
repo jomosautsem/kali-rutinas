@@ -29,6 +29,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   const handleLogout = () => {
     // In a real app, you'd call an auth service here.
     // For now, just redirect to login.
+    sessionStorage.clear();
     router.push('/login');
   }
 
@@ -63,7 +64,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 <span>Panel</span>
               </Link>
             </DropdownMenuItem>
-             {user.email === 'kalicentrodeportivotemixco@gmail.com' && (
+             {user.email === 'admin@dojodynamics.com' && (
                <DropdownMenuItem asChild>
                   <Link href="/admin/dashboard">
                     <ShieldCheck className="mr-2 h-4 w-4" />
