@@ -69,7 +69,7 @@ export function TemplateGeneratorAI() {
           <CardTitle className="font-headline">Generar con IA</CardTitle>
           <CardDescription>Describe el tipo de plantilla que necesitas y la IA creará un plan de entrenamiento completo.</CardDescription>
         </CardHeader>
-        <CardContent className="px-0">
+        <CardContent className="px-0 pb-0">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
