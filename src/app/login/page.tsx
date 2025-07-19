@@ -23,6 +23,11 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
+    // Clear previous session data
+    if (typeof window !== 'undefined') {
+      sessionStorage.clear();
+    }
+
     const adminEmail = "kalicentrodeportivotemixco@gmail.com"
     const adminPassword = "123321qw"
     

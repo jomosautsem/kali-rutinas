@@ -1,12 +1,9 @@
 
 "use client"
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
+import { useState, useEffect } from "react"
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
-import { GeneratePersonalizedTrainingPlanInputSchema } from "@/lib/types"
+import type { GeneratePersonalizedTrainingPlanInput } from "@/lib/types"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,36 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Sparkles, CheckCircle, Loader2 } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Sparkles, CheckCircle, Loader2, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { MultiSelect } from "./ui/multi-select"
+import { useRouter } from "next/navigation"
 
-
-const formSchema = GeneratePersonalizedTrainingPlanInputSchema.omit({
-    goals: true,
-    trainingDays: true,
-}).extend({
-    goals: z.string().min(1, "Debes describir al menos una meta."),
-    trainingDays: z.string().min(1, "Debes especificar los días de entrenamiento.")
-});
 
 type PlanGeneratorProps = {
   onPlanGenerated: () => void;
@@ -69,40 +42,44 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isPlanSuccessfullyGenerated, setIsPlanSuccessfullyGenerated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const [onboardingData, setOnboardingData] = useState<GeneratePersonalizedTrainingPlanInput | null>(null);
+  const { toast } = useToast();
+  const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      goals: "",
-      currentFitnessLevel: "principiante",
-      trainingDays: "",
-      preferredWorkoutStyle: "",
-      age: 18,
-      weight: 70,
-      height: 175,
-      goalTerm: "mediano",
-    },
-  })
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isOpen) {
+        const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
+        if (loggedInUserEmail) {
+            const data = localStorage.getItem(`onboardingData_${loggedInUserEmail}`);
+            if (data) {
+                setOnboardingData(JSON.parse(data));
+            } else {
+                setOnboardingData(null);
+            }
+        }
+    }
+  }, [isOpen]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function handleGenerate() {
+    if (!onboardingData) {
+        toast({
+            variant: "destructive",
+            title: "Faltan datos",
+            description: "No se encontraron tus datos de perfil. Por favor, completa tu registro.",
+        });
+        // Optionally redirect to onboarding
+        // router.push('/onboarding');
+        return;
+    }
+    
     setIsLoading(true)
     setIsPlanSuccessfullyGenerated(false)
     try {
-      // Adapt the form data to match the AI flow input schema
-      const adaptedValues = {
-        ...values,
-        goals: values.goals.split(',').map(s => s.trim()),
-        trainingDays: values.trainingDays.split(',').map(s => s.trim()),
-      };
-
-      const plan = await generatePersonalizedTrainingPlan(adaptedValues)
+      const plan = await generatePersonalizedTrainingPlan(onboardingData)
       
-      // Save the generated plan to localStorage
       const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
       if (loggedInUserEmail) {
         localStorage.setItem(`userPlan_${loggedInUserEmail}`, JSON.stringify(plan));
-        localStorage.setItem(`onboardingData_${loggedInUserEmail}`, JSON.stringify(adaptedValues));
       }
 
       toast({
@@ -127,9 +104,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
     if (!open) {
-      // Delay reset to allow fade-out animation to complete
       setTimeout(() => {
-        form.reset();
         setIsPlanSuccessfullyGenerated(false);
         setIsLoading(false);
       }, 300);
@@ -144,15 +119,15 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
           Generar/Actualizar Plan
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-md">
         {isPlanSuccessfullyGenerated ? (
             <PlanGeneratedConfirmation onClose={() => handleOpenChange(false)} />
         ) : (
             <>
             <DialogHeader>
-              <DialogTitle className="font-headline">Crea Tu Plan Personalizado</DialogTitle>
+              <DialogTitle className="font-headline">Generar Plan con IA</DialogTitle>
               <DialogDescription>
-                Proporciona tus detalles y deja que nuestra IA cree el plan de entrenamiento perfecto para ti.
+                Usa la información de tu perfil para generar un plan de entrenamiento personalizado.
               </DialogDescription>
             </DialogHeader>
 
@@ -162,147 +137,29 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                     <p className="text-center text-muted-foreground animate-pulse">Generando tu plan, por favor espera...</p>
                 </div>
             ) : (
-                <div className="py-4">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="goals"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Metas de Fitness</FormLabel>
-                            <FormControl>
-                            <Input placeholder="ej., perder 5 kilos, ganar músculo" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <FormField
-                        control={form.control}
-                        name="currentFitnessLevel"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Nivel de Condición Física</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona tu nivel de condición física" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                <SelectItem value="principiante">Principiante</SelectItem>
-                                <SelectItem value="intermedio">Intermedio</SelectItem>
-                                <SelectItem value="avanzado">Avanzado</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                         <FormField
-                        control={form.control}
-                        name="trainingDays"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Días de entrenamiento</FormLabel>
-                            <FormControl>
-                                <Input placeholder="ej. Lunes, Miércoles, Viernes" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    </div>
-
-                    <FormField
-                        control={form.control}
-                        name="preferredWorkoutStyle"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
-                            <FormControl>
-                            <Input placeholder="ej., Levantamiento de pesas, Cardio, HIIT" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <FormField
-                        control={form.control}
-                        name="age"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Edad</FormLabel>
-                            <FormControl>
-                                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="weight"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Peso (kg)</FormLabel>
-                            <FormControl>
-                                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="height"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Estatura (cm)</FormLabel>
-                            <FormControl>
-                                <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    </div>
-
-                    <FormField
-                        control={form.control}
-                        name="goalTerm"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Plazo de la Meta</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                                <SelectTrigger>
-                                <SelectValue placeholder="Selecciona un plazo" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                <SelectItem value="corto">Corto Plazo</SelectItem>
-                                <SelectItem value="mediano">Mediano Plazo</SelectItem>
-                                <SelectItem value="largo">Largo Plazo</SelectItem>
-                            </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-
-                    <DialogFooter>
-                        <Button type="submit" disabled={isLoading} className="w-full">
-                            {isLoading ? "Generando..." : "Generar Plan y Enviar a Revisión"}
-                        </Button>
-                    </DialogFooter>
-                    </form>
-                </Form>
+                <div className="py-4 space-y-6">
+                    {onboardingData ? (
+                         <Alert>
+                            <Sparkles className="h-4 w-4" />
+                            <AlertTitle>¡Todo Listo!</AlertTitle>
+                            <AlertDescription>
+                                Hemos cargado tus datos del perfil. Haz clic en el botón de abajo para que la IA genere tu nuevo plan.
+                            </AlertDescription>
+                        </Alert>
+                    ) : (
+                         <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Datos de Perfil No Encontrados</AlertTitle>
+                            <AlertDescription>
+                                No pudimos encontrar la información de tu perfil necesaria para generar un plan. Por favor, asegúrate de haber completado el registro inicial.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                   
+                    <Button onClick={handleGenerate} disabled={isLoading || !onboardingData} className="w-full">
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                        {isLoading ? "Generando..." : "Generar Mi Plan Ahora"}
+                    </Button>
                 </div>
             )}
             </>
