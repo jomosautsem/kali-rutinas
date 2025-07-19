@@ -33,7 +33,7 @@ const formSchema = z.object({
   paternalLastName: z.string().min(2, "El apellido paterno es requerido."),
   maternalLastName: z.string().min(2, "El apellido materno es requerido."),
   email: z.string().email("Por favor, ingresa un correo electrónico válido."),
-  avatarUrl: z.string().url("Por favor, ingresa una URL de imagen válida.").optional().or(z.literal("")),
+  avatarUrl: z.string().optional().or(z.literal("")),
 });
 
 type EditUserDialogProps = {
