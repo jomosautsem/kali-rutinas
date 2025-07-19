@@ -320,47 +320,61 @@ export default function OnboardingPage() {
                   )}
                   {currentStep === 4 && (
                     <Step title={steps[4].title} icon={steps[4].icon}>
-                         <FormField control={form.control} name="age" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Edad</FormLabel>
-                                <FormControl>
-                                    <Input 
-                                        type="number" 
-                                        placeholder="Tu edad" 
-                                        {...field} 
-                                        value={field.value ?? ''}
-                                        onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <FormField control={form.control} name="weight" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Peso (kg)</FormLabel>
-                                <FormControl>
-                                    <Input 
-                                        type="number" 
-                                        placeholder="Tu peso en kg" 
-                                        {...field} 
-                                        value={field.value ?? ''}
-                                        onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField control={form.control} name="age" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Edad</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input 
+                                                type="number" 
+                                                placeholder="Tu edad" 
+                                                className="pl-10"
+                                                {...field} 
+                                                value={field.value ?? ''}
+                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
+                                            />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                            <FormField control={form.control} name="weight" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Peso (kg)</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Scale className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input 
+                                                type="number" 
+                                                placeholder="Tu peso en kg"
+                                                className="pl-10" 
+                                                {...field} 
+                                                value={field.value ?? ''}
+                                                onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
+                                            />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </div>
                         <FormField control={form.control} name="height" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Estatura (cm)</FormLabel>
                                 <FormControl>
-                                    <Input 
-                                        type="number" 
-                                        placeholder="Tu altura en cm" 
-                                        {...field} 
-                                        value={field.value ?? ''}
-                                        onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
-                                    />
+                                    <div className="relative">
+                                        <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input 
+                                            type="number" 
+                                            placeholder="Tu altura en cm"
+                                            className="pl-10"
+                                            {...field} 
+                                            value={field.value ?? ''}
+                                            onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} 
+                                        />
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -394,3 +408,5 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
+
+    

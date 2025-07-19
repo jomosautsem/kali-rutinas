@@ -31,7 +31,7 @@ export function MultiToggleButtonGroup({
   }
 
   return (
-    <div className={cn("grid grid-cols-2 gap-2", className)}>
+    <div className={cn("grid grid-cols-2 gap-2 md:grid-cols-3", className)}>
       {options.map((option) => {
         const isSelected = selected.includes(option.value)
         return (
@@ -40,10 +40,10 @@ export function MultiToggleButtonGroup({
             type="button"
             onClick={() => handleToggle(option.value)}
             className={cn(
-              "p-3 rounded-md border text-center text-sm font-medium transition-colors duration-200",
+              "p-3 rounded-md border text-center text-sm font-medium transition-all duration-200",
               isSelected
-                ? "bg-primary border-primary text-primary-foreground shadow-md"
-                : "bg-transparent border-input hover:bg-accent/50"
+                ? "bg-primary border-primary/80 text-primary-foreground shadow-lg"
+                : "bg-transparent border-input hover:bg-accent/50 hover:border-accent"
             )}
           >
             {option.label}
@@ -53,3 +53,5 @@ export function MultiToggleButtonGroup({
     </div>
   )
 }
+
+    
