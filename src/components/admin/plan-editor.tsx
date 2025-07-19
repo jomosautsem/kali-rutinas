@@ -312,15 +312,14 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Añadir Día
                 </Button>
+                 <DialogFooter className="pt-4 border-t mt-auto sticky bottom-0 bg-card">
+                    <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+                    <Button type="submit">
+                        <Save className="mr-2 h-4 w-4" />
+                        Guardar y Aprobar Plan
+                    </Button>
+                </DialogFooter>
             </form>
-
-            <DialogFooter className="pt-4 border-t mt-auto">
-                <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Guardar y Aprobar Plan
-                </Button>
-            </DialogFooter>
             </Form>
         )}
       </DialogContent>
@@ -436,5 +435,3 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
         </div>
     )
 }
-
-    
