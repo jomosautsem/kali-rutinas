@@ -69,6 +69,10 @@ export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   goalTerm: z
     .string()
     .describe('El plazo en el que el usuario espera alcanzar sus metas, ej., corto, mediano, largo plazo.'),
+  injuriesOrConditions: z
+    .string()
+    .optional()
+    .describe('Cualquier lesión o condición médica que el entrenador deba conocer.'),
 });
 export type GeneratePersonalizedTrainingPlanInput = z.infer<typeof GeneratePersonalizedTrainingPlanInputSchema>;
 

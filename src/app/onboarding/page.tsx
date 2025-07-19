@@ -29,6 +29,7 @@ import { Loader2, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { MultiSelect } from "@/components/ui/multi-select"
+import { Textarea } from "@/components/ui/textarea"
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
     otherWorkoutStyle: z.string().optional()
@@ -115,6 +116,7 @@ export default function OnboardingPage() {
       weight: 70,
       height: 175,
       goalTerm: "mediano",
+      injuriesOrConditions: "",
     },
   })
 
@@ -339,6 +341,23 @@ export default function OnboardingPage() {
                 )}
                 />
             </div>
+
+            <FormField
+                control={form.control}
+                name="injuriesOrConditions"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Lesiones o Condiciones Médicas (Opcional)</FormLabel>
+                    <FormControl>
+                        <Textarea 
+                            placeholder="Ej. Dolor lumbar crónico, tendinitis en el hombro derecho." 
+                            {...field}
+                        />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
 
             <FormField
                 control={form.control}

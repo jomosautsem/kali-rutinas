@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, AlertTriangle } from "lucide-react";
+import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, AlertTriangle, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
@@ -195,20 +195,31 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                     </Button>
                 </div>
 
-                {onboardingData && (
-                  <Alert variant="default" className="bg-blue-500/10 border-blue-500/20">
-                    <Lightbulb className="h-5 w-5 text-blue-500" />
-                    <AlertTitle className="text-blue-600 font-semibold">Datos del Cliente</AlertTitle>
-                    <AlertDescription>
-                      <ul className="text-sm space-y-1 mt-2 text-blue-700/80">
-                        <li><strong>Metas:</strong> {onboardingData.goals.join(', ')}</li>
-                        <li><strong>Nivel:</strong> {onboardingData.currentFitnessLevel}</li>
-                        <li><strong>Días:</strong> {onboardingData.trainingDays.join(', ')}</li>
-                        <li><strong>Estilo:</strong> {onboardingData.preferredWorkoutStyle}</li>
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
-                )}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {onboardingData && (
+                    <Alert variant="default" className="bg-blue-500/10 border-blue-500/20">
+                      <Lightbulb className="h-5 w-5 text-blue-500" />
+                      <AlertTitle className="text-blue-600 font-semibold">Datos del Cliente</AlertTitle>
+                      <AlertDescription>
+                        <ul className="text-sm space-y-1 mt-2 text-blue-700/80">
+                          <li><strong>Metas:</strong> {onboardingData.goals.join(', ')}</li>
+                          <li><strong>Nivel:</strong> {onboardingData.currentFitnessLevel}</li>
+                          <li><strong>Días:</strong> {onboardingData.trainingDays.join(', ')}</li>
+                          <li><strong>Estilo:</strong> {onboardingData.preferredWorkoutStyle}</li>
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {onboardingData?.injuriesOrConditions && (
+                      <Alert variant="destructive" className="bg-orange-500/10 border-orange-500/20 text-orange-700">
+                          <ShieldAlert className="h-5 w-5 text-orange-500" />
+                          <AlertTitle className="text-orange-600 font-semibold">Lesiones/Condiciones Reportadas</AlertTitle>
+                          <AlertDescription className="text-sm mt-2 text-orange-700/80">
+                            {onboardingData.injuriesOrConditions}
+                          </AlertDescription>
+                      </Alert>
+                  )}
+                </div>
 
                 <div className="space-y-2 p-4 rounded-lg border bg-secondary/30">
                   <Label htmlFor="recommendations" className="flex items-center gap-2 text-base font-semibold">

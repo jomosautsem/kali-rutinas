@@ -28,13 +28,14 @@ const prompt = ai.definePrompt({
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
   
-  Deja el campo 'mediaUrl' como una cadena vacía para cada ejercicio. Este campo será completado manually más tarde.
+  Deja el campo 'mediaUrl' como una cadena vacía para cada ejercicio. Este campo será completado manualmente más tarde.
   
   Objetivos: {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
   Días de Entrenamiento: {{#each trainingDays}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Estilo de Entrenamiento Preferido: {{{preferredWorkoutStyle}}}
   {{#if muscleFocus}}Enfoque Muscular Específico: {{#each muscleFocus}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
+  {{#if injuriesOrConditions}}Consideraciones Importantes (lesiones/condiciones): {{{injuriesOrConditions}}}. Adapta el plan para evitar ejercicios que puedan agravar estas condiciones.{{/if}}
   Edad: {{{age}}}
   Peso (kg): {{{weight}}}
   Estatura (cm): {{{height}}}
