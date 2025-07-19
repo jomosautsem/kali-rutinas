@@ -53,6 +53,14 @@ export default function AdminUsersPage() {
     setUsers(updatedUsers);
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
   }
+  
+  const handleEditUser = (updatedUser: User) => {
+     const updatedUsers = users.map(user =>
+      user.id === updatedUser.id ? { ...user, ...updatedUser, name: `${updatedUser.firstName} ${updatedUser.paternalLastName} ${updatedUser.maternalLastName}`.trim() } : user
+    );
+    setUsers(updatedUsers);
+    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+  }
 
   const handleDeleteUser = (userId: string) => {
     const updatedUsers = users.filter(user => user.id !== userId);
@@ -101,7 +109,8 @@ export default function AdminUsersPage() {
         <AddUserDialog onAddUser={handleAddUser} />
       </div>
       <UserTableClient 
-        users={users} 
+        users={users}
+        onEditUser={handleEditUser}
         onDeleteUser={handleDeleteUser} 
         onSaveAndApprovePlan={handleSaveAndApprovePlan}
         onApproveUser={handleApproveUser}
