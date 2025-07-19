@@ -209,11 +209,18 @@ export default function OnboardingPage() {
       footer={<p className="text-xs text-muted-foreground">Esta información será revisada por tu entrenador.</p>}
     >
        <FormProvider {...form}>
-        <form onSubmit={(e) => { e.preventDefault(); processStep(); }} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); processStep(); }} className="space-y-6 flex flex-col flex-grow">
             <StepsIndicator steps={steps} currentStep={currentStep} />
             <AnimatePresence mode="wait">
-              <motion.div key={currentStep} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }}>
-                 <div className="min-h-[350px] flex flex-col">
+              <motion.div 
+                key={currentStep} 
+                initial={{ opacity: 0, x: 50 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                exit={{ opacity: 0, x: -50 }} 
+                transition={{ duration: 0.3 }}
+                className="flex flex-col flex-grow"
+              >
+                 <div className="flex-grow">
                   {currentStep === 0 && (
                      <Step title={steps[0].title} icon={steps[0].icon}>
                          <FormField control={form.control} name="goals" render={({ field }) => (
@@ -397,12 +404,14 @@ export default function OnboardingPage() {
                 </div>
               </motion.div>
             </AnimatePresence>
-            <FormNavigation 
-                currentStep={currentStep}
-                totalSteps={steps.length}
-                isLoading={isLoading}
-                onBack={prevStep}
-            />
+            <div className="mt-auto pt-4">
+              <FormNavigation 
+                  currentStep={currentStep}
+                  totalSteps={steps.length}
+                  isLoading={isLoading}
+                  onBack={prevStep}
+              />
+            </div>
         </form>
        </FormProvider>
     </AuthCard>

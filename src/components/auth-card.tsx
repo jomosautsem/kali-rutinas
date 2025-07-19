@@ -17,7 +17,7 @@ type AuthCardProps = {
 export function AuthCard({ title, description, children, footer }: AuthCardProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-md shadow-lg border-primary/20 relative">
+      <Card className="w-full max-w-md shadow-lg border-primary/20 relative flex flex-col">
         <div className="absolute top-4 right-4">
             <Button variant="outline" size="icon" asChild>
                 <Link href="/" aria-label="Home">
@@ -30,7 +30,7 @@ export function AuthCard({ title, description, children, footer }: AuthCardProps
           <CardTitle className="mt-4 text-2xl font-bold font-headline">{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent className="px-6 pb-2 md:px-8">
+        <CardContent className="px-6 pb-2 md:px-8 flex-grow flex flex-col">
           {children}
         </CardContent>
         <CardFooter className="flex justify-center text-sm px-6 pt-4 md:px-8">
