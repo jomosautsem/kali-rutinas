@@ -444,17 +444,19 @@ export default function DashboardPage() {
   }
 
   const handleProgressChange = (day: string, exerciseName: string, setId: string, field: 'weight' | 'reps' | 'completed', value: string | boolean) => {
-      const newProgress = { ...progress };
-      if (!newProgress[day]) newProgress[day] = {};
-      if (!newProgress[day][exerciseName]) newProgress[day][exerciseName] = {};
-      if (!newProgress[day][exerciseName][setId]) newProgress[day][exerciseName][setId] = { weight: '', reps: '', completed: false };
-      
-      (newProgress[day][exerciseName][setId] as any)[field] = value;
-      
-      setProgress(newProgress);
-      if (userEmail) {
-          localStorage.setItem(`progress_${userEmail}`, JSON.stringify(newProgress));
-      }
+      setProgress(prevProgress => {
+        const newProgress = JSON.parse(JSON.stringify(prevProgress));
+        if (!newProgress[day]) newProgress[day] = {};
+        if (!newProgress[day][exerciseName]) newProgress[day][exerciseName] = {};
+        if (!newProgress[day][exerciseName][setId]) newProgress[day][exerciseName][setId] = { weight: '', reps: '', completed: false };
+        
+        (newProgress[day][exerciseName][setId] as any)[field] = value;
+        
+        if (userEmail) {
+            localStorage.setItem(`progress_${userEmail}`, JSON.stringify(newProgress));
+        }
+        return newProgress;
+      });
   };
 
 

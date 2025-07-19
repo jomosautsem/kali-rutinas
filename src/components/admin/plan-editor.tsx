@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useForm, useFieldArray, useWatch, Control } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, Control, UseFormRegister } from "react-hook-form";
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan";
 import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan, DayPlan, Exercise } from "@/lib/types";
 
@@ -338,7 +338,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
 }
 
 
-function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number; control: Control<UserPlan>; register: any }) {
+function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number; control: Control<UserPlan>; register: UseFormRegister<UserPlan> }) {
     const { fields, append, remove } = useFieldArray({
         control,
         name: `weeklyPlan.${dayIndex}.exercises`
@@ -396,7 +396,7 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => append({ name: "", sets: [{ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "8-12" }], rest: "60s", mediaUrl: "" })}
+                onClick={() => append({ name: "", sets: [{ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "8-12", weight: "", completed: false }], rest: "60s", mediaUrl: "" })}
             >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Añadir Ejercicio
@@ -405,7 +405,7 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
     )
 }
 
-function SetsFieldArray({ dayIndex, exerciseIndex, control, register }: { dayIndex: number; exerciseIndex: number; control: Control<UserPlan>; register: any }) {
+function SetsFieldArray({ dayIndex, exerciseIndex, control, register }: { dayIndex: number; exerciseIndex: number; control: Control<UserPlan>; register: UseFormRegister<UserPlan> }) {
     const { fields, append, remove } = useFieldArray({
         control,
         name: `weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets`
@@ -449,7 +449,7 @@ function SetsFieldArray({ dayIndex, exerciseIndex, control, register }: { dayInd
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => append({ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "8-12" })}
+                onClick={() => append({ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "8-12", weight: "", completed: false })}
             >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Añadir Serie
