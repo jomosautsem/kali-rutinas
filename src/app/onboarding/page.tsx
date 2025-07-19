@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User, Trophy, Scale, Ruler } from "lucide-react"
+import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User, Trophy, Scale, Ruler, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { MultiSelect } from "@/components/ui/multi-select"
@@ -89,10 +89,12 @@ const muscleFocusOptions = [
 ]
 
 const steps = [
-    { id: "step-1", title: "Tus Metas", fields: ["goals", "goalTerm"], icon: Trophy },
-    { id: "step-2", title: "Tu Estilo", fields: ["currentFitnessLevel", "trainingDays", "preferredWorkoutStyle", "otherWorkoutStyle", "muscleFocus"], icon: Dumbbell },
-    { id: "step-3", title: "Tus Datos", fields: ["age", "weight", "height"], icon: User },
-    { id: "step-4", title: "Salud", fields: ["injuriesOrConditions"], icon: HeartPulse }
+    { id: "step-1", title: "Metas", fields: ["goals"], icon: Trophy },
+    { id: "step-2", title: "Plazo", fields: ["goalTerm"], icon: Clock },
+    { id: "step-3", title: "Tu Nivel", fields: ["currentFitnessLevel", "trainingDays"], icon: HeartPulse },
+    { id: "step-4", title: "Tu Estilo", fields: ["preferredWorkoutStyle", "otherWorkoutStyle", "muscleFocus"], icon: Dumbbell },
+    { id: "step-5", title: "Tus Datos", fields: ["age", "weight", "height"], icon: User },
+    { id: "step-6", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
 ];
 
 export default function OnboardingPage() {
@@ -221,6 +223,10 @@ export default function OnboardingPage() {
                                 <FormMessage />
                             </FormItem>
                         )} />
+                    </Step>
+                  )}
+                  {currentStep === 1 && (
+                     <Step title={steps[1].title} icon={steps[1].icon}>
                         <FormField control={form.control} name="goalTerm" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Plazo de la Meta</FormLabel>
@@ -237,8 +243,8 @@ export default function OnboardingPage() {
                         )} />
                     </Step>
                   )}
-                  {currentStep === 1 && (
-                    <Step title={steps[1].title} icon={steps[1].icon}>
+                  {currentStep === 2 && (
+                    <Step title={steps[2].title} icon={steps[2].icon}>
                       <FormField control={form.control} name="currentFitnessLevel" render={({ field }) => (
                         <FormItem>
                           <FormLabel>Nivel de Condición Física</FormLabel>
@@ -260,26 +266,30 @@ export default function OnboardingPage() {
                           <FormMessage />
                         </FormItem>
                       )} />
-                      <FormField control={form.control} name="preferredWorkoutStyle" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
-                           <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue placeholder="Selecciona un estilo" /></SelectTrigger></FormControl>
-                            <SelectContent>
-                              {workoutStyleOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                       {watchedWorkoutStyle === 'otro' && (
-                          <FormField control={form.control} name="otherWorkoutStyle" render={({ field }) => (
+                    </Step>
+                  )}
+                  {currentStep === 3 && (
+                     <Step title={steps[3].title} icon={steps[3].icon}>
+                        <FormField control={form.control} name="preferredWorkoutStyle" render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Especifica tu estilo</FormLabel>
-                              <FormControl><Input placeholder="Ej. CrossFit, Powerlifting" {...field} /></FormControl>
-                              <FormMessage />
+                            <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Selecciona un estilo" /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                {workoutStyleOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
                             </FormItem>
-                          )} />
+                        )} />
+                        {watchedWorkoutStyle === 'otro' && (
+                            <FormField control={form.control} name="otherWorkoutStyle" render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Especifica tu estilo</FormLabel>
+                                <FormControl><Input placeholder="Ej. CrossFit, Powerlifting" {...field} /></FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )} />
                         )}
                         <FormField control={form.control} name="muscleFocus" render={({ field }) => (
                             <FormItem>
@@ -290,8 +300,8 @@ export default function OnboardingPage() {
                         )} />
                     </Step>
                   )}
-                  {currentStep === 2 && (
-                    <Step title={steps[2].title} icon={steps[2].icon}>
+                  {currentStep === 4 && (
+                    <Step title={steps[4].title} icon={steps[4].icon}>
                          <FormField control={form.control} name="age" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Edad</FormLabel>
@@ -315,8 +325,8 @@ export default function OnboardingPage() {
                         )} />
                     </Step>
                   )}
-                   {currentStep === 3 && (
-                    <Step title={steps[3].title} icon={steps[3].icon}>
+                   {currentStep === 5 && (
+                    <Step title={steps[5].title} icon={steps[5].icon}>
                         <FormField control={form.control} name="injuriesOrConditions" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Lesiones o Condiciones Médicas (Opcional)</FormLabel>
@@ -342,5 +352,3 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
-
-    
