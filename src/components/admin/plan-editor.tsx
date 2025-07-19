@@ -126,9 +126,9 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     try {
         const generationInput: GeneratePersonalizedTrainingPlanInput = onboardingData || {
             // Default values if no onboarding data is found
-            goals: "Ganancia muscular y fuerza",
+            goals: ["ganar masa muscular", "ganar fuerza"],
             currentFitnessLevel: "intermedio",
-            daysPerWeek: 4,
+            trainingDays: ["lunes", "martes", "jueves", "viernes"],
             preferredWorkoutStyle: "Levantamiento de pesas",
             age: 28,
             weight: 80,
@@ -201,9 +201,9 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                     <AlertTitle className="text-blue-600 font-semibold">Datos del Cliente</AlertTitle>
                     <AlertDescription>
                       <ul className="text-sm space-y-1 mt-2 text-blue-700/80">
-                        <li><strong>Metas:</strong> {onboardingData.goals}</li>
+                        <li><strong>Metas:</strong> {onboardingData.goals.join(', ')}</li>
                         <li><strong>Nivel:</strong> {onboardingData.currentFitnessLevel}</li>
-                        <li><strong>Días/Semana:</strong> {onboardingData.daysPerWeek}</li>
+                        <li><strong>Días:</strong> {onboardingData.trainingDays.join(', ')}</li>
                         <li><strong>Estilo:</strong> {onboardingData.preferredWorkoutStyle}</li>
                       </ul>
                     </AlertDescription>

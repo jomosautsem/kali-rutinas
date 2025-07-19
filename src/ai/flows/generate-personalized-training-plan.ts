@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview AI agent that generates personalized training plans based on user input.
@@ -25,13 +26,13 @@ const prompt = ai.definePrompt({
 
   Además del plan de ejercicios, proporciona una recomendación general en el campo 'recommendations'. Esta recomendación debe ser concisa (2-3 frases) y puede incluir consejos sobre calentamiento, hidratación, nutrición general o mentalidad.
 
-  Crea un plan para el número de días especificado por el usuario. No crees más días de los solicitados.
+  Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
   
   Deja el campo 'mediaUrl' como una cadena vacía para cada ejercicio. Este campo será completado manualmente más tarde.
 
   Objetivos: {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
-  Días por Semana: {{{daysPerWeek}}}
+  Días de Entrenamiento: {{#each trainingDays}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Estilo de Entrenamiento Preferido: {{{preferredWorkoutStyle}}}
   Edad: {{{age}}}
   Peso (kg): {{{weight}}}

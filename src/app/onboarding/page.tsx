@@ -42,6 +42,16 @@ const fitnessGoalsOptions = [
     { value: "rendimiento deportivo", label: "Rendimiento deportivo" },
 ];
 
+const trainingDaysOptions = [
+    { value: "lunes", label: "Lunes" },
+    { value: "martes", label: "Martes" },
+    { value: "miercoles", label: "Miércoles" },
+    { value: "jueves", label: "Jueves" },
+    { value: "viernes", label: "Viernes" },
+    { value: "sabado", label: "Sábado" },
+    { value: "domingo", label: "Domingo" },
+];
+
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -68,7 +78,7 @@ export default function OnboardingPage() {
     defaultValues: {
       goals: [],
       currentFitnessLevel: "principiante",
-      daysPerWeek: 3,
+      trainingDays: [],
       preferredWorkoutStyle: "",
       age: 18,
       weight: 70,
@@ -164,18 +174,23 @@ export default function OnboardingPage() {
                     </FormItem>
                 )}
                 />
-                <FormField
-                control={form.control}
-                name="daysPerWeek"
-                render={({ field }) => (
+                 <FormField
+                  control={form.control}
+                  name="trainingDays"
+                  render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Días por semana</FormLabel>
-                    <FormControl>
-                        <Input type="number" min="1" max="7" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                    </FormControl>
-                    <FormMessage />
+                      <FormLabel>Días de Entrenamiento</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={trainingDaysOptions}
+                          selected={field.value}
+                          onChange={field.onChange}
+                          placeholder="Selecciona los días..."
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
-                )}
+                  )}
                 />
             </div>
 

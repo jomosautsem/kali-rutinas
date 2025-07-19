@@ -34,11 +34,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { Sparkles, CheckCircle, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { MultiSelect } from "./ui/multi-select"
 
-const formSchema = GeneratePersonalizedTrainingPlanInputSchema;
+
+const formSchema = GeneratePersonalizedTrainingPlanInputSchema.omit({
+    goals: true,
+    trainingDays: true,
+}).extend({
+    goals: z.string().min(1, "Debes describir al menos una meta."),
+    trainingDays: z.string().min(1, "Debes especificar los días de entrenamiento.")
+});
 
 type PlanGeneratorProps = {
   onPlanGenerated: () => void;
@@ -69,7 +76,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
     defaultValues: {
       goals: "",
       currentFitnessLevel: "principiante",
-      daysPerWeek: 3,
+      trainingDays: "",
       preferredWorkoutStyle: "",
       age: 18,
       weight: 70,
@@ -82,12 +89,20 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
     setIsLoading(true)
     setIsPlanSuccessfullyGenerated(false)
     try {
-      const plan = await generatePersonalizedTrainingPlan(values)
+      // Adapt the form data to match the AI flow input schema
+      const adaptedValues = {
+        ...values,
+        goals: values.goals.split(',').map(s => s.trim()),
+        trainingDays: values.trainingDays.split(',').map(s => s.trim()),
+      };
+
+      const plan = await generatePersonalizedTrainingPlan(adaptedValues)
       
       // Save the generated plan to localStorage
       const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
       if (loggedInUserEmail) {
         localStorage.setItem(`userPlan_${loggedInUserEmail}`, JSON.stringify(plan));
+        localStorage.setItem(`onboardingData_${loggedInUserEmail}`, JSON.stringify(adaptedValues));
       }
 
       toast({
@@ -126,7 +141,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
       <DialogTrigger asChild>
         <Button>
           <Sparkles className="mr-2 h-4 w-4" />
-          Generar Nuevo Plan
+          Generar/Actualizar Plan
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-xl">
@@ -157,7 +172,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                         <FormItem>
                             <FormLabel>Metas de Fitness</FormLabel>
                             <FormControl>
-                            <Textarea placeholder="ej., perder 5 kilos, ganar músculo" {...field} />
+                            <Input placeholder="ej., perder 5 kilos, ganar músculo" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -187,14 +202,14 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                             </FormItem>
                         )}
                         />
-                        <FormField
+                         <FormField
                         control={form.control}
-                        name="daysPerWeek"
+                        name="trainingDays"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Días por semana</FormLabel>
+                            <FormLabel>Días de entrenamiento</FormLabel>
                             <FormControl>
-                                <Input type="number" min="1" max="7" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                                <Input placeholder="ej. Lunes, Miércoles, Viernes" {...field} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>

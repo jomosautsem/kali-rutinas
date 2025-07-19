@@ -44,9 +44,12 @@ export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   currentFitnessLevel: z
     .string()
     .describe('El nivel de fitness actual del usuario, ej., principiante, intermedio, avanzado.'),
-  daysPerWeek: z
-    .number()
-    .describe('El número de días a la semana que el usuario puede dedicar al entrenamiento.'),
+  trainingDays: z
+    .array(z.string())
+    .refine((value) => value.length > 0, {
+        message: "Debes seleccionar al menos un día de entrenamiento.",
+    })
+    .describe('Los días específicos de la semana que el usuario puede dedicar al entrenamiento.'),
   preferredWorkoutStyle: z
     .string()
     .describe('El estilo de entrenamiento preferido por el usuario, ej., levantamiento de pesas, cardio, HIIT, yoga.'),
