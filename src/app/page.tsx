@@ -49,7 +49,7 @@ export default function Home() {
           FORJA TU MEJOR VERSIÓN
         </h1>
         <p className="mt-6 max-w-2xl text-lg text-neutral-300">
-          Planes de entrenamiento y nutrición personalizados, alcanza tus metas de fitness con la guía experta de Kali Dojo Gym.
+          Planes de entrenamiento personalizados, alcanza tus metas de fitness con la guía experta de Kali Dojo Gym e impulsados por IA.
         </p>
       </main>
     </div>
