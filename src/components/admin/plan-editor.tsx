@@ -5,13 +5,13 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useForm, useFieldArray, useWatch, Control, UseFormRegister } from "react-hook-form";
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan";
-import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan } from "@/lib/types";
+import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan, Exercise } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, AlertTriangle, ShieldAlert } from "lucide-react";
+import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, AlertTriangle, ShieldAlert, Expand } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
@@ -27,28 +27,103 @@ type PlanEditorProps = {
   onSaveAndApprove: (userId: string, plan: UserPlan) => void;
 };
 
+const getYoutubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|\/shorts\/)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
 const isVideo = (url: string) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.mov'];
     const lowercasedUrl = url.toLowerCase();
-    return videoExtensions.some(ext => lowercasedUrl.endsWith(ext));
+    return videoExtensions.some(ext => lowercasedUrl.includes(ext));
 };
 
-const isYoutubeUrl = (url: string) => {
-    if (!url) return false;
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
-    return youtubeRegex.test(url);
-}
-
-const isValidUrl = (url: string): boolean => {
+const isYoutubeSearchUrl = (url: string) => {
     if (!url) return false;
     try {
-        new URL(url);
-        return true;
-    } catch (_) {
+        const urlObj = new URL(url);
+        return urlObj.hostname.includes('youtube.com') && urlObj.pathname.includes('/results');
+    } catch (e) {
         return false;
     }
+}
+
+
+const MediaDisplay = ({ url, alt }: { url: string, alt: string }) => {
+    if (!url) {
+        return (
+            <div className="w-full h-full bg-secondary rounded-md flex items-center justify-center">
+                <ImageIcon className="h-16 w-16 text-muted-foreground" />
+            </div>
+        )
+    };
+    
+    const youtubeId = getYoutubeVideoId(url);
+    if (youtubeId) {
+        return (
+            <div className="aspect-video w-full">
+                <iframe
+                    className="w-full h-full rounded-md"
+                    src={`https://www.youtube.com/embed/${youtubeId}`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                ></iframe>
+            </div>
+        )
+    }
+
+    if (isVideo(url)) {
+        return <video src={url} controls className="w-full max-h-[80vh] rounded-md" />
+    }
+
+    return <Image src={url} alt={alt} width={800} height={600} className="w-auto h-auto max-w-full max-h-[80vh] object-contain rounded-md" data-ai-hint="fitness exercise"/>
 };
+
+
+const MediaPreview = ({ url, alt, onPreviewClick }: { url: string, alt: string, onPreviewClick: () => void }) => {
+    if (!url) {
+        return (
+            <div className="w-full h-32 bg-secondary rounded-md flex items-center justify-center">
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            </div>
+        )
+    };
+    
+    const youtubeId = getYoutubeVideoId(url);
+
+    return (
+        <div onClick={onPreviewClick} className="relative group w-full h-32 bg-secondary rounded-md flex items-center justify-center cursor-pointer overflow-hidden">
+            {youtubeId ? (
+                <Image 
+                    src={`https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`} 
+                    alt={alt} 
+                    fill 
+                    className="object-cover" 
+                    data-ai-hint="fitness exercise"
+                />
+            ) : isVideo(url) ? (
+                <div className="w-full h-full flex items-center justify-center bg-black">
+                    <Youtube className="h-10 w-10 text-white" />
+                </div>
+            ) : isYoutubeSearchUrl(url) ? (
+                <div className="w-full h-full flex items-center justify-center bg-red-900/50">
+                    <Youtube className="h-10 w-10 text-white" />
+                </div>
+            ) : (
+                <Image src={url} alt={alt} fill className="object-cover" data-ai-hint="fitness exercise"/>
+            )}
+             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Expand className="h-8 w-8 text-white" />
+            </div>
+        </div>
+    )
+};
+
 
 const dayButtonColors = [
     "bg-red-500/80 hover:bg-red-500",
@@ -66,6 +141,8 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [onboardingData, setOnboardingData] = useState<GeneratePersonalizedTrainingPlanInput | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<{ url: string; name: string } | null>(null);
   const { toast } = useToast();
 
   const form = useForm<UserPlan>({
@@ -118,6 +195,15 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     }
   }, [user, isOpen, form]);
 
+  const handlePreviewClick = (exercise: Exercise) => {
+    if (isYoutubeSearchUrl(exercise.mediaUrl)) {
+         window.open(exercise.mediaUrl, '_blank');
+         return;
+    }
+    setSelectedMedia({ url: exercise.mediaUrl, name: exercise.name });
+    setIsModalOpen(true);
+  };
+
   const handleGeneratePlan = async () => {
     if (!user) return;
     setIsGenerating(true);
@@ -169,6 +255,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
   if (!user) return null;
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
         <DialogHeader>
@@ -298,7 +385,12 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                                             <Trash2 className="h-5 w-5" />
                                         </Button>
                                     </div>
-                                    <ExercisesFieldArray dayIndex={index} control={form.control} register={form.register} />
+                                    <ExercisesFieldArray 
+                                      dayIndex={index} 
+                                      control={form.control} 
+                                      register={form.register} 
+                                      onPreviewClick={handlePreviewClick} 
+                                    />
                                 </div>
                             </div>
                         ))}
@@ -318,51 +410,88 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
         )}
       </DialogContent>
     </Dialog>
+    
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-3xl">
+            <DialogHeader>
+                <DialogTitle>{selectedMedia?.name}</DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-center items-center py-4">
+                {selectedMedia && <MediaDisplay url={selectedMedia.url} alt={selectedMedia.name} />}
+            </div>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
 
-function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number; control: Control<UserPlan>; register: UseFormRegister<UserPlan> }) {
+function ExercisesFieldArray({ dayIndex, control, register, onPreviewClick }: { dayIndex: number; control: Control<UserPlan>; register: UseFormRegister<UserPlan>; onPreviewClick: (exercise: Exercise) => void; }) {
     const { fields, append, remove } = useFieldArray({
         control,
         name: `weeklyPlan.${dayIndex}.exercises`
     });
 
+    const watchedExercises = useWatch({ control, name: `weeklyPlan.${dayIndex}.exercises` });
+
     return (
-        <div className="space-y-2 pt-4">
-            {fields.map((field, exerciseIndex) => (
-                <div key={field.id} className="flex items-center gap-2 p-2 rounded-md bg-card/50">
-                    <Input
-                        {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
-                        placeholder="Ejercicio"
-                        className="flex-grow"
-                    />
-                    <Input
-                        {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
-                        placeholder="Series"
-                        className="w-20"
-                    />
-                     <Input
-                        {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
-                        placeholder="Reps"
-                        className="w-24"
-                    />
-                     <Input
-                        {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
-                        placeholder="URL Video/Imagen"
-                        className="flex-grow"
-                    />
+        <div className="space-y-4 pt-4">
+            {fields.map((field, exerciseIndex) => {
+              const exercise = watchedExercises?.[exerciseIndex] || {};
+              return (
+                <div key={field.id} className="p-4 rounded-lg bg-card/50">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <div className="md:col-span-2 space-y-4">
+                       <Input
+                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
+                          placeholder="Nombre del Ejercicio"
+                          className="font-semibold text-base"
+                      />
+                      <div className="flex items-center gap-2">
+                        <Input
+                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
+                          placeholder="Series"
+                          className="w-24"
+                        />
+                        <Input
+                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
+                          placeholder="Reps"
+                          className="w-24"
+                        />
+                        <Input
+                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
+                          placeholder="Descanso"
+                          className="w-24"
+                        />
+                      </div>
+                      <Input
+                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
+                          placeholder="URL de Video/Imagen (YouTube, .mp4, etc.)"
+                      />
+                    </div>
+
+                    <div className="self-center">
+                       <MediaPreview 
+                          url={exercise.mediaUrl || ''} 
+                          alt={`Visual de ${exercise.name}`}
+                          onPreviewClick={() => onPreviewClick(exercise)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-2">
                     <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => remove(exerciseIndex)}
-                        className="text-muted-foreground hover:text-destructive flex-shrink-0"
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => remove(exerciseIndex)}
+                      className="text-muted-foreground hover:text-destructive flex-shrink-0"
                     >
-                        <XCircle className="h-4 w-4" />
+                      <XCircle className="h-5 w-5" />
                     </Button>
+                  </div>
                 </div>
-            ))}
+              );
+            })}
             <Button
                 type="button"
                 variant="outline"
@@ -376,48 +505,5 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
         </div>
     )
 }
-
-const MediaPreview = ({ dayIndex, exerciseIndex, control }: { dayIndex: number, exerciseIndex: number, control: Control<UserPlan> }) => {
-    const mediaUrl = useWatch({
-        control,
-        name: `weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`
-    });
-
-    if (!mediaUrl) {
-        return (
-            <div className="w-full h-32 bg-secondary rounded-md flex items-center justify-center">
-                <ImageIcon className="h-8 w-8 text-muted-foreground" />
-            </div>
-        )
-    };
-
-    if (isYoutubeUrl(mediaUrl)) {
-        return (
-            <Button asChild variant="secondary" className="w-full h-32">
-                 <Link href={mediaUrl} target="_blank" rel="noopener noreferrer" className="flex-col gap-2">
-                    <Youtube className="h-8 w-8" />
-                    <span className="text-xs">Ver en YouTube</span>
-                </Link>
-            </Button>
-        )
-    }
-
-    if (isVideo(mediaUrl)) {
-        return <video src={mediaUrl} controls className="w-full aspect-video rounded-md" />
-    }
-
-    if (!isValidUrl(mediaUrl)) {
-         return (
-            <div className="w-full h-32 bg-destructive/10 rounded-md flex flex-col items-center justify-center text-center p-2">
-                <AlertTriangle className="h-6 w-6 text-destructive" />
-                <p className="text-xs text-destructive font-semibold mt-1">URL Inválida</p>
-            </div>
-        )
-    }
-
-    return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-32 object-cover rounded-md" data-ai-hint="fitness exercise"/>
-};
-
-    
 
     
