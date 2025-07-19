@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 const isVideo = (url: string) => {
@@ -375,6 +376,7 @@ const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; comp
 export default function DashboardPage() {
   const [planStatus, setPlanStatus] = useState<'aprobado' | 'pendiente' | 'sin-plan' | null>(null);
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [completedDays, setCompletedDays] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -390,6 +392,7 @@ export default function DashboardPage() {
         const users: User[] = JSON.parse(storedUsers);
         const currentUser = users.find(u => u.email === loggedInUserEmail);
         if (currentUser) {
+          setUser(currentUser);
           setPlanStatus(currentUser.planStatus as any);
           if (currentUser.planStatus === 'aprobado') {
               const storedPlan = localStorage.getItem(`userPlan_${currentUser.email}`);
@@ -489,7 +492,13 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl md:text-3xl font-bold font-headline">Tu Panel</h1>
+        {user ? (
+          <h1 className="text-2xl md:text-3xl font-bold font-headline">
+            Bienvenido, <span className="text-primary">{user.firstName}</span>
+          </h1>
+        ) : (
+          <Skeleton className="h-9 w-64" />
+        )}
         {planStatus !== 'pendiente' && (
           <PlanGenerator onPlanGenerated={handlePlanGenerated} />
         )}
@@ -531,3 +540,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
