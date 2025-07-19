@@ -11,7 +11,6 @@ import { GeneratePersonalizedTrainingPlanInputSchema } from "@/lib/types"
 
 import { Button } from "@/components/ui/button"
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -130,11 +129,12 @@ export default function OnboardingPage() {
       goalTerm: "mediano",
       injuriesOrConditions: "",
     },
+    mode: "onChange",
   });
 
   const watchedWorkoutStyle = form.watch("preferredWorkoutStyle");
 
-  const processStep = async (values: OnboardingFormValues) => {
+  const processStep = async () => {
     const fieldsToValidate = steps[currentStep].fields as (keyof OnboardingFormValues)[];
     const isValid = await form.trigger(fieldsToValidate, { shouldFocus: true });
     
@@ -143,10 +143,10 @@ export default function OnboardingPage() {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      await onSubmit(values);
+      await form.handleSubmit(onSubmit)();
     }
   }
-
+  
   const prevStep = () => {
     if(currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -207,7 +207,7 @@ export default function OnboardingPage() {
       footer={<p className="text-xs text-muted-foreground">Esta información será revisada por tu entrenador.</p>}
     >
        <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(processStep)} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); processStep(); }} className="space-y-6">
             <StepsIndicator steps={steps} currentStep={currentStep} />
             <AnimatePresence mode="wait">
               <motion.div key={currentStep} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3 }}>
