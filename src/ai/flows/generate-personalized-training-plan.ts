@@ -14,16 +14,21 @@ import { z } from 'zod';
 const searchExerciseVideo = ai.defineTool(
   {
     name: 'searchExerciseVideo',
-    description: 'Busca un video de un ejercicio en YouTube y devuelve la URL.',
+    description: 'Busca un video de un ejercicio en YouTube y devuelve la URL del video.',
     inputSchema: z.object({
       exerciseName: z.string().describe('El nombre del ejercicio a buscar (ej. "Press de Banca", "Sentadilla").'),
     }),
     outputSchema: z.string().describe('Una URL al video de YouTube del ejercicio.'),
   },
   async (input) => {
-    // En una implementación real, esto podría usar la API de YouTube.
-    // Por ahora, construiremos una URL de búsqueda para que el admin pueda encontrar videos fácilmente.
-    const query = encodeURIComponent(`${input.exerciseName} ejercicio`);
+    // This is a simplified search. In a real app, this would use the YouTube Data API
+    // to find the most relevant video and return its direct watch URL.
+    const query = encodeURIComponent(`${input.exerciseName} ejercicio tutorial`);
+    // This will generate a search results URL. For demonstration, we will assume
+    // the admin will replace this with a direct video link. To make it more realistic,
+    // let's try to construct a plausible, though not guaranteed, video URL.
+    // A real implementation would require an API key and more complex logic.
+    // For now, we will just return a search link.
     return `https://www.youtube.com/results?search_query=${query}`;
   }
 )
@@ -48,7 +53,7 @@ const prompt = ai.definePrompt({
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
   
-  MUY IMPORTANTE: Para cada ejercicio en el plan, debes usar la herramienta 'searchExerciseVideo' para encontrar un video del ejercicio y agregar la URL en el campo 'mediaUrl'. NO dejes el campo 'mediaUrl' vacío.
+  MUY IMPORTANTE: Para cada ejercicio en el plan, debes usar la herramienta 'searchExerciseVideo' para encontrar un video del ejercicio y agregar la URL en el campo 'mediaUrl'. NO dejes el campo 'mediaUrl' vacío. La URL devuelta será una URL de búsqueda de youtube, está bien.
   
   Objetivos: {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
@@ -75,3 +80,4 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
   }
 );
 
+    

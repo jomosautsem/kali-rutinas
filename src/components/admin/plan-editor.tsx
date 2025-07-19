@@ -352,10 +352,10 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
 
         if (isYoutubeUrl(mediaUrl)) {
             return (
-                <Button asChild variant="secondary" className="w-full">
-                     <Link href={mediaUrl} target="_blank" rel="noopener noreferrer">
-                        <Youtube className="mr-2 h-5 w-5" />
-                        Ver en YouTube
+                <Button asChild variant="secondary" className="w-full h-32">
+                     <Link href={mediaUrl} target="_blank" rel="noopener noreferrer" className="flex-col gap-2">
+                        <Youtube className="h-8 w-8" />
+                        <span className="text-xs">Ver en YouTube</span>
                     </Link>
                 </Button>
             )
@@ -374,7 +374,7 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
             )
         }
 
-        return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-auto object-cover rounded-md" data-ai-hint="fitness exercise"/>
+        return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-32 object-cover rounded-md" data-ai-hint="fitness exercise"/>
     };
 
     return (
@@ -406,7 +406,7 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
                              <Input
                                 id={`mediaUrl-${dayIndex}-${exerciseIndex}`}
                                 {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
-                                placeholder="https://example.com/exercise.mp4"
+                                placeholder="https://www.youtube.com/watch?v=..."
                             />
                         </div>
                     </div>
@@ -436,3 +436,5 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
         </div>
     )
 }
+
+    
