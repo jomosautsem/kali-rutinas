@@ -32,6 +32,7 @@ const formSchema = z.object({
   name: z.string().min(2, "El nombre completo es requerido."),
   email: z.string().email("Por favor, ingresa un correo electrónico válido."),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+  avatarUrl: z.string().url("Por favor, ingresa una URL de imagen válida.").optional().or(z.literal("")),
 });
 
 type AddUserDialogProps = {
@@ -48,6 +49,7 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
       name: "",
       email: "",
       password: "",
+      avatarUrl: "",
     },
   });
 
@@ -135,6 +137,19 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
                     <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="avatarUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL de la Imagen de Perfil</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/image.png" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

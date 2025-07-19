@@ -9,11 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 
 // In a real app, this data would be fetched from your database.
 const initialMockUsers: User[] = [
-  { id: "user-alice-1", name: "Alice Johnson", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado", inviteCode: "AJ23" },
-  { id: "user-bob-2", name: "Bob Williams", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan", inviteCode: "BW45" },
-  { id: "user-charlie-3", name: "Charlie Brown", email: "charlie@example.com", role: "client", status: "pendiente", registeredAt: "2023-10-05", planStatus: "sin-plan" },
-  { id: "user-diana-4", name: "Diana Prince", email: "kalicentrodeportivotemixco@gmail.com", role: "admin", status: "activo", registeredAt: "2023-01-15", planStatus: "n/a" },
-  { id: "user-ethan-5", name: "Ethan Hunt", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan" },
+  { id: "user-alice-1", name: "Alice Johnson", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado", inviteCode: "AJ23", avatarUrl: "https://placehold.co/100x100.png" },
+  { id: "user-bob-2", name: "Bob Williams", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan", inviteCode: "BW45", avatarUrl: "https://placehold.co/100x100.png" },
+  { id: "user-charlie-3", name: "Charlie Brown", email: "charlie@example.com", role: "client", status: "pendiente", registeredAt: "2023-10-05", planStatus: "sin-plan", avatarUrl: "https://placehold.co/100x100.png" },
+  { id: "user-diana-4", name: "Diana Prince", email: "kalicentrodeportivotemixco@gmail.com", role: "admin", status: "activo", registeredAt: "2023-01-15", planStatus: "n/a", avatarUrl: "https://placehold.co/100x100.png" },
+  { id: "user-ethan-5", name: "Ethan Hunt", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan", avatarUrl: "https://placehold.co/100x100.png" },
 ];
 
 export default function AdminUsersPage() {

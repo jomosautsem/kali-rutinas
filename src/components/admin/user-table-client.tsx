@@ -35,6 +35,7 @@ import {
 import { cn } from "@/lib/utils"
 import { PlanEditor } from "./plan-editor"
 import { GenerateInviteCodeDialog } from "./generate-invite-code-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 type UserTableClientProps = {
   users: User[]
@@ -107,8 +108,16 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>
-                  <div className="font-medium">{user.name}</div>
-                  <div className="text-sm text-muted-foreground">{user.email}</div>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.avatarUrl} alt={user.name} />
+                      <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{user.name}</div>
+                      <div className="text-sm text-muted-foreground">{user.email}</div>
+                    </div>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Badge variant={user.role === "admin" ? "default" : "secondary"}>

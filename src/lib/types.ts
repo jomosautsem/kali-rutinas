@@ -39,6 +39,8 @@ export type User = {
   registeredAt: string
   planStatus: "aprobado" | "pendiente" | "sin-plan" | "n/a"
   inviteCode?: string;
+  avatarUrl?: string;
+  password?: string;
 }
 
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
