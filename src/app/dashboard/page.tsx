@@ -7,14 +7,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlanGenerator } from "@/components/plan-generator"
 import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import type { User, UserPlan, Exercise } from "@/lib/types";
+import type { User, UserPlan, Exercise, Set as SetType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SetbackReporter } from "@/components/setback-reporter";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+
+type ProgressData = {
+    [day: string]: {
+        [exerciseName: string]: {
+            [setId: string]: {
+                weight: string;
+                reps: string;
+                completed: boolean;
+            }
+        }
+    }
+}
 
 const isVideo = (url: string) => {
     if (!url) return false;
@@ -124,7 +137,13 @@ const dayButtonColors = [
     "bg-teal-500/80 hover:bg-teal-500",
 ]
 
-const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; completedDays: string[]; onToggleDay: (day: string) => void; }) => {
+const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressChange }: { 
+    plan: UserPlan; 
+    completedDays: string[]; 
+    onToggleDay: (day: string) => void;
+    progress: ProgressData;
+    onProgressChange: (day: string, exerciseName: string, setId: string, field: 'weight' | 'reps' | 'completed', value: string | boolean) => void;
+}) => {
     const [activeDayIndex, setActiveDayIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState<{ url: string; name: string } | null>(null);
@@ -138,6 +157,8 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; co
         setIsModalOpen(true);
     };
 
+    const activeDay = plan.weeklyPlan[activeDayIndex]?.day;
+    const activeDayProgress = progress[activeDay] || {};
 
     return (
         <>
@@ -189,30 +210,79 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; co
                                           onCheckedChange={() => onToggleDay(dayPlan.day)}
                                         />
                                         <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
-                                          Marcar como completado
+                                          Marcar día como completado
                                         </Label>
                                       </div>
                                     </div>
-                                    <div className="space-y-4 pt-4">
-                                        {dayPlan.exercises.map((exercise, exerciseIndex) => (
-                                            <div key={exerciseIndex} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-card/50">
-                                                <div className="md:col-span-8 space-y-2">
-                                                    <p className="font-semibold text-base">{exercise.name}</p>
-                                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                                                        <span>Series: <span className="font-medium text-foreground">{exercise.series}</span></span>
-                                                        <span>Reps: <span className="font-medium text-foreground">{exercise.reps}</span></span>
-                                                        <span>Descanso: <span className="font-medium text-foreground">{exercise.rest}</span></span>
+                                    <div className="space-y-8 pt-4">
+                                        {dayPlan.exercises.map((exercise, exerciseIndex) => {
+                                            const exerciseProgress = activeDayProgress[exercise.name] || {};
+                                            return (
+                                                <div key={exerciseIndex} className="p-4 rounded-lg bg-card/50">
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                                        <div className="md:col-span-2 space-y-2">
+                                                            <p className="font-semibold text-lg">{exercise.name}</p>
+                                                            <p className="text-sm text-muted-foreground">Descanso entre series: {exercise.rest}</p>
+                                                        </div>
+                                                        <div className="self-center">
+                                                            <MediaPreview 
+                                                                url={exercise.mediaUrl} 
+                                                                alt={`Visual de ${exercise.name}`}
+                                                                onPreviewClick={() => handlePreviewClick(exercise)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-4">
+                                                        <Table>
+                                                            <TableHeader>
+                                                                <TableRow>
+                                                                    <TableHead className="w-16">Set</TableHead>
+                                                                    <TableHead>Reps Objetivo</TableHead>
+                                                                    <TableHead>Peso (kg)</TableHead>
+                                                                    <TableHead>Reps Hechas</TableHead>
+                                                                    <TableHead className="w-16 text-center">Hecho</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {exercise.sets.map((set, setIndex) => {
+                                                                    const setProgress = exerciseProgress[set.id] || { weight: '', reps: '', completed: false };
+                                                                    return (
+                                                                        <TableRow key={set.id}>
+                                                                            <TableCell className="font-medium">{setIndex + 1}</TableCell>
+                                                                            <TableCell>{set.reps}</TableCell>
+                                                                            <TableCell>
+                                                                                <Input 
+                                                                                    type="number"
+                                                                                    placeholder="0"
+                                                                                    className="h-8"
+                                                                                    value={setProgress.weight}
+                                                                                    onChange={(e) => onProgressChange(dayPlan.day, exercise.name, set.id, 'weight', e.target.value)}
+                                                                                />
+                                                                            </TableCell>
+                                                                             <TableCell>
+                                                                                <Input 
+                                                                                    type="number"
+                                                                                    placeholder="0"
+                                                                                    className="h-8"
+                                                                                    value={setProgress.reps}
+                                                                                    onChange={(e) => onProgressChange(dayPlan.day, exercise.name, set.id, 'reps', e.target.value)}
+                                                                                />
+                                                                            </TableCell>
+                                                                             <TableCell className="text-center">
+                                                                                <Checkbox 
+                                                                                    checked={setProgress.completed}
+                                                                                    onCheckedChange={(checked) => onProgressChange(dayPlan.day, exercise.name, set.id, 'completed', !!checked)}
+                                                                                />
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    )
+                                                                })}
+                                                            </TableBody>
+                                                        </Table>
                                                     </div>
                                                 </div>
-                                                <div className="md:col-span-4 self-center">
-                                                    <MediaPreview 
-                                                        url={exercise.mediaUrl} 
-                                                        alt={`Visual de ${exercise.name}`}
-                                                        onPreviewClick={() => handlePreviewClick(exercise)}
-                                                    />
-                                                </div>
-                                            </div>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 </div>
                             </div>
@@ -308,11 +378,14 @@ export default function DashboardPage() {
   const [planStatus, setPlanStatus] = useState<'aprobado' | 'pendiente' | 'sin-plan' | null>(null);
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [completedDays, setCompletedDays] = useState<string[]>([]);
+  const [progress, setProgress] = useState<ProgressData>({});
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     // This simulates fetching the current user's plan status after they log in.
     if (typeof window !== 'undefined') {
       const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
+      setUserEmail(loggedInUserEmail);
       const storedUsers = localStorage.getItem("registeredUsers");
       if (loggedInUserEmail && storedUsers) {
         const users: User[] = JSON.parse(storedUsers);
@@ -328,6 +401,10 @@ export default function DashboardPage() {
               if(storedCompletedDays) {
                   setCompletedDays(JSON.parse(storedCompletedDays));
               }
+              const storedProgress = localStorage.getItem(`progress_${currentUser.email}`);
+              if(storedProgress) {
+                  setProgress(JSON.parse(storedProgress));
+              }
           }
         } else {
           setPlanStatus('sin-plan');
@@ -338,9 +415,7 @@ export default function DashboardPage() {
     }
   }, []);
 
-
   const handlePlanGenerated = () => {
-    // When a plan is generated, it should be set to 'pending'
     if (typeof window !== 'undefined') {
       const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
       const storedUsers = localStorage.getItem("registeredUsers");
@@ -351,7 +426,9 @@ export default function DashboardPage() {
         setPlanStatus('pendiente');
         // Reset progress when a new plan is generated
         localStorage.removeItem(`completedDays_${loggedInUserEmail}`);
+        localStorage.removeItem(`progress_${loggedInUserEmail}`);
         setCompletedDays([]);
+        setProgress({});
       }
     }
   };
@@ -361,11 +438,24 @@ export default function DashboardPage() {
           ? completedDays.filter(d => d !== day)
           : [...completedDays, day];
       setCompletedDays(newCompletedDays);
-      const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
-      if (loggedInUserEmail) {
-          localStorage.setItem(`completedDays_${loggedInUserEmail}`, JSON.stringify(newCompletedDays));
+      if (userEmail) {
+          localStorage.setItem(`completedDays_${userEmail}`, JSON.stringify(newCompletedDays));
       }
   }
+
+  const handleProgressChange = (day: string, exerciseName: string, setId: string, field: 'weight' | 'reps' | 'completed', value: string | boolean) => {
+      const newProgress = { ...progress };
+      if (!newProgress[day]) newProgress[day] = {};
+      if (!newProgress[day][exerciseName]) newProgress[day][exerciseName] = {};
+      if (!newProgress[day][exerciseName][setId]) newProgress[day][exerciseName][setId] = { weight: '', reps: '', completed: false };
+      
+      (newProgress[day][exerciseName][setId] as any)[field] = value;
+      
+      setProgress(newProgress);
+      if (userEmail) {
+          localStorage.setItem(`progress_${userEmail}`, JSON.stringify(newProgress));
+      }
+  };
 
 
   const renderPlanContent = () => {
@@ -374,7 +464,7 @@ export default function DashboardPage() {
     }
     switch(planStatus) {
       case 'aprobado':
-        return userPlan ? <PlanAprobado plan={userPlan} completedDays={completedDays} onToggleDay={handleToggleDay} /> : <p>Cargando plan...</p>;
+        return userPlan ? <PlanAprobado plan={userPlan} completedDays={completedDays} onToggleDay={handleToggleDay} progress={progress} onProgressChange={handleProgressChange} /> : <p>Cargando plan...</p>;
       case 'pendiente':
         return <PlanPendiente />;
       case 'sin-plan':

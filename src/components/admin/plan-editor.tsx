@@ -3,9 +3,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, Control } from "react-hook-form";
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan";
-import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan } from "@/lib/types";
+import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan, DayPlan, Exercise } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -19,6 +19,7 @@ import Link from "next/link";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
 type PlanEditorProps = {
   user: User | null;
@@ -90,7 +91,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
       setIsLoading(true);
       setActiveDayIndex(0);
       
-      // Load existing plan
       const storedPlan = localStorage.getItem(`userPlan_${user.email}`);
       if (storedPlan) {
         try {
@@ -103,7 +103,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
         form.reset({ recommendations: "", weeklyPlan: [] });
       }
 
-      // Load onboarding data
       const storedOnboardingData = localStorage.getItem(`onboardingData_${user.email}`);
       if (storedOnboardingData) {
         try {
@@ -125,7 +124,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     setIsGenerating(true);
     try {
         const generationInput: GeneratePersonalizedTrainingPlanInput = onboardingData || {
-            // Default values if no onboarding data is found
             goals: ["ganar masa muscular", "ganar fuerza"],
             currentFitnessLevel: "intermedio",
             trainingDays: ["lunes", "martes", "jueves", "viernes"],
@@ -136,7 +134,23 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
             goalTerm: "mediano"
         };
         const newPlan = await generatePersonalizedTrainingPlan(generationInput);
-        form.reset(newPlan);
+        
+        // Post-process to add unique IDs to sets
+        const planWithSetIds = {
+            ...newPlan,
+            weeklyPlan: newPlan.weeklyPlan.map(day => ({
+                ...day,
+                exercises: day.exercises.map(exercise => ({
+                    ...exercise,
+                    sets: exercise.sets.map(set => ({
+                        ...set,
+                        id: `set-${Math.random().toString(36).substr(2, 9)}`
+                    }))
+                }))
+            }))
+        };
+
+        form.reset(planWithSetIds);
         setActiveDayIndex(0);
         toast({
             title: "Plan Generado",
@@ -157,11 +171,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
   const onSubmit = (data: UserPlan) => {
     if (user) {
         onSaveAndApprove(user.id, data);
-        toast({
-            title: "Plan Aprobado",
-            description: `El plan para ${user.name} ha sido guardado y aprobado.`,
-            className: "bg-green-500/20 text-green-700 border-green-500/50"
-        });
         onClose();
     }
   };
@@ -177,7 +186,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="font-headline">Plan de Entrenamiento para {user.name}</DialogTitle>
           <DialogDescription>
@@ -270,6 +279,15 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                                     {weeklyPlanValues?.[index]?.day || `Día ${index + 1}`}
                                 </Button>
                             ))}
+                             <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => append({ day: `Día ${fields.length + 1}`, focus: "Enfoque", exercises: [] })}
+                                className="ml-auto"
+                            >
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Añadir Día
+                            </Button>
                         </div>
 
                         {fields.map((field, index) => (
@@ -296,7 +314,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                                             <XCircle className="h-5 w-5" />
                                         </Button>
                                     </div>
-                                    <ExercisesFieldArray dayIndex={index} form={form} />
+                                    <ExercisesFieldArray dayIndex={index} control={form.control} register={form.register} />
                                 </div>
                             </div>
                         ))}
@@ -304,14 +322,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                 )}
 
 
-                 <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => append({ day: `Día ${fields.length + 1}`, focus: "Enfoque", exercises: [] })}
-                >
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Añadir Día
-                </Button>
                  <DialogFooter className="pt-4 border-t mt-auto sticky bottom-0 bg-card">
                     <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
                     <Button type="submit">
@@ -328,106 +338,65 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
 }
 
 
-function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }) {
-    const { control, register } = form;
+function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number; control: Control<UserPlan>; register: any }) {
     const { fields, append, remove } = useFieldArray({
         control,
         name: `weeklyPlan.${dayIndex}.exercises`
     });
-    
-    const MediaPreview = ({ exerciseIndex }: { exerciseIndex: number }) => {
-        const mediaUrl = useWatch({
-            control,
-            name: `weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`
-        });
-
-        if (!mediaUrl) {
-            return (
-                <div className="w-full h-32 bg-secondary rounded-md flex items-center justify-center">
-                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                </div>
-            )
-        };
-
-        if (isYoutubeUrl(mediaUrl)) {
-            return (
-                <Button asChild variant="secondary" className="w-full h-32">
-                     <Link href={mediaUrl} target="_blank" rel="noopener noreferrer" className="flex-col gap-2">
-                        <Youtube className="h-8 w-8" />
-                        <span className="text-xs">Ver en YouTube</span>
-                    </Link>
-                </Button>
-            )
-        }
-
-        if (isVideo(mediaUrl)) {
-            return <video src={mediaUrl} controls className="w-full aspect-video rounded-md" />
-        }
-
-        if (!isValidUrl(mediaUrl)) {
-             return (
-                <div className="w-full h-32 bg-destructive/10 rounded-md flex flex-col items-center justify-center text-center p-2">
-                    <AlertTriangle className="h-6 w-6 text-destructive" />
-                    <p className="text-xs text-destructive font-semibold mt-1">URL Inválida</p>
-                </div>
-            )
-        }
-
-        return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-32 object-cover rounded-md" data-ai-hint="fitness exercise"/>
-    };
 
     return (
         <div className="space-y-4 pt-4">
             {fields.map((field, exerciseIndex) => (
                 <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-3 rounded-lg bg-card/50">
-                    <div className="md:col-span-8 space-y-2">
-                        <Input
-                            {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
-                            placeholder="Nombre del Ejercicio"
-                            className="font-semibold"
-                        />
-                        <div className="grid grid-cols-3 gap-2">
+                    <div className="md:col-span-8 space-y-4">
+                        <div className="flex items-center gap-2">
                              <Input
-                                {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
-                                placeholder="Series"
+                                {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
+                                placeholder="Nombre del Ejercicio"
+                                className="font-semibold text-lg flex-1"
                             />
-                             <Input
-                                {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
-                                placeholder="Reps"
-                            />
-                             <Input
-                                {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
-                                placeholder="Descanso"
-                            />
+                             <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => remove(exerciseIndex)}
+                                className="text-muted-foreground hover:text-destructive"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
                         </div>
-                         <div className="space-y-1">
-                            <Label htmlFor={`mediaUrl-${dayIndex}-${exerciseIndex}`}>URL de Imagen/Video</Label>
-                             <Input
-                                id={`mediaUrl-${dayIndex}-${exerciseIndex}`}
-                                {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
-                                placeholder="https://www.youtube.com/watch?v=..."
-                            />
+                       
+                        <SetsFieldArray dayIndex={dayIndex} exerciseIndex={exerciseIndex} control={control} register={register} />
+                         
+                         <div className="grid grid-cols-2 gap-4 items-end">
+                            <div className="space-y-1">
+                                <Label htmlFor={`rest-${dayIndex}-${exerciseIndex}`} className="text-xs">Descanso</Label>
+                                <Input
+                                    id={`rest-${dayIndex}-${exerciseIndex}`}
+                                    {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
+                                    placeholder="Ej. 60s"
+                                />
+                            </div>
+                             <div className="space-y-1">
+                                <Label htmlFor={`mediaUrl-${dayIndex}-${exerciseIndex}`} className="text-xs">URL de Imagen/Video</Label>
+                                <Input
+                                    id={`mediaUrl-${dayIndex}-${exerciseIndex}`}
+                                    {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
+                                    placeholder="https://www.youtube.com/watch?v=..."
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div className="md:col-span-3 self-center">
-                         <MediaPreview exerciseIndex={exerciseIndex} />
+                    <div className="md:col-span-4 self-center">
+                         <MediaPreview dayIndex={dayIndex} exerciseIndex={exerciseIndex} control={control} />
                     </div>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => remove(exerciseIndex)}
-                        className="md:col-span-1 text-destructive hover:bg-destructive/10 justify-self-center md:justify-self-end"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
                 </div>
             ))}
             <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => append({ name: "", series: "", reps: "", rest: "", mediaUrl: "" })}
+                onClick={() => append({ name: "", sets: [{ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "8-12" }], rest: "60s", mediaUrl: "" })}
             >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Añadir Ejercicio
@@ -435,3 +404,97 @@ function ExercisesFieldArray({ dayIndex, form }: { dayIndex: number, form: any }
         </div>
     )
 }
+
+function SetsFieldArray({ dayIndex, exerciseIndex, control, register }: { dayIndex: number; exerciseIndex: number; control: Control<UserPlan>; register: any }) {
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: `weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets`
+    });
+
+    return (
+        <div className="space-y-2 p-3 bg-secondary/30 rounded-md">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[80px]">Serie</TableHead>
+                        <TableHead>Reps Objetivo</TableHead>
+                        <TableHead className="w-[80px]"></TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {fields.map((field, setIndex) => (
+                        <TableRow key={field.id}>
+                            <TableCell className="font-medium">{setIndex + 1}</TableCell>
+                            <TableCell>
+                                <Input
+                                    {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.sets.${setIndex}.reps`)}
+                                    placeholder="Ej. 8-12"
+                                />
+                            </TableCell>
+                            <TableCell>
+                                 <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => remove(setIndex)}
+                                >
+                                    <XCircle className="h-4 w-4" />
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+            <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => append({ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "8-12" })}
+            >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Añadir Serie
+            </Button>
+        </div>
+    )
+}
+
+const MediaPreview = ({ dayIndex, exerciseIndex, control }: { dayIndex: number, exerciseIndex: number, control: Control<UserPlan> }) => {
+    const mediaUrl = useWatch({
+        control,
+        name: `weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`
+    });
+
+    if (!mediaUrl) {
+        return (
+            <div className="w-full h-32 bg-secondary rounded-md flex items-center justify-center">
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            </div>
+        )
+    };
+
+    if (isYoutubeUrl(mediaUrl)) {
+        return (
+            <Button asChild variant="secondary" className="w-full h-32">
+                 <Link href={mediaUrl} target="_blank" rel="noopener noreferrer" className="flex-col gap-2">
+                    <Youtube className="h-8 w-8" />
+                    <span className="text-xs">Ver en YouTube</span>
+                </Link>
+            </Button>
+        )
+    }
+
+    if (isVideo(mediaUrl)) {
+        return <video src={mediaUrl} controls className="w-full aspect-video rounded-md" />
+    }
+
+    if (!isValidUrl(mediaUrl)) {
+         return (
+            <div className="w-full h-32 bg-destructive/10 rounded-md flex flex-col items-center justify-center text-center p-2">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
+                <p className="text-xs text-destructive font-semibold mt-1">URL Inválida</p>
+            </div>
+        )
+    }
+
+    return <Image src={mediaUrl} alt="Vista previa del ejercicio" width={200} height={150} className="w-full h-32 object-cover rounded-md" data-ai-hint="fitness exercise"/>
+};

@@ -21,14 +21,7 @@ const searchExerciseVideo = ai.defineTool(
     outputSchema: z.string().describe('Una URL al video de YouTube del ejercicio.'),
   },
   async (input) => {
-    // This is a simplified search. In a real app, this would use the YouTube Data API
-    // to find the most relevant video and return its direct watch URL.
     const query = encodeURIComponent(`${input.exerciseName} ejercicio tutorial`);
-    // This will generate a search results URL. For demonstration, we will assume
-    // the admin will replace this with a direct video link. To make it more realistic,
-    // let's try to construct a plausible, though not guaranteed, video URL.
-    // A real implementation would require an API key and more complex logic.
-    // For now, we will just return a search link.
     return `https://www.youtube.com/results?search_query=${query}`;
   }
 )
@@ -52,6 +45,8 @@ const prompt = ai.definePrompt({
   Además del plan de ejercicios, proporciona una recomendación general en el campo 'recommendations'. Esta recomendación debe ser concisa (2-3 frases) y puede incluir consejos sobre calentamiento, hidratación, nutrición general o mentalidad.
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
+
+  Para cada ejercicio, crea un número apropiado de series (generalmente de 3 a 5 series por ejercicio, dependiendo de la intensidad y el objetivo). Asigna repeticiones objetivo a cada serie (por ejemplo, "8-12 reps").
   
   MUY IMPORTANTE: Para cada ejercicio en el plan, debes usar la herramienta 'searchExerciseVideo' para encontrar un video del ejercicio y agregar la URL en el campo 'mediaUrl'. NO dejes el campo 'mediaUrl' vacío. La URL devuelta será una URL de búsqueda de youtube, está bien.
   
@@ -76,8 +71,30 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+
+    if (!output) {
+      throw new Error("La IA no pudo generar un plan.");
+    }
+    
+    // Post-procesamiento para asegurar que cada serie tenga un ID único
+    const planWithSetIds: GeneratePersonalizedTrainingPlanOutput = {
+      ...output,
+      weeklyPlan: output.weeklyPlan.map(day => ({
+        ...day,
+        exercises: day.exercises.map(exercise => ({
+          ...exercise,
+          // Asegurarse de que `sets` sea un array antes de mapear
+          sets: Array.isArray(exercise.sets) 
+            ? exercise.sets.map(set => ({
+                ...set,
+                id: `set-${Math.random().toString(36).substr(2, 9)}`,
+              }))
+            // Si `sets` no es un array (caso anómalo de la IA), crear un array por defecto
+            : [{ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "10", weight: "", completed: false }],
+        })),
+      })),
+    };
+
+    return planWithSetIds;
   }
 );
-
-    

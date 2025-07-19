@@ -1,10 +1,17 @@
 
 import { z } from "zod";
 
+export const SetSchema = z.object({
+  id: z.string(),
+  reps: z.string().describe('El número objetivo de repeticiones para esta serie.'),
+  weight: z.string().describe('El peso levantado en esta serie (llenado por el usuario).').optional(),
+  completed: z.boolean().describe('Si el usuario completó esta serie.').optional(),
+});
+export type Set = z.infer<typeof SetSchema>;
+
 export const ExerciseSchema = z.object({
   name: z.string().describe('El nombre del ejercicio.'),
-  series: z.string().describe('El número de series a realizar.'),
-  reps: z.string().describe('El rango de repeticiones a realizar.'),
+  sets: z.array(SetSchema).describe('Las series a realizar para este ejercicio.'),
   rest: z.string().describe('El tiempo de descanso entre series, ej., "60s".'),
   mediaUrl: z.string().describe('URL a una imagen o video del ejercicio. Puede ser una cadena vacía.'),
 });
@@ -102,5 +109,3 @@ export const GenerateTrainingTemplateInputSchema = z.object({
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres.").describe("Una descripción detallada de la plantilla de entrenamiento deseada."),
 });
 export type GenerateTrainingTemplateInput = z.infer<typeof GenerateTrainingTemplateInputSchema>;
-
-    
