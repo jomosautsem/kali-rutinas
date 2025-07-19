@@ -31,7 +31,7 @@ export function MultiToggleButtonGroup({
   }
 
   return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-3 gap-2", className)}>
+    <div className={cn("grid grid-cols-2 gap-2", className)}>
       {options.map((option) => {
         const isSelected = selected.includes(option.value)
         return (

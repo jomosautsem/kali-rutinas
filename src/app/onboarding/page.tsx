@@ -73,18 +73,18 @@ const workoutStyleOptions = [
     { value: "resistencia", label: "Resistencia" },
     { value: "hipertrofia", label: "Hipertrofia" },
     { value: "cardio", label: "Cardio" },
-    { value: "hiit", label: "HIIT (Entrenamiento de Intervalos de Alta Intensidad)" },
-    { value: "nucleus overload", label: "Nucleus Overload (método no probado)" },
+    { value: "hiit", label: "HIIT" },
+    { value: "nucleus overload", label: "Nucleus Overload" },
     { value: "otro", label: "Otro (especificar)" },
 ]
 
 const muscleFocusOptions = [
     { value: "pecho", label: "Pecho" },
     { value: "espalda", label: "Espalda" },
-    { value: "pierna", label: "Pierna (Cuádriceps/Femoral/Pantorrilla)" },
-    { value: "gluteos y esquiotibiales", label: "Glúteos e Isquiotibiales" },
+    { value: "pierna", label: "Pierna (Completa)" },
+    { value: "gluteos y esquiotibiales", label: "Glúteos e Isquios" },
     { value: "hombros", label: "Hombros" },
-    { value: "brazos", label: "Brazos (Bíceps/Tríceps/Antebrazos)" },
+    { value: "brazos", label: "Brazos (Completo)" },
     { value: "abdomen", label: "Abdomen" },
 ]
 
