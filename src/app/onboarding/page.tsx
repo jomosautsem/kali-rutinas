@@ -28,11 +28,11 @@ import {
 import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User, Trophy, Scale, Ruler, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
-import { MultiSelect } from "@/components/ui/multi-select"
 import { Textarea } from "@/components/ui/textarea"
 import { StepsIndicator } from "@/components/onboarding/steps-indicator"
 import { FormNavigation } from "@/components/onboarding/form-navigation"
 import { Step } from "@/components/onboarding/step"
+import { MultiToggleButtonGroup } from "@/components/ui/multi-toggle"
 
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
@@ -219,7 +219,13 @@ export default function OnboardingPage() {
                          <FormField control={form.control} name="goals" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Metas Principales</FormLabel>
-                                <MultiSelect options={fitnessGoalsOptions} selected={field.value} onChange={field.onChange} placeholder="Selecciona una o más metas..." />
+                                <FormControl>
+                                  <MultiToggleButtonGroup
+                                    options={fitnessGoalsOptions}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -262,7 +268,13 @@ export default function OnboardingPage() {
                       <FormField control={form.control} name="trainingDays" render={({ field }) => (
                         <FormItem>
                           <FormLabel>Días de Entrenamiento</FormLabel>
-                          <MultiSelect options={trainingDaysOptions} selected={field.value} onChange={field.onChange} placeholder="Selecciona los días..." />
+                           <FormControl>
+                              <MultiToggleButtonGroup
+                                options={trainingDaysOptions}
+                                selected={field.value}
+                                onChange={field.onChange}
+                              />
+                            </FormControl>
                           <FormMessage />
                         </FormItem>
                       )} />
@@ -294,7 +306,13 @@ export default function OnboardingPage() {
                         <FormField control={form.control} name="muscleFocus" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Enfoque Muscular (Opcional)</FormLabel>
-                                <MultiSelect options={muscleFocusOptions} selected={field.value || []} onChange={field.onChange} placeholder="Selecciona grupos musculares..." />
+                                 <FormControl>
+                                  <MultiToggleButtonGroup
+                                    options={muscleFocusOptions}
+                                    selected={field.value}
+                                    onChange={field.onChange}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
