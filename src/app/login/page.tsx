@@ -134,7 +134,7 @@ export default function LoginPage() {
           />
         </div>
         <div className="space-y-2">
-            <Label htmlFor="inviteCode">Código de Invitación (solo clientes)</Label>
+            <Label htmlFor="inviteCode">KaliCodigo</Label>
             <Input 
                 id="inviteCode" 
                 placeholder="Ingresa tu código de invitación" 
