@@ -20,7 +20,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 type ProgressData = {
     [day: string]: {
         [exerciseName: string]: {
-            [setId: string]: {
+            [setIndex: number]: {
                 weight: string;
                 reps: string;
                 completed: boolean;
@@ -142,7 +142,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
     completedDays: string[]; 
     onToggleDay: (day: string) => void;
     progress: ProgressData;
-    onProgressChange: (day: string, exerciseName: string, setId: string, field: 'weight' | 'reps' | 'completed', value: string | boolean) => void;
+    onProgressChange: (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => void;
 }) => {
     const [activeDayIndex, setActiveDayIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -215,8 +215,9 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                       </div>
                                     </div>
                                     <div className="space-y-8 pt-4">
-                                        {dayPlan.exercises.map((exercise, exerciseIndex) => {
+                                        {(dayPlan.exercises || []).map((exercise, exerciseIndex) => {
                                             const exerciseProgress = activeDayProgress[exercise.name] || {};
+                                            const numberOfSets = parseInt(exercise.series) || 0;
                                             return (
                                                 <div key={exerciseIndex} className="p-4 rounded-lg bg-card/50">
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
@@ -244,19 +245,19 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
-                                                                {Array.isArray(exercise.sets) && exercise.sets.map((set, setIndex) => {
-                                                                    const setProgress = exerciseProgress[set.id] || { weight: '', reps: '', completed: false };
+                                                                {Array.from({ length: numberOfSets }).map((_, setIndex) => {
+                                                                    const setProgress = exerciseProgress[setIndex] || { weight: '', reps: '', completed: false };
                                                                     return (
-                                                                        <TableRow key={set.id}>
+                                                                        <TableRow key={setIndex}>
                                                                             <TableCell className="font-medium">{setIndex + 1}</TableCell>
-                                                                            <TableCell>{set.reps}</TableCell>
+                                                                            <TableCell>{exercise.reps}</TableCell>
                                                                             <TableCell>
                                                                                 <Input 
                                                                                     type="number"
                                                                                     placeholder="0"
                                                                                     className="h-8"
                                                                                     value={setProgress.weight}
-                                                                                    onChange={(e) => onProgressChange(dayPlan.day, exercise.name, set.id, 'weight', e.target.value)}
+                                                                                    onChange={(e) => onProgressChange(dayPlan.day, exercise.name, setIndex, 'weight', e.target.value)}
                                                                                 />
                                                                             </TableCell>
                                                                              <TableCell>
@@ -265,13 +266,13 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                                                     placeholder="0"
                                                                                     className="h-8"
                                                                                     value={setProgress.reps}
-                                                                                    onChange={(e) => onProgressChange(dayPlan.day, exercise.name, set.id, 'reps', e.target.value)}
+                                                                                    onChange={(e) => onProgressChange(dayPlan.day, exercise.name, setIndex, 'reps', e.target.value)}
                                                                                 />
                                                                             </TableCell>
                                                                              <TableCell className="text-center">
                                                                                 <Checkbox 
                                                                                     checked={setProgress.completed}
-                                                                                    onCheckedChange={(checked) => onProgressChange(dayPlan.day, exercise.name, set.id, 'completed', !!checked)}
+                                                                                    onCheckedChange={(checked) => onProgressChange(dayPlan.day, exercise.name, setIndex, 'completed', !!checked)}
                                                                                 />
                                                                             </TableCell>
                                                                         </TableRow>
@@ -443,26 +444,26 @@ export default function DashboardPage() {
       }
   }
 
-  const handleProgressChange = (day: string, exerciseName: string, setId: string, field: 'weight' | 'reps' | 'completed', value: string | boolean) => {
+  const handleProgressChange = (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => {
     setProgress(prev => {
-      const newProgress = { ...prev };
-      if (!newProgress[day]) {
-        newProgress[day] = {};
-      }
-      if (!newProgress[day][exerciseName]) {
-        newProgress[day][exerciseName] = {};
-      }
-      if (!newProgress[day][exerciseName][setId]) {
-        newProgress[day][exerciseName][setId] = { weight: '', reps: '', completed: false };
-      }
-      (newProgress[day][exerciseName][setId] as any)[field] = value;
-
-      if (userEmail) {
-        localStorage.setItem(`progress_${userEmail}`, JSON.stringify(newProgress));
-      }
-      return newProgress;
+        const newProgress = { ...prev };
+        if (!newProgress[day]) {
+            newProgress[day] = {};
+        }
+        if (!newProgress[day][exerciseName]) {
+            newProgress[day][exerciseName] = {};
+        }
+        if (!newProgress[day][exerciseName][setIndex]) {
+            newProgress[day][exerciseName][setIndex] = { weight: '', reps: '', completed: false };
+        }
+        (newProgress[day][exerciseName][setIndex] as any)[field] = value;
+      
+        if (userEmail) {
+            localStorage.setItem(`progress_${userEmail}`, JSON.stringify(newProgress));
+        }
+        return newProgress;
     });
-  };
+};
 
 
   const renderPlanContent = () => {

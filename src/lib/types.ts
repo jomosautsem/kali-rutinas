@@ -1,6 +1,7 @@
 
 import { z } from "zod";
 
+// This type is now deprecated for plan generation, but kept for client-side progress tracking.
 export const SetSchema = z.object({
   id: z.string(),
   reps: z.string().describe('El número objetivo de repeticiones para esta serie.'),
@@ -11,7 +12,8 @@ export type Set = z.infer<typeof SetSchema>;
 
 export const ExerciseSchema = z.object({
   name: z.string().describe('El nombre del ejercicio.'),
-  sets: z.array(SetSchema).describe('Las series a realizar para este ejercicio.'),
+  series: z.string().describe('El número de series a realizar, ej., "4".'),
+  reps: z.string().describe('El rango de repeticiones objetivo, ej., "8-12".'),
   rest: z.string().describe('El tiempo de descanso entre series, ej., "60s".'),
   mediaUrl: z.string().describe('URL a una imagen o video del ejercicio. Puede ser una cadena vacía.'),
 });

@@ -46,7 +46,7 @@ const prompt = ai.definePrompt({
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
 
-  Para cada ejercicio, crea un número apropiado de series (generalmente de 3 a 5 series por ejercicio, dependiendo de la intensidad y el objetivo). Asigna repeticiones objetivo a cada serie (por ejemplo, "8-12 reps").
+  Para cada ejercicio, especifica las series y las repeticiones en los campos 'series' y 'reps' respectivamente. Por ejemplo, series: "4", reps: "8-12".
   
   MUY IMPORTANTE: Para cada ejercicio en el plan, debes usar la herramienta 'searchExerciseVideo' para encontrar un video del ejercicio y agregar la URL en el campo 'mediaUrl'. NO dejes el campo 'mediaUrl' vacío. La URL devuelta será una URL de búsqueda de youtube, está bien.
   
@@ -76,25 +76,20 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
       throw new Error("La IA no pudo generar un plan.");
     }
     
-    // Post-procesamiento para asegurar que cada serie tenga un ID único
-    const planWithSetIds: GeneratePersonalizedTrainingPlanOutput = {
+    // Post-procesamiento para asegurar que los ejercicios tengan valores por defecto si faltan
+    const sanitizedPlan: GeneratePersonalizedTrainingPlanOutput = {
       ...output,
       weeklyPlan: output.weeklyPlan.map(day => ({
         ...day,
         exercises: day.exercises.map(exercise => ({
           ...exercise,
-          // Asegurarse de que `sets` sea un array antes de mapear
-          sets: Array.isArray(exercise.sets) 
-            ? exercise.sets.map(set => ({
-                ...set,
-                id: `set-${Math.random().toString(36).substr(2, 9)}`,
-              }))
-            // Si `sets` no es un array (caso anómalo de la IA), crear un array por defecto
-            : [{ id: `set-${Math.random().toString(36).substr(2, 9)}`, reps: "10", weight: "", completed: false }],
+          series: exercise.series || "3", // Valor por defecto para series
+          reps: exercise.reps || "10-12", // Valor por defecto para reps
+          mediaUrl: exercise.mediaUrl || "",
         })),
       })),
     };
 
-    return planWithSetIds;
+    return sanitizedPlan;
   }
 );
