@@ -9,11 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 
 // In a real app, this data would be fetched from your database.
 const initialMockUsers: User[] = [
-  { id: "user_2klj3h5g", name: "Alice Johnson", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado", inviteCode: "AJ23" },
-  { id: "user_9fj4kew8", name: "Bob Williams", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan", inviteCode: "BW45" },
-  { id: "user_1mnb2vcs", name: "Charlie Brown", email: "charlie@example.com", role: "client", status: "pendiente", registeredAt: "2023-10-05", planStatus: "sin-plan" },
-  { id: "user_admin_01", name: "Diana Prince", email: "kalicentrodeportivotemixco@gmail.com", role: "admin", status: "activo", registeredAt: "2023-01-15", planStatus: "n/a" },
-  { id: "user_p0o9i8uy", name: "Ethan Hunt", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan" },
+  { id: `user-${Math.random().toString(36).substr(2, 9)}`, name: "Alice Johnson", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado", inviteCode: "AJ23" },
+  { id: `user-${Math.random().toString(36).substr(2, 9)}`, name: "Bob Williams", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan", inviteCode: "BW45" },
+  { id: `user-${Math.random().toString(36).substr(2, 9)}`, name: "Charlie Brown", email: "charlie@example.com", role: "client", status: "pendiente", registeredAt: "2023-10-05", planStatus: "sin-plan" },
+  { id: `user-${Math.random().toString(36).substr(2, 9)}`, name: "Diana Prince", email: "kalicentrodeportivotemixco@gmail.com", role: "admin", status: "activo", registeredAt: "2023-01-15", planStatus: "n/a" },
+  { id: `user-${Math.random().toString(36).substr(2, 9)}`, name: "Ethan Hunt", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan" },
 ];
 
 export default function AdminUsersPage() {
@@ -42,7 +42,7 @@ export default function AdminUsersPage() {
   const handleAddUser = (newUser: Omit<User, 'id' | 'role' | 'status' | 'registeredAt' | 'planStatus'>) => {
     const userWithDefaults: User = {
         ...newUser,
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         role: "client",
         status: "activo",
         registeredAt: new Date().toISOString().split("T")[0],
