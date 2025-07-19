@@ -8,7 +8,7 @@ import { ExerciseProgressChart } from "@/components/progress/exercise-progress-c
 import { PersonalRecords } from "@/components/progress/personal-records";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { BarChart } from "lucide-react";
+import { BarChart, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -40,7 +40,10 @@ export default function ProgressPage() {
     if (loading) {
         return (
             <div className="space-y-6">
-                <Skeleton className="h-9 w-64" />
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-9 w-64" />
+                    <Skeleton className="h-10 w-36" />
+                </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                    <Skeleton className="h-40 rounded-lg" />
                    <Skeleton className="h-40 rounded-lg" />
@@ -69,9 +72,17 @@ export default function ProgressPage() {
     
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Tu Progreso General</h1>
-                <p className="text-muted-foreground">Analiza tus datos para seguir mejorando.</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">Tu Progreso General</h1>
+                    <p className="text-muted-foreground">Analiza tus datos para seguir mejorando.</p>
+                </div>
+                <Button asChild variant="outline">
+                    <Link href="/dashboard">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Volver al Panel
+                    </Link>
+                </Button>
             </div>
 
             <PersonalRecords plan={userPlan} progress={progressData} />
