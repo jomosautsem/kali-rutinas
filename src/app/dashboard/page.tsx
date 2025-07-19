@@ -30,6 +30,17 @@ const getYoutubeVideoId = (url: string): string | null => {
     return (match && match[2].length === 11) ? match[2] : null;
 }
 
+const isYoutubeSearchUrl = (url: string) => {
+    if (!url) return false;
+    try {
+        const urlObj = new URL(url);
+        return urlObj.hostname.includes('youtube.com') && urlObj.pathname.includes('/results');
+    } catch (e) {
+        return false;
+    }
+}
+
+
 const MediaDisplay = ({ url, alt }: { url: string, alt: string }) => {
     if (!url) {
         return (
@@ -88,6 +99,10 @@ const MediaPreview = ({ url, alt, onPreviewClick }: { url: string, alt: string, 
                 <div className="w-full h-full flex items-center justify-center bg-black">
                     <Youtube className="h-10 w-10 text-white" />
                 </div>
+            ) : isYoutubeSearchUrl(url) ? (
+                <div className="w-full h-full flex items-center justify-center bg-red-900/50">
+                    <Youtube className="h-10 w-10 text-white" />
+                </div>
             ) : (
                 <Image src={url} alt={alt} fill className="object-cover" data-ai-hint="fitness exercise"/>
             )}
@@ -115,6 +130,10 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay }: { plan: UserPlan; co
     const [selectedMedia, setSelectedMedia] = useState<{ url: string; name: string } | null>(null);
 
     const handlePreviewClick = (exercise: Exercise) => {
+        if (isYoutubeSearchUrl(exercise.mediaUrl)) {
+             window.open(exercise.mediaUrl, '_blank');
+             return;
+        }
         setSelectedMedia({ url: exercise.mediaUrl, name: exercise.name });
         setIsModalOpen(true);
     };
@@ -410,5 +429,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
