@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -94,6 +95,7 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
               <TableHead>Usuario</TableHead>
               <TableHead>Rol</TableHead>
               <TableHead>Estado Usuario</TableHead>
+              <TableHead>KaliCodigo</TableHead>
               <TableHead>Estado del Plan</TableHead>
               <TableHead>Registrado</TableHead>
               <TableHead>
@@ -120,6 +122,9 @@ export function UserTableClient({ users, onDeleteUser, onSaveAndApprovePlan, onA
                   )}>
                     {user.status === 'activo' ? 'Activo' : 'Pendiente'}
                   </Badge>
+                </TableCell>
+                 <TableCell>
+                  <span className="font-mono text-xs">{user.inviteCode || "-"}</span>
                 </TableCell>
                 <TableCell>
                     {(() => {
