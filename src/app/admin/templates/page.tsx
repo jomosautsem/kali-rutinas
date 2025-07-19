@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock data structure now includes a full UserPlan
-type Template = {
+// The full template object type
+export type Template = {
     id: string;
     title: string;
     description: string;
@@ -82,7 +82,7 @@ export default function AdminTemplatesPage() {
     const { toast } = useToast();
 
     const handleCreateClick = () => {
-        setSelectedTemplate(null);
+        setSelectedTemplate(null); // No template is selected, so we are creating a new one
         setIsEditorOpen(true);
     };
 
@@ -91,24 +91,20 @@ export default function AdminTemplatesPage() {
         setIsEditorOpen(true);
     };
 
-    const handleSaveTemplate = (plan: UserPlan) => {
+    const handleSaveTemplate = (templateData: Template) => {
         if (selectedTemplate) {
             // Editing existing template
             const updatedTemplates = templates.map(t =>
-                t.id === selectedTemplate.id ? { ...selectedTemplate, plan: plan } : t
+                t.id === templateData.id ? { ...templateData, days: templateData.plan.weeklyPlan.length } : t
             );
             setTemplates(updatedTemplates);
-            toast({ title: "Plantilla Actualizada", description: `Se guardaron los cambios para "${selectedTemplate.title}".` });
+            toast({ title: "Plantilla Actualizada", description: `Se guardaron los cambios para "${templateData.title}".` });
         } else {
-            // In a real app, you would ask for title, description, etc.
-            // For now, creating a new "manual" template with a default structure.
+            // Creating a new template
             const newTemplate: Template = {
+                ...templateData,
                 id: `template-${Date.now()}`,
-                title: "Plantilla Manual Nueva",
-                description: "Descripción de la nueva plantilla manual.",
-                level: "Principiante",
-                days: plan.weeklyPlan.length,
-                plan: plan,
+                days: templateData.plan.weeklyPlan.length,
             };
             setTemplates(prev => [...prev, newTemplate]);
             toast({ title: "Plantilla Creada", description: "La nueva plantilla manual ha sido añadida." });
@@ -159,7 +155,7 @@ export default function AdminTemplatesPage() {
                         <CardContent className="flex-grow space-y-2">
                              <div className="flex items-center text-sm text-muted-foreground">
                                 <Calendar className="mr-2 h-4 w-4" />
-                                <span>{template.days} días por semana</span>
+                                <span>{template.plan.weeklyPlan.length} días por semana</span>
                             </div>
                         </CardContent>
                         <CardFooter className="gap-2">
@@ -203,7 +199,7 @@ export default function AdminTemplatesPage() {
                 isOpen={isEditorOpen}
                 onClose={() => setIsEditorOpen(false)}
                 onSave={handleSaveTemplate}
-                initialData={selectedTemplate?.plan}
+                initialData={selectedTemplate}
             />
         </div>
     )
