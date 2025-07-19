@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { SetbackReporter } from "@/components/setback-reporter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 
 
 const isVideo = (url: string) => {
@@ -126,12 +127,13 @@ const dayButtonColors = [
     "bg-teal-500/80 hover:bg-teal-500",
 ]
 
-const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressChange }: { 
+const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressChange, onSaveChanges }: { 
     plan: UserPlan; 
     completedDays: string[]; 
     onToggleDay: (day: string) => void;
     progress: ProgressData;
     onProgressChange: (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => void;
+    onSaveChanges: () => void;
 }) => {
     const [activeDayIndex, setActiveDayIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -274,6 +276,12 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                             )
                                         })}
                                     </div>
+                                    <div className="flex justify-end pt-4">
+                                        <Button onClick={onSaveChanges}>
+                                            <Save className="mr-2 h-4 w-4" />
+                                            Guardar Avances del Día
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -370,6 +378,7 @@ export default function DashboardPage() {
   const [completedDays, setCompletedDays] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     // This simulates fetching the current user's plan status after they log in.
@@ -446,13 +455,19 @@ export default function DashboardPage() {
             newProgress[day][exerciseName][setIndex] = { weight: '', reps: '', completed: false };
         }
         (newProgress[day][exerciseName][setIndex] as any)[field] = value;
-      
-        if (userEmail) {
-            localStorage.setItem(`progress_${userEmail}`, JSON.stringify(newProgress));
-        }
         return newProgress;
     });
-};
+  };
+
+  const handleSaveChanges = () => {
+    if (userEmail) {
+        localStorage.setItem(`progress_${userEmail}`, JSON.stringify(progress));
+        toast({
+            title: "¡Progreso Guardado!",
+            description: "Tus avances han sido registrados correctamente.",
+        });
+    }
+  };
 
 
   const renderPlanContent = () => {
@@ -461,7 +476,7 @@ export default function DashboardPage() {
     }
     switch(planStatus) {
       case 'aprobado':
-        return userPlan ? <PlanAprobado plan={userPlan} completedDays={completedDays} onToggleDay={handleToggleDay} progress={progress} onProgressChange={handleProgressChange} /> : <p>Cargando plan...</p>;
+        return userPlan ? <PlanAprobado plan={userPlan} completedDays={completedDays} onToggleDay={handleToggleDay} progress={progress} onProgressChange={handleProgressChange} onSaveChanges={handleSaveChanges} /> : <p>Cargando plan...</p>;
       case 'pendiente':
         return <PlanPendiente />;
       case 'sin-plan':
