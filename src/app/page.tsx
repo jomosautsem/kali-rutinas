@@ -53,14 +53,14 @@ const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <path d="M12.52.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-1.06-.63-1.9-1.47-2.46-2.51-1.86-3.31-.31-7.36 2.45-9.63 1.1-1.02 2.37-1.57 3.72-1.82 1.23-.26 2.48-.25 3.71-.25v4.03c-1.11 0-2.22-.02-3.33-.02-1.35.08-2.67.68-3.52 1.61-1.14 1.23-1.04 3.04.23 4.16.65.57 1.43.9 2.27.99 1.02.12 2.05-.15 2.93-.66.97-.6 1.6-1.47 1.9-2.52.34-1.21.34-2.45.34-3.68v-4.03H12.52z"/>
     </svg>
 );
 
 
 const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
     </svg>
 );
@@ -185,7 +185,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="w-full py-8 border-t border-border/50 bg-background z-10">
+      <footer className="w-full py-8 border-t border-border/50 bg-gradient-to-r from-slate-900 via-zinc-800 to-slate-900 z-10">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
                 <Logo className="h-12 w-12" width={48} height={48} />
