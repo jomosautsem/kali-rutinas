@@ -16,6 +16,7 @@ export async function generatePersonalizedTrainingPlan(
 
 const prompt = ai.definePrompt({
   name: 'generatePersonalizedTrainingPlanPrompt',
+  model: 'googleai/gemini-2.0-flash',
   input: {schema: GeneratePersonalizedTrainingPlanInputSchema},
   output: {schema: GeneratePersonalizedTrainingPlanOutputSchema},
   prompt: `Eres un entrenador personal que se especializa en crear planes de entrenamiento personalizados y detallados.

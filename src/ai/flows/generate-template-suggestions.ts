@@ -34,6 +34,7 @@ export async function generateTemplateSuggestions(input: GenerateTemplateSuggest
 
 const prompt = ai.definePrompt({
   name: 'generateTemplateSuggestionsPrompt',
+  model: 'googleai/gemini-2.0-flash',
   input: {schema: GenerateTemplateSuggestionsInputSchema},
   output: {schema: GenerateTemplateSuggestionsOutputSchema},
   prompt: `Eres un generador experto de plantillas de planes de entrenamiento.

@@ -18,6 +18,7 @@ export async function generateMotivation(input: GenerateMotivationInput): Promis
 
 const prompt = ai.definePrompt({
   name: 'generateMotivationPrompt',
+  model: 'googleai/gemini-2.0-flash',
   input: { schema: GenerateMotivationInputSchema },
   output: { schema: GenerateMotivationOutputSchema },
   prompt: `Eres un entrenador personal y coach motivacional empático y positivo. Un usuario no pudo completar su entrenamiento y necesita un consejo y una dosis de motivación.

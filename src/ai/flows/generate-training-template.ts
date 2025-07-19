@@ -18,6 +18,7 @@ export async function generateTrainingTemplate(input: GenerateTrainingTemplateIn
 
 const prompt = ai.definePrompt({
   name: 'generateTrainingTemplatePrompt',
+  model: 'googleai/gemini-2.0-flash',
   input: { schema: GenerateTrainingTemplateInputSchema },
   output: { schema: UserPlanSchema },
   prompt: `Eres un entrenador personal experto en crear plantillas de planes de entrenamiento genéricos pero efectivos que puedan ser usados por múltiples personas.
