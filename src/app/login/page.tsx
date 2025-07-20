@@ -40,7 +40,7 @@ export default function LoginPage() {
       })
       sessionStorage.setItem("loggedInUser", email);
       router.push("/admin/dashboard")
-      return;
+      return; // Stop execution here for admin
     }
 
     // If not admin, proceed with client login logic
@@ -153,3 +153,4 @@ export default function LoginPage() {
     </AuthCard>
   )
 }
+
