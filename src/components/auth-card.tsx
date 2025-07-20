@@ -22,7 +22,7 @@ export function AuthCard({ title, description, children, footer }: AuthCardProps
         style={{
           backgroundImage: `
             radial-gradient(circle at 15% 30%, hsla(var(--primary) / 0.1), transparent 30%),
-            radial-gradient(circle at 85% 65%, hsla(var(--primary) / 0.1), transparent 40%)
+            radial-gradient(circle at 85% 65%, hsla(var(--accent) / 0.1), transparent 40%)
           `,
         }}
       ></div>

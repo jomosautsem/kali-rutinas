@@ -49,13 +49,13 @@ type TemplateEditorProps = {
 };
 
 const dayButtonColors = [
-    "bg-red-500/80 hover:bg-red-500",
-    "bg-blue-500/80 hover:bg-blue-500",
-    "bg-green-500/80 hover:bg-green-500",
-    "bg-purple-500/80 hover:bg-purple-500",
+    "bg-purple-600/80 hover:bg-purple-600",
+    "bg-fuchsia-600/80 hover:bg-fuchsia-600",
+    "bg-pink-600/80 hover:bg-pink-600",
+    "bg-rose-600/80 hover:bg-rose-600",
+    "bg-red-600/80 hover:bg-red-600",
     "bg-orange-500/80 hover:bg-orange-500",
-    "bg-pink-500/80 hover:bg-pink-500",
-    "bg-teal-500/80 hover:bg-teal-500",
+    "bg-amber-500/80 hover:bg-amber-500",
 ];
 
 export function TemplateEditor({ isOpen, onClose, onSave, initialData }: TemplateEditorProps) {

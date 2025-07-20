@@ -122,13 +122,13 @@ const MediaPreview = ({ url, alt, onPreviewClick }: { url: string, alt: string, 
 
 
 const dayButtonColors = [
-    "bg-primary/80 hover:bg-primary",
-    "bg-blue-500/80 hover:bg-blue-500",
-    "bg-green-500/80 hover:bg-green-500",
-    "bg-purple-500/80 hover:bg-purple-500",
+    "bg-purple-600/80 hover:bg-purple-600",
+    "bg-fuchsia-600/80 hover:bg-fuchsia-600",
+    "bg-pink-600/80 hover:bg-pink-600",
+    "bg-rose-600/80 hover:bg-rose-600",
+    "bg-red-600/80 hover:bg-red-600",
     "bg-orange-500/80 hover:bg-orange-500",
-    "bg-pink-500/80 hover:bg-pink-500",
-    "bg-teal-500/80 hover:bg-teal-500",
+    "bg-amber-500/80 hover:bg-amber-500",
 ]
 
 const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressChange, onSaveChanges, user }: { 
@@ -187,7 +187,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                     type="button"
                                     onClick={() => setActiveDayIndex(index)}
                                     className={cn(
-                                        "text-primary-foreground transition-all",
+                                        "text-white transition-all",
                                         activeDayIndex === index 
                                             ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
                                             : "bg-gray-600/50 hover:bg-gray-600",

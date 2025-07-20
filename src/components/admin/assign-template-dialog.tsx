@@ -131,5 +131,3 @@ export function AssignTemplateDialog({ user, templates, isOpen, onClose, onAssig
     </Dialog>
   );
 }
-
-    
