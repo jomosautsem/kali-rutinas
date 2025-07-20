@@ -182,7 +182,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                         const Icon = planConfig.icon;
                         return (
                             <Badge variant="outline" className={cn("gap-1.5", planConfig.className)}>
-                                <Icon className="h-3 w-3" />
+                                {user.planStatus !== 'sin-plan' && user.planStatus !== 'n/a' && <Icon className="h-3 w-3" />}
                                 {planConfig.label}
                             </Badge>
                         )
@@ -311,10 +311,10 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
         />
       )}
       
-      {selectedUser && selectedUserProgress && (
+      {selectedUser && data?.progress && (
         <ProgressAnalytics
           user={selectedUser}
-          data={selectedUserProgress}
+          data={{ progress: data.progress, plan: data.plan }}
           isOpen={isAnalyticsOpen}
           onClose={() => setIsAnalyticsOpen(false)}
         />
@@ -334,5 +334,3 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     </>
   )
 }
-
-    
