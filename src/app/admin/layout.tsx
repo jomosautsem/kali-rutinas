@@ -36,7 +36,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-background relative">
+        <div className="aurora-bg"></div>
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2 justify-center group-data-[collapsible=icon]:justify-start">
@@ -81,8 +82,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarContent>
         </Sidebar>
-        <div className="flex flex-col w-full">
-           <header className="flex h-16 items-center justify-between border-b bg-card/50 backdrop-blur-sm px-4 md:px-6 sticky top-0 z-40">
+        <div className="flex flex-col w-full z-10">
+           <header className="flex h-16 items-center justify-between border-b border-border/50 bg-card/50 backdrop-blur-sm px-4 md:px-6 sticky top-0 z-40">
                 <div className="md:hidden">
                     <SidebarTrigger />
                 </div>
@@ -90,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <DashboardHeader user={mockUser} />
                 </div>
             </header>
-          <main className="flex-1 overflow-auto p-4 md:p-8 bg-background">
+          <main className="flex-1 overflow-auto p-4 md:p-8">
             {children}
           </main>
         </div>

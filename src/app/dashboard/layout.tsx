@@ -40,8 +40,9 @@ export default function DashboardLayout({
   const displayUser = user || mockUser;
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
-       <header className="flex h-16 items-center justify-end border-b bg-card/50 backdrop-blur-sm px-4 md:px-6 sticky top-0 z-40">
+    <div className="min-h-screen w-full flex flex-col relative">
+      <div className="aurora-bg"></div>
+       <header className="flex h-16 items-center justify-end border-b border-border/50 bg-card/50 backdrop-blur-sm px-4 md:px-6 sticky top-0 z-40">
         {loading ? (
             <div className="flex items-center gap-4">
               <Skeleton className="h-10 w-10 rounded-full" />
@@ -50,7 +51,7 @@ export default function DashboardLayout({
           <DashboardHeader user={displayUser} />
         )}
       </header>
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 bg-background">
+      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 z-10">
         {children}
       </main>
     </div>

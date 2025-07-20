@@ -1,9 +1,13 @@
+
+"use client"
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { ArrowRight, BarChart2, Sparkles, UserCheck, Instagram } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 const features = [
     {
@@ -66,19 +70,37 @@ const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function Home() {
-  return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
-      <div
-        className="absolute inset-0 z-0 opacity-10"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 15% 30%, hsl(var(--primary)), transparent 40%),
-            radial-gradient(circle at 85% 65%, hsl(var(--primary)), transparent 40%)
-          `,
-        }}
-      ></div>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
-      <header className="px-4 lg:px-6 h-20 flex items-center z-10 bg-background/80 backdrop-blur-sm sticky top-0 border-b border-border/50">
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+      },
+    },
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden relative">
+      <div className="aurora-bg"></div>
+
+      <motion.header 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="px-4 lg:px-6 h-20 flex items-center z-10 bg-background/30 backdrop-blur-lg sticky top-0 border-b border-border/50">
         <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
           <Logo className="h-12 w-12 text-primary" width={48} height={48} />
           <span className="font-bold text-lg font-headline">Dojo Dynamics</span>
@@ -95,96 +117,121 @@ export default function Home() {
             </Link>
           </Button>
         </nav>
-      </header>
+      </motion.header>
 
       <main className="flex-1 z-10">
         {/* Hero Section */}
-        <section className="flex flex-col items-center justify-center text-center px-4 py-20 md:py-32">
-            <div className="relative mb-8">
-                <div className="absolute -top-12 -left-1/2 w-[200%] h-[200%] bg-primary/10 blur-3xl rounded-full animate-pulse-slow"></div>
+        <motion.section 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center justify-center text-center px-4 py-20 md:py-32">
+            <motion.div variants={itemVariants} className="relative mb-8">
                 <div className="relative flex items-center justify-center w-32 h-32 md:w-40 md:h-40">
                     <Logo className="h-full w-full" width={160} height={160} />
                 </div>
-            </div>
+            </motion.div>
 
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl font-headline"
+            <motion.h1 
+                variants={itemVariants}
+                className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl font-headline"
                 style={{ textShadow: '0 0 30px hsla(var(--primary) / 0.5)' }}>
               Forja tu Mejor Versión
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg text-muted-foreground">
+            </motion.h1>
+            <motion.p 
+                variants={itemVariants}
+                className="mt-6 max-w-3xl text-lg text-muted-foreground">
               Planes de entrenamiento inteligentes y personalizados por Kali Gym e impulsados por nuestra IA.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
+            </motion.p>
+            <motion.div 
+                variants={itemVariants}
+                className="mt-10 flex flex-col sm:flex-row items-center gap-4">
                 <Button asChild size="lg" className="font-bold text-base shadow-lg shadow-primary/30">
                     <Link href="/register">
                         Comienza tu Transformación <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                 </Button>
-            </div>
-        </section>
+            </motion.div>
+        </motion.section>
 
         {/* Features Section */}
-        <section id="features" className="py-16 md:py-24 bg-card/50">
-            <div className="container mx-auto px-4">
-                <div className="max-w-3xl mx-auto text-center">
+        <section id="features" className="py-16 md:py-24 bg-card/50 backdrop-blur-sm">
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              className="container mx-auto px-4">
+                <motion.div variants={itemVariants} className="max-w-3xl mx-auto text-center">
                     <h2 className="text-3xl font-bold font-headline sm:text-4xl">Tu Gimnasio, Más Inteligente</h2>
                     <p className="mt-4 text-muted-foreground">
                         Combinamos tecnología de punta con la supervisión de expertos para darte la mejor experiencia de entrenamiento.
                     </p>
-                </div>
-                <div className="mt-12 grid gap-8 md:grid-cols-3">
+                </motion.div>
+                <motion.div 
+                  variants={containerVariants}
+                  className="mt-12 grid gap-8 md:grid-cols-3">
                     {features.map((feature, index) => (
-                        <div key={index} className="flex flex-col items-center text-center p-6">
+                        <motion.div variants={itemVariants} key={index} className="flex flex-col items-center text-center p-6">
                             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-6">
                                 {feature.icon}
                             </div>
                             <h3 className="text-xl font-semibold font-headline">{feature.title}</h3>
                             <p className="mt-2 text-muted-foreground">{feature.description}</p>
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </section>
 
         {/* Testimonials Section */}
         <section id="testimonials" className="py-16 md:py-24">
-            <div className="container mx-auto px-4">
-                <div className="max-w-3xl mx-auto text-center">
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              className="container mx-auto px-4">
+                <motion.div variants={itemVariants} className="max-w-3xl mx-auto text-center">
                     <h2 className="text-3xl font-bold font-headline sm:text-4xl">Lo que dicen nuestros atletas</h2>
                      <p className="mt-4 text-muted-foreground">
                         Historias reales de personas que están alcanzando sus metas con Dojo Dynamics.
                     </p>
-                </div>
-                <div className="mt-12 grid gap-8 md:grid-cols-1 lg:grid-cols-3">
+                </motion.div>
+                <motion.div 
+                  variants={containerVariants}
+                  className="mt-12 grid gap-8 md:grid-cols-1 lg:grid-cols-3">
                     {testimonials.map((testimonial, index) => (
-                        <Card key={index} className="bg-card border-border/50">
-                            <CardContent className="p-6 flex flex-col justify-between h-full">
-                                <blockquote className="text-lg italic border-l-2 border-primary pl-4">
-                                    "{testimonial.quote}"
-                                </blockquote>
-                                <div className="mt-6 flex items-center gap-4">
-                                    <Image 
-                                        src={testimonial.avatar} 
-                                        alt={testimonial.name}
-                                        width={48}
-                                        height={48}
-                                        className="rounded-full"
-                                        data-ai-hint="person face"
-                                    />
-                                    <div>
-                                        <p className="font-semibold">{testimonial.name}</p>
-                                        <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                        <motion.div variants={itemVariants} key={index}>
+                            <Card className="bg-card/50 backdrop-blur-sm border-border/50 h-full">
+                                <CardContent className="p-6 flex flex-col justify-between h-full">
+                                    <blockquote className="text-lg italic border-l-2 border-primary pl-4">
+                                        "{testimonial.quote}"
+                                    </blockquote>
+                                    <div className="mt-6 flex items-center gap-4">
+                                        <Image 
+                                            src={testimonial.avatar} 
+                                            alt={testimonial.name}
+                                            width={48}
+                                            height={48}
+                                            className="rounded-full"
+                                            data-ai-hint="person face"
+                                        />
+                                        <div>
+                                            <p className="font-semibold">{testimonial.name}</p>
+                                            <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
                     ))}
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </section>
       </main>
 
-      <footer className="w-full py-8 border-t border-border/50 bg-card/50 z-10">
+      <footer className="w-full py-8 border-t border-border/50 bg-card/30 backdrop-blur-sm z-10">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
                 <Logo className="h-10 w-10 text-primary" width={40} height={40} />

@@ -2,78 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
-    --background: 0 0% 4%;
-    --foreground: 60 90% 98%;
-    --card: 0 0% 8%;
-    --card-foreground: 60 90% 98%;
-    --popover: 0 0% 4%;
-    --popover-foreground: 60 90% 98%;
-    --primary: 48 96% 53%;
-    --primary-foreground: 48 96% 10%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 60 90% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 25%;
-    --accent-foreground: 60 90% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 60 90% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 48 96% 53%;
+    --radius: 0.75rem;
     --chart-1: 48 96% 53%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 330 90% 65%;
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 60 90% 98%;
-    --sidebar-primary: 48 96% 53%;
-    --sidebar-primary-foreground: 48 96% 10%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 60 90% 98%;
-    --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 48 96% 53%;
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 60 90% 98%;
-    --card: 0 0% 8%;
-    --card-foreground: 60 90% 98%;
-    --popover: 0 0% 4%;
-    --popover-foreground: 60 90% 98%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    
+    --card: 240 4% 10% / 0.75;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    
     --primary: 48 96% 53%;
     --primary-foreground: 48 96% 10%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 60 90% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 25%;
-    --accent-foreground: 60 90% 98%;
+    
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 60 90% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
     --ring: 48 96% 53%;
-    --chart-1: 48 96% 53%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 330 90% 65%;
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 60 90% 98%;
+
+    --sidebar-background: 240 4% 10% / 0.75;
+    --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 48 96% 53%;
     --sidebar-primary-foreground: 48 96% 10%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 60 90% 98%;
-    --sidebar-border: 0 0% 15%;
+    --sidebar-accent: 240 4% 15% / 0.9;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 48 96% 53%;
   }
 }
@@ -84,5 +58,53 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  .aurora-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      overflow: hidden;
+      background-color: hsl(var(--background));
+  }
+
+  .aurora-bg::before,
+  .aurora-bg::after {
+      content: '';
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.15;
+      pointer-events: none;
+  }
+
+  .aurora-bg::before {
+      background-color: hsl(var(--primary));
+      top: -20%;
+      left: -30%;
+      animation: aurora-glow1 15s infinite alternate;
+  }
+
+  .aurora-bg::after {
+      background-color: hsl(220, 96%, 53%); /* Blue accent */
+      bottom: -20%;
+      right: -30%;
+      animation: aurora-glow2 17s infinite alternate;
+  }
+}
+
+@keyframes aurora-glow1 {
+  0% { transform: translate(-20%, 10%) scale(1); }
+  100% { transform: translate(20%, -10%) scale(1.2); }
+}
+
+@keyframes aurora-glow2 {
+  0% { transform: translate(20%, -10%) scale(1); }
+  100% { transform: translate(-20%, 10%) scale(1.2); }
 }

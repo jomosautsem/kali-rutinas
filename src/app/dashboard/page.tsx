@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlanDownloader } from "@/components/plan-downloader";
+import { motion } from "framer-motion";
 
 
 const isVideo = (url: string) => {
@@ -179,18 +180,17 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
 
                 {plan.weeklyPlan.length > 0 && (
                      <div className="space-y-4">
-                        <div className="flex flex-wrap items-center gap-2 border-b pb-4">
+                        <div className="flex flex-wrap items-center gap-2 border-b border-border/50 pb-4">
                             {plan.weeklyPlan.map((dayPlan, index) => (
                                 <Button
                                     key={index}
                                     type="button"
+                                    variant={activeDayIndex === index ? 'default' : 'secondary'}
                                     onClick={() => setActiveDayIndex(index)}
                                     className={cn(
                                         "transition-all",
-                                        activeDayIndex === index 
-                                            ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
-                                            : "bg-gray-600/50 hover:bg-gray-600 text-white",
-                                         completedDays.includes(dayPlan.day) && "ring-2 ring-offset-2 ring-offset-background ring-green-400"
+                                        activeDayIndex === index && "scale-105",
+                                        completedDays.includes(dayPlan.day) && "ring-2 ring-offset-2 ring-offset-background ring-green-400"
                                     )}
                                 >
                                     {completedDays.includes(dayPlan.day) && <Check className="mr-2 h-5 w-5" />}
@@ -204,7 +204,13 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                         </div>
 
                         {plan.weeklyPlan.map((dayPlan, index) => (
-                           <div key={index} className={cn(activeDayIndex === index ? "block" : "hidden")}>
+                           <motion.div 
+                              key={index} 
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: activeDayIndex === index ? 1 : 0 }}
+                              transition={{ duration: 0.3 }}
+                              className={cn(activeDayIndex === index ? "block" : "hidden")}
+                            >
                                <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
                                     <div className="flex items-center justify-between gap-4">
                                       <div className="flex-1">
@@ -311,7 +317,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                         </Button>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 )}
@@ -368,7 +374,7 @@ const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; comp
                         stroke="currentColor"
                         strokeWidth="3"
                     />
-                    <path
+                    <motion.path
                         className={cn(allDaysCompleted ? "text-green-500" : "text-primary")}
                         d="M18 2.0845
                           a 15.9155 15.9155 0 0 1 0 31.831
@@ -376,8 +382,10 @@ const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; comp
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="3"
-                        strokeDasharray={`${progressPercentage}, 100`}
                         strokeLinecap="round"
+                        initial={{ strokeDasharray: `0, 100` }}
+                        animate={{ strokeDasharray: `${progressPercentage}, 100` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
                     />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -408,6 +416,28 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+      },
+    },
+  };
 
   useEffect(() => {
     // This simulates fetching the current user's plan status after they log in.
@@ -517,8 +547,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <>
-      <div className="flex items-center justify-between">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
         {user ? (
           <h1 className="text-2xl md:text-3xl font-bold font-headline">
             Bienvenido, <span className="text-primary">{user.firstName}</span>
@@ -529,68 +564,70 @@ export default function DashboardPage() {
         {planStatus !== 'pendiente' && (
           <PlanGenerator onPlanGenerated={handlePlanGenerated} />
         )}
-      </div>
+      </motion.div>
       
-      <Tabs defaultValue="plan">
-        <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="plan">Tu Plan Semanal</TabsTrigger>
-            <TabsTrigger value="progress">Resumen de Progreso</TabsTrigger>
-        </TabsList>
-        <TabsContent value="plan">
-             <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">Tu Plan de Entrenamiento</CardTitle>
-                    <CardDescription>
-                        {planStatus === 'aprobado' 
-                            ? "Este es tu horario de entrenamiento personalizado para la semana."
-                            : "Tu plan de entrenamiento aparecerá aquí una vez que sea aprobado."
-                        }
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="px-2 md:px-6">
-                    {renderPlanContent()}
-                </CardContent>
-            </Card>
-        </TabsContent>
-        <TabsContent value="progress">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">Tu Progreso</CardTitle>
-                    <CardDescription>
-                        Visualiza tus logros y mantente motivado.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {planStatus === 'aprobado' && userPlan ? (
-                         <div className="grid gap-6 md:grid-cols-2">
-                            <div className="h-[400px] flex items-center justify-center">
-                                <ProgressSummary 
-                                    totalDays={userPlan.weeklyPlan.length} 
-                                    completedDays={completedDays.length}
-                                />
-                             </div>
-                             <div className="md:col-span-1 flex flex-col items-center justify-center p-8 text-center bg-secondary/50 rounded-lg">
-                                <h3 className="text-xl font-semibold">Analiza tu Rendimiento</h3>
-                                <p className="text-muted-foreground mt-2 mb-4 max-w-md">
-                                    Explora gráficos detallados y descubre tus récords personales para optimizar tu entrenamiento.
-                                </p>
-                                <Button asChild>
-                                    <Link href="/dashboard/progress">
-                                        <TrendingUp className="mr-2 h-5 w-5" />
-                                        Ver mi Progreso Detallado
-                                    </Link>
-                                </Button>
-                             </div>
-                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-64 text-center">
-                            <p className="text-muted-foreground">Tu progreso aparecerá aquí una vez que empieces a entrenar.</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </TabsContent>
-      </Tabs>
-    </>
+      <motion.div variants={itemVariants}>
+        <Tabs defaultValue="plan">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="plan">Tu Plan Semanal</TabsTrigger>
+                <TabsTrigger value="progress">Resumen de Progreso</TabsTrigger>
+            </TabsList>
+            <TabsContent value="plan">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline">Tu Plan de Entrenamiento</CardTitle>
+                        <CardDescription>
+                            {planStatus === 'aprobado' 
+                                ? "Este es tu horario de entrenamiento personalizado para la semana."
+                                : "Tu plan de entrenamiento aparecerá aquí una vez que sea aprobado."
+                            }
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="px-2 md:px-6">
+                        {renderPlanContent()}
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="progress">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline">Tu Progreso</CardTitle>
+                        <CardDescription>
+                            Visualiza tus logros y mantente motivado.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {planStatus === 'aprobado' && userPlan ? (
+                            <div className="grid gap-6 md:grid-cols-2">
+                                <div className="h-[400px] flex items-center justify-center">
+                                    <ProgressSummary 
+                                        totalDays={userPlan.weeklyPlan.length} 
+                                        completedDays={completedDays.length}
+                                    />
+                                </div>
+                                <div className="md:col-span-1 flex flex-col items-center justify-center p-8 text-center bg-secondary/50 rounded-lg">
+                                    <h3 className="text-xl font-semibold">Analiza tu Rendimiento</h3>
+                                    <p className="text-muted-foreground mt-2 mb-4 max-w-md">
+                                        Explora gráficos detallados y descubre tus récords personales para optimizar tu entrenamiento.
+                                    </p>
+                                    <Button asChild>
+                                        <Link href="/dashboard/progress">
+                                            <TrendingUp className="mr-2 h-5 w-5" />
+                                            Ver mi Progreso Detallado
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-64 text-center">
+                                <p className="text-muted-foreground">Tu progreso aparecerá aquí una vez que empieces a entrenar.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
+      </motion.div>
+    </motion.div>
   )
 }
