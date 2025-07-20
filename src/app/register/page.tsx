@@ -40,7 +40,7 @@ export default function RegisterPage() {
       }
 
       const newUser: User = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `user-${email}-${Date.now()}`,
         firstName,
         paternalLastName,
         maternalLastName,

@@ -42,7 +42,7 @@ export default function AdminUsersPage() {
   const handleAddUser = (newUser: Omit<User, 'id' | 'role' | 'status' | 'registeredAt' | 'planStatus' | 'name'>) => {
     const userWithDefaults: User = {
         ...newUser,
-        id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `user-${newUser.email}-${Date.now()}`,
         name: `${newUser.firstName} ${newUser.paternalLastName} ${newUser.maternalLastName}`.trim(),
         role: "client",
         status: "activo",
