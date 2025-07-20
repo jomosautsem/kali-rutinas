@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useMemo } from 'react';
@@ -65,7 +66,7 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
     onApprove(user.id, finalInviteCode);
     toast({
       title: "Usuario Aprobado y Código Generado",
-      description: `El código de invitación para ${user.name} es: ${finalInviteCode}`,
+      description: `El KaliCodigo para ${user.name} es: ${finalInviteCode}`,
     });
     onClose();
     form.reset();
@@ -77,9 +78,9 @@ export function GenerateInviteCodeDialog({ user, isOpen, onClose, onApprove }: G
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Aprobar Usuario y Generar Código</DialogTitle>
+          <DialogTitle>Aprobar Usuario y Generar KaliCodigo</DialogTitle>
           <DialogDescription>
-            Genera un código de invitación único de 10 caracteres para <span className="font-bold">{user.name}</span>.
+            Genera un KaliCodigo único de 10 caracteres para <span className="font-bold">{user.name}</span>.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">

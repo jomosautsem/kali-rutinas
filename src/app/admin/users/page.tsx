@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -151,7 +152,7 @@ export default function AdminUsersPage() {
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
     toast({
       title: "Usuario Aprobado",
-      description: `El código de invitación se ha generado y guardado.`,
+      description: `El KaliCodigo se ha generado y guardado.`,
     });
   };
 

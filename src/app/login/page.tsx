@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label"
 import { AuthCard } from "@/components/auth-card"
 import { useToast } from "@/hooks/use-toast"
 import type { User } from "@/lib/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { KeyRound } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -65,8 +67,8 @@ export default function LoginPage() {
             if (user.inviteCode !== inviteCode) {
                  toast({
                     variant: "destructive",
-                    title: "Código de Invitación Inválido",
-                    description: "Por favor, verifica tu código de invitación.",
+                    title: "KaliCodigo Inválido",
+                    description: "Por favor, verifica tu KaliCodigo.",
                 });
                 setIsLoading(false);
                 return;
@@ -135,17 +137,22 @@ export default function LoginPage() {
           />
         </div>
         <div className="space-y-2">
-            <Label htmlFor="inviteCode">Código de Invitación</Label>
+            <Label htmlFor="inviteCode">KaliCodigo</Label>
             <Input 
                 id="inviteCode" 
-                placeholder="Ingresa tu código de invitación" 
+                placeholder="Ingresa tu código único" 
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 disabled={isLoading}
-                // Admin doesn't need an invite code, but for simplicity we show it.
-                // In a real app, this field might be conditionally shown.
             />
         </div>
+        <Alert className="border-primary/30 bg-primary/10">
+          <KeyRound className="h-5 w-5 text-primary" />
+          <AlertTitle className="font-semibold text-primary/90">¿No tienes tu KaliCodigo?</AlertTitle>
+          <AlertDescription className="text-foreground/80">
+            Solicítalo en recepción o a través de nuestro WhatsApp para activar tu cuenta.
+          </AlertDescription>
+        </Alert>
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
         </Button>
