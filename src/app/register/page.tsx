@@ -19,11 +19,22 @@ export default function RegisterPage() {
   const [maternalLastName, setMaternalLastName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
+
+    if (password !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Las contraseñas no coinciden",
+        description: "Por favor, verifica que ambas contraseñas sean iguales.",
+      })
+      setIsLoading(false)
+      return
+    }
 
     try {
       const storedUsers = localStorage.getItem("registeredUsers")
@@ -140,6 +151,17 @@ export default function RegisterPage() {
             required 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+          <Input 
+            id="confirmPassword" 
+            type="password" 
+            required 
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={isLoading}
           />
         </div>
