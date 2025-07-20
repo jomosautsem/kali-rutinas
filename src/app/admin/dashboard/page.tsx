@@ -1,19 +1,51 @@
 
 "use client"
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, FileText, CheckCircle, ArrowRight } from "lucide-react"
+import { Users, FileText, CheckCircle, ArrowRight, UserCheck } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+import type { User } from "@/lib/types";
 
-export default function AdminDashboardPage() {
-  const stats = [
-    { title: "Usuarios Totales", value: "1,254", icon: Users, color: "text-blue-500" },
-    { title: "Planes Activos", value: "873", icon: FileText, color: "text-green-500" },
-    { title: "Nuevos Usuarios Hoy", value: "12", icon: Users, color: "text-primary" },
-    { title: "Aprobaciones Pendientes", value: "3", icon: CheckCircle, color: "text-yellow-500" },
-  ]
+const AdminDashboardPage = () => {
+  const [stats, setStats] = useState([
+    { title: "Usuarios Totales", value: "0", icon: Users, color: "text-blue-500" },
+    { title: "Planes Aprobados", value: "0", icon: FileText, color: "text-green-500" },
+    { title: "Planes Pendientes", value: "0", icon: CheckCircle, color: "text-yellow-500" },
+    { title: "Usuarios Pendientes", value: "0", icon: UserCheck, color: "text-orange-500" },
+  ]);
+  const [recentActivity, setRecentActivity] = useState<User[]>([]);
+
+  useEffect(() => {
+    // In a real app, this data would be fetched from an API.
+    // For this prototype, we'll use localStorage.
+    if (typeof window !== 'undefined') {
+      const storedUsers = localStorage.getItem("registeredUsers");
+      const users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+
+      const totalUsers = users.length;
+      const approvedPlans = users.filter(u => u.planStatus === 'aprobado').length;
+      const pendingPlans = users.filter(u => u.planStatus === 'pendiente').length;
+      const pendingUsers = users.filter(u => u.status === 'pendiente').length;
+
+      setStats([
+        { title: "Usuarios Totales", value: totalUsers.toString(), icon: Users, color: "text-blue-500" },
+        { title: "Planes Aprobados", value: approvedPlans.toString(), icon: FileText, color: "text-green-500" },
+        { title: "Planes Pendientes", value: pendingPlans.toString(), icon: CheckCircle, color: "text-yellow-500" },
+        { title: "Usuarios Pendientes", value: pendingUsers.toString(), icon: UserCheck, color: "text-orange-500" },
+      ]);
+      
+      // Get the 3 most recent users who are pending
+      const recentPendingUsers = users
+        .filter(u => u.status === 'pendiente')
+        .sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime())
+        .slice(0, 3);
+        
+      setRecentActivity(recentPendingUsers);
+    }
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -36,7 +68,6 @@ export default function AdminDashboardPage() {
       },
     },
   };
-
 
   return (
     <motion.div 
@@ -103,22 +134,18 @@ export default function AdminDashboardPage() {
                 <CardTitle className="font-headline">Actividad Reciente</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                {/* Mock activity feed */}
-                <div className="flex items-center">
-                <Users className="h-4 w-4 mr-2" />
-                <p className="text-sm text-muted-foreground">Nuevo usuario 'Jane Doe' registrado.</p>
-                <p className="text-sm text-muted-foreground ml-auto">hace 2 min</p>
-                </div>
-                <div className="flex items-center">
-                <FileText className="h-4 w-4 mr-2" />
-                <p className="text-sm text-muted-foreground">Plan generado para 'John Smith'.</p>
-                <p className="text-sm text-muted-foreground ml-auto">hace 15 min</p>
-                </div>
-                <div className="flex items-center">
-                <CheckCircle className="h-4 w-4 mr-2 text-yellow-500" />
-                <p className="text-sm text-muted-foreground">Plan de 'Charlie Brown' necesita aprobación.</p>
-                <p className="text-sm text-muted-foreground ml-auto">hace 30 min</p>
-                </div>
+              {recentActivity.length > 0 ? (
+                recentActivity.map(user => (
+                   <div key={user.id} className="flex items-center">
+                    <UserCheck className="h-4 w-4 mr-3 text-orange-500" />
+                    <p className="text-sm text-muted-foreground">
+                      Nuevo usuario <span className="font-semibold text-foreground">{user.name}</span> necesita aprobación.
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No hay nuevos usuarios pendientes.</p>
+              )}
             </CardContent>
             </Card>
         </motion.div>
@@ -126,3 +153,5 @@ export default function AdminDashboardPage() {
     </motion.div>
   )
 }
+
+export default AdminDashboardPage;
