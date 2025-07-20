@@ -3,7 +3,6 @@ import '@/ai/genkit';
 import Link from "next/link";
 import {
   Activity,
-  Dumbbell,
   FileText,
   LayoutDashboard,
   Users,
@@ -16,9 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarTrigger,
-  SidebarInset,
 } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Logo } from "@/components/logo";
@@ -34,7 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const mockUser = {
     name: "Admin User",
     email: "kalicentrodeportivotemixco@gmail.com",
-    avatarUrl: "https://placehold.co/100x100.png"
+    avatarUrl: "/images/avatars/avatar-04.png",
   }
 
   return (
@@ -42,15 +39,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex min-h-screen w-full">
         <Sidebar>
           <SidebarHeader>
-            <div className="flex items-center gap-2 p-2">
-              <Logo className="h-12 w-12 text-primary" width={48} height={48} />
-              <span className="text-lg font-bold font-headline">Dojo Dynamics</span>
+            <div className="flex items-center gap-2 p-2 justify-center group-data-[collapsible=icon]:justify-start">
+              <Logo className="h-10 w-10 text-primary" width={40} height={40} />
+              <span className="text-lg font-bold font-headline group-data-[collapsible=icon]:hidden">Dojo Dynamics</span>
             </div>
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Panel">
                   <Link href="/admin/dashboard">
                     <LayoutDashboard />
                     <span>Panel</span>
@@ -58,7 +55,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Usuarios">
                   <Link href="/admin/users">
                     <Users />
                     <span>Usuarios</span>
@@ -66,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Plantillas">
                   <Link href="/admin/templates">
                     <FileText />
                     <span>Plantillas</span>
@@ -74,7 +71,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Estado del Sistema">
                   <Link href="/admin/status">
                     <Activity />
                     <span>Estado del Sistema</span>
@@ -83,12 +80,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
-          <SidebarFooter>
-             {/* Can add footer items here if needed */}
-          </SidebarFooter>
         </Sidebar>
         <div className="flex flex-col w-full">
-           <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 sticky top-0 z-40">
+           <header className="flex h-16 items-center justify-between border-b bg-card/50 backdrop-blur-sm px-4 md:px-6 sticky top-0 z-40">
                 <div className="md:hidden">
                     <SidebarTrigger />
                 </div>
@@ -96,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <DashboardHeader user={mockUser} />
                 </div>
             </header>
-          <main className="flex-1 overflow-auto p-4 md:p-8 bg-secondary/50">
+          <main className="flex-1 overflow-auto p-4 md:p-8 bg-background">
             {children}
           </main>
         </div>

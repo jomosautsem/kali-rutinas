@@ -70,19 +70,19 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
       <div
-        className="absolute inset-0 z-0 opacity-40"
+        className="absolute inset-0 z-0 opacity-20"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 15% 30%, hsla(var(--primary) / 0.2), transparent 30%),
-            radial-gradient(circle at 85% 65%, hsla(var(--accent) / 0.15), transparent 40%)
+            radial-gradient(circle at 15% 30%, hsla(var(--primary) / 0.1), transparent 30%),
+            radial-gradient(circle at 85% 65%, hsla(var(--primary) / 0.1), transparent 40%)
           `,
         }}
       ></div>
 
       <header className="px-4 lg:px-6 h-20 flex items-center z-10">
-        <Link href="#" className="flex items-center justify-center" prefetch={false}>
-          <Logo className="h-16 w-16" width={64} height={64} />
-          <span className="sr-only">Dojo Dynamics</span>
+        <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
+          <Logo className="h-12 w-12 text-primary" width={48} height={48} />
+          <span className="font-bold text-lg font-headline">Dojo Dynamics</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
           <Button variant="ghost" asChild>
@@ -90,7 +90,7 @@ export default function Home() {
                 Iniciar Sesión
             </Link>
           </Button>
-          <Button asChild className="rounded-full font-bold hidden sm:flex">
+          <Button asChild className="font-bold hidden sm:flex shadow-lg shadow-primary/20">
             <Link href="/register" prefetch={false}>
               Registrarse
             </Link>
@@ -102,21 +102,21 @@ export default function Home() {
         {/* Hero Section */}
         <section className="flex flex-col items-center justify-center text-center px-4 py-20 md:py-32">
             <div className="relative mb-8">
-                <div className="absolute -top-12 -left-1/2 w-[200%] h-[200%] bg-primary/10 blur-3xl rounded-full animate-pulse"></div>
+                <div className="absolute -top-12 -left-1/2 w-[200%] h-[200%] bg-primary/10 blur-3xl rounded-full animate-pulse-slow"></div>
                 <div className="relative flex items-center justify-center w-32 h-32 md:w-40 md:h-40">
                     <Logo className="h-full w-full" width={160} height={160} />
                 </div>
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl font-headline text-shadow"
-                style={{ textShadow: '0 0 20px hsla(var(--primary) / 0.5)' }}>
+                style={{ textShadow: '0 0 30px hsla(var(--primary) / 0.5)' }}>
               Forja tu Mejor Versión
             </h1>
             <p className="mt-6 max-w-3xl text-lg text-muted-foreground">
               Planes de entrenamiento inteligentes y personalizados por Kali Gym e impulsados por nuestra IA.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
-                <Button asChild size="lg" className="rounded-full font-bold text-base">
+                <Button asChild size="lg" className="font-bold text-base shadow-lg shadow-primary/30">
                     <Link href="/register">
                         Comienza tu Transformación <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
@@ -125,7 +125,7 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-16 md:py-24 bg-secondary/30">
+        <section id="features" className="py-16 md:py-24 bg-secondary/20">
             <div className="container mx-auto px-4">
                 <div className="max-w-3xl mx-auto text-center">
                     <h2 className="text-3xl font-bold font-headline sm:text-4xl">Tu Gimnasio, Más Inteligente</h2>
@@ -158,7 +158,7 @@ export default function Home() {
                 </div>
                 <div className="mt-12 grid gap-8 md:grid-cols-1 lg:grid-cols-3">
                     {testimonials.map((testimonial) => (
-                        <Card key={testimonial.name} className="bg-card/50">
+                        <Card key={testimonial.name} className="bg-card border border-border">
                             <CardContent className="p-6 flex flex-col justify-between h-full">
                                 <blockquote className="text-lg italic border-l-2 border-primary pl-4">
                                     "{testimonial.quote}"
@@ -185,10 +185,10 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="w-full py-8 border-t border-border/50 bg-gradient-to-r from-slate-900 via-zinc-800 to-slate-900 z-10">
+      <footer className="w-full py-8 border-t border-border/50 bg-secondary/20 z-10">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
-                <Logo className="h-12 w-12" width={48} height={48} />
+                <Logo className="h-10 w-10 text-primary" width={40} height={40} />
                 <span className="font-bold text-lg font-headline">Dojo Dynamics</span>
             </div>
              <div className="flex gap-4">
