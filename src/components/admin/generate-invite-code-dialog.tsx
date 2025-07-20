@@ -38,9 +38,9 @@ type GenerateInviteCodeDialogProps = {
 };
 
 function getCodePrefix(firstName: string, paternalLastName: string, maternalLastName: string): string {
-    const first = firstName.slice(0, 2).toUpperCase();
-    const paternal = paternalLastName.slice(0, 2).toUpperCase();
-    const maternal = maternalLastName.slice(0, 2).toUpperCase();
+    const first = (firstName || '').slice(0, 2).toUpperCase();
+    const paternal = (paternalLastName || '').slice(0, 2).toUpperCase();
+    const maternal = (maternalLastName || '').slice(0, 2).toUpperCase();
     return `${first}${paternal}${maternal}`;
 }
 
