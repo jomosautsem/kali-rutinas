@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -64,7 +65,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 <span>Panel</span>
               </Link>
             </DropdownMenuItem>
-             {user.email === 'admin@dojodynamics.com' && (
+             {user.email === 'kalicentrodeportivotemixco@gmail.com' && (
                <DropdownMenuItem asChild>
                   <Link href="/admin/dashboard">
                     <ShieldCheck className="mr-2 h-4 w-4" />

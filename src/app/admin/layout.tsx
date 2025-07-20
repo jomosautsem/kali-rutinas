@@ -1,3 +1,4 @@
+
 import '@/ai/genkit';
 import Link from "next/link";
 import {
@@ -32,7 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   
   const mockUser = {
     name: "Admin User",
-    email: "admin@dojodynamics.com",
+    email: "kalicentrodeportivotemixco@gmail.com",
     avatarUrl: "https://placehold.co/100x100.png"
   }
 

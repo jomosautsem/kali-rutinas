@@ -29,8 +29,8 @@ export default function LoginPage() {
       sessionStorage.clear();
     }
 
-    const adminEmail = "admin@dojodynamics.com"
-    const adminPassword = "password123"
+    const adminEmail = "kalicentrodeportivotemixco@gmail.com"
+    const adminPassword = "1q2w3e12"
     
     // Check for admin credentials first
     if (email === adminEmail && password === adminPassword) {
@@ -153,4 +153,3 @@ export default function LoginPage() {
     </AuthCard>
   )
 }
-
