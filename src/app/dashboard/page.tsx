@@ -234,7 +234,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                         <div className="md:col-span-2 space-y-2">
                                                             <p className="font-semibold text-lg">{exercise.name}</p>
                                                             <p className="text-sm text-muted-foreground">
-                                                                <span className="font-medium text-primary">{exercise.reps}</span> | Descanso: {exercise.rest}
+                                                                <span className="font-medium text-primary">{exercise.series} x {exercise.reps}</span> | Descanso: {exercise.rest}
                                                             </p>
                                                         </div>
                                                         <div className="self-center">
