@@ -182,7 +182,7 @@ export default function AdminUsersPage() {
         users={users}
         templates={templates}
         onEditUser={handleEditUser}
-        onDeleteUser={onDeleteUser} 
+        onDeleteUser={handleDeleteUser} 
         onSaveAndApprovePlan={handleSaveAndApprovePlan}
         onApproveUser={handleApproveUser}
         onToggleUserStatus={handleToggleUserStatus}
