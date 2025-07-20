@@ -23,8 +23,8 @@ export default function SystemStatusPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {services.map((service, index) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-card">
+            {services.map((service) => (
+              <div key={service.name} className="flex items-center justify-between p-3 rounded-lg bg-card">
                 <div className="flex items-center gap-4">
                   <service.icon className="h-6 w-6 text-muted-foreground" />
                   <span className="font-medium">{service.name}</span>
