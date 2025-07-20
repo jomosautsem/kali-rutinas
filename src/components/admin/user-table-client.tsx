@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react"
 import type { User, UserPlan, ProgressData } from "@/lib/types";
+import type { Template } from "@/app/admin/templates/page";
 import {
   Table,
   TableBody,
@@ -21,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,9 +39,11 @@ import { GenerateInviteCodeDialog } from "./generate-invite-code-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ProgressAnalytics } from "./progress-analytics";
 import { EditUserDialog } from "./edit-user-dialog";
+import { AssignTemplateDialog } from "./assign-template-dialog";
 
 type UserTableClientProps = {
-  users: User[]
+  users: User[];
+  templates: Template[];
   onEditUser: (user: User) => void;
   onDeleteUser: (userId: string) => void;
   onSaveAndApprovePlan: (userId: string, plan: UserPlan) => void;
@@ -48,21 +51,23 @@ type UserTableClientProps = {
 }
 
 const planStatusConfig = {
-    aprobado: { label: "Aprobado", icon: CheckCircle, className: "bg-green-500/20 text-green-700" },
-    pendiente: { label: "Pendiente", icon: Clock, className: "bg-yellow-500/20 text-yellow-700" },
-    "sin-plan": { label: "Sin Plan", icon: () => null, className: "bg-gray-500/20 text-gray-700" },
+    aprobado: { label: "Aprobado", icon: CheckCircle, className: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400 border-green-500/30" },
+    pendiente: { label: "Pendiente", icon: Clock, className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400 border-yellow-500/30" },
+    "sin-plan": { label: "Sin Plan", icon: () => null, className: "bg-gray-100 text-gray-800 dark:bg-gray-700/40 dark:text-gray-300 border-gray-500/30" },
     "n/a": { label: "N/A", icon: () => null, className: "bg-transparent text-muted-foreground" },
 };
 
 
-export function UserTableClient({ users, onEditUser, onDeleteUser, onSaveAndApprovePlan, onApproveUser }: UserTableClientProps) {
+export function UserTableClient({ users, templates, onEditUser, onDeleteUser, onSaveAndApprovePlan, onApproveUser }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPlanEditorOpen, setIsPlanEditorOpen] = useState(false)
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [isInviteCodeDialogOpen, setIsInviteCodeDialogOpen] = useState(false);
+  const [isAssignTemplateDialogOpen, setIsAssignTemplateDialogOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [selectedUserProgress, setSelectedUserProgress] = useState<ProgressData | null>(null);
+  const [selectedUserProgress, setSelectedUserProgress] = useState<{ progress: ProgressData, plan: UserPlan } | null>(null);
+
 
   const handleDeleteClick = (user: User) => {
     setSelectedUser(user)
@@ -85,6 +90,11 @@ export function UserTableClient({ users, onEditUser, onDeleteUser, onSaveAndAppr
   const handlePlanEditorOpen = (user: User) => {
     setSelectedUser(user);
     setIsPlanEditorOpen(true);
+  }
+  
+  const handleAssignTemplateOpen = (user: User) => {
+    setSelectedUser(user);
+    setIsAssignTemplateDialogOpen(true);
   }
 
   const handlePlanEditorClose = () => {
@@ -152,6 +162,7 @@ export function UserTableClient({ users, onEditUser, onDeleteUser, onSaveAndAppr
                 </TableCell>
                 <TableCell>
                   <Badge variant={user.status === "activo" ? "outline" : "destructive"} className={cn(
+                      "font-semibold",
                       user.status === 'activo' && 'border-green-500 text-green-500',
                       user.status === 'pendiente' && 'border-yellow-500 text-yellow-500'
                   )}>
@@ -201,7 +212,11 @@ export function UserTableClient({ users, onEditUser, onDeleteUser, onSaveAndAppr
                         <>
                           <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)}>
                               <FileEdit className="mr-2 h-4 w-4" />
-                              Ver/Editar Plan
+                              Editar/Generar Plan
+                          </DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => handleAssignTemplateOpen(user)}>
+                              <FilePlus className="mr-2 h-4 w-4" />
+                              Asignar Plantilla
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleAnalyticsOpen(user)}>
                               <BarChart2 className="mr-2 h-4 w-4" />
@@ -263,8 +278,18 @@ export function UserTableClient({ users, onEditUser, onDeleteUser, onSaveAndAppr
           onEditUser={onEditUser}
         />
       )}
-      
+
       {selectedUser && (
+        <AssignTemplateDialog
+          user={selectedUser}
+          templates={templates}
+          isOpen={isAssignTemplateDialogOpen}
+          onClose={() => setIsAssignTemplateDialogOpen(false)}
+          onAssign={(plan) => onSaveAndApprovePlan(selectedUser.id, plan)}
+        />
+      )}
+      
+      {selectedUser && selectedUserProgress && (
         <ProgressAnalytics
           user={selectedUser}
           data={selectedUserProgress}
@@ -287,3 +312,5 @@ export function UserTableClient({ users, onEditUser, onDeleteUser, onSaveAndAppr
     </>
   )
 }
+
+    
