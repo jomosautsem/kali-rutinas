@@ -27,6 +27,10 @@ const prompt = ai.definePrompt({
 
   Asegúrate de que los nombres de los días y los enfoques sean claros y descriptivos. El número de días debe ser lógico según la descripción (ej., si se pide una rutina de '3 días', genera 3 días de entrenamiento).
 
+  Además del plan, proporciona dos secciones de texto importantes:
+  1. En el campo 'warmup', escribe una rutina de calentamiento y activación general (3-4 frases) apropiada para el tipo de plantilla descrita.
+  2. En el campo 'recommendations', proporciona una recomendación general (2-3 frases) sobre consejos de post-entrenamiento, como enfriamiento, hidratación o nutrición.
+
   Deja el campo 'mediaUrl' como una cadena vacía para cada ejercicio.
 
   Descripción de la Plantilla Solicitada: {{{description}}}

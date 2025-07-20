@@ -25,6 +25,7 @@ const templateSchema = z.object({
     level: z.enum(["Principiante", "Intermedio", "Avanzado"]),
     days: z.number(),
     plan: z.object({
+        warmup: z.string().optional(),
         recommendations: z.string().optional(),
         weeklyPlan: z.array(z.object({
             day: z.string().min(1, "El nombre del día es requerido."),
@@ -69,6 +70,7 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
       level: "Principiante",
       days: 1,
       plan: {
+        warmup: "",
         recommendations: "",
         weeklyPlan: [{ day: "Día 1", focus: "Enfoque del día", exercises: [] }]
       }
@@ -93,6 +95,7 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
           level: "Principiante",
           days: 1,
           plan: {
+              warmup: "",
               recommendations: "",
               weeklyPlan: [{ day: "Día 1", focus: "Enfoque del día", exercises: [] }]
           }
@@ -156,20 +159,38 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
                 </div>
               </div>
 
-              <div className="space-y-2 p-4 rounded-lg border bg-secondary/30">
-                <FormLabel htmlFor="recommendations" className="text-base font-semibold">
-                  Recomendaciones Generales
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    id="recommendations"
-                    {...register("plan.recommendations")}
-                    placeholder="Escribe aquí cualquier sugerencia general para esta plantilla..."
-                    rows={3}
-                    className="text-sm bg-card"
-                  />
-                </FormControl>
+              <div className="space-y-4">
+                <div className="space-y-2 p-4 rounded-lg border bg-secondary/30">
+                  <FormLabel htmlFor="warmup" className="text-base font-semibold">
+                    Calentamiento y activación de músculo
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id="warmup"
+                      {...register("plan.warmup")}
+                      placeholder="Escribe aquí las instrucciones de calentamiento..."
+                      rows={3}
+                      className="text-sm bg-card"
+                    />
+                  </FormControl>
+                </div>
+
+                <div className="space-y-2 p-4 rounded-lg border bg-secondary/30">
+                  <FormLabel htmlFor="recommendations" className="text-base font-semibold">
+                    Recomendaciones Generales
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id="recommendations"
+                      {...register("plan.recommendations")}
+                      placeholder="Escribe aquí cualquier sugerencia general para esta plantilla..."
+                      rows={3}
+                      className="text-sm bg-card"
+                    />
+                  </FormControl>
+                </div>
               </div>
+
 
               {fields.length > 0 ? (
                 <div className="space-y-4">

@@ -31,7 +31,8 @@ const initialTemplates: Template[] = [
         level: "Avanzado",
         days: 5,
         plan: {
-            recommendations: "Asegúrate de calentar bien antes de cada sesión y mantenerte hidratado.",
+            warmup: "Comienza con 5 minutos de cardio ligero (saltar la cuerda o trotar). Sigue con círculos de brazos, rotaciones de torso y sentadillas sin peso para activar las articulaciones principales.",
+            recommendations: "Asegúrate de calentar bien antes de cada sesión y mantenerte hidratado. Realiza estiramientos suaves al finalizar.",
             weeklyPlan: [
                 { day: "Día 1: HIIT Total", focus: "Cardio y Resistencia", exercises: [{ name: "Burpees", series: "5", reps: "20", rest: "30s", mediaUrl: "" }] },
                 { day: "Día 2: Piernas y Glúteos", focus: "Fuerza y Potencia", exercises: [{ name: "Sentadillas con Salto", series: "4", reps: "15", rest: "45s", mediaUrl: "" }] },
@@ -48,7 +49,8 @@ const initialTemplates: Template[] = [
         level: "Principiante",
         days: 3,
         plan: {
-            recommendations: "Concéntrate en la técnica correcta antes de aumentar el peso. El descanso es clave.",
+            warmup: "5-10 minutos en la caminadora o bicicleta estática. Realiza 2 series de 15 repeticiones de bisagras de cadera, band pull-aparts y rotaciones de hombros con poco peso.",
+            recommendations: "Concéntrate en la técnica correcta antes de aumentar el peso. El descanso es clave para la recuperación y el crecimiento.",
             weeklyPlan: [
                 { day: "Día 1: Empuje", focus: "Pecho, Hombros, Tríceps", exercises: [{ name: "Press de Banca", series: "3", reps: "8-10", rest: "90s", mediaUrl: "" }] },
                 { day: "Día 2: Tirón", focus: "Espalda, Bíceps", exercises: [{ name: "Remo con Barra", series: "3", reps: "8-10", rest: "90s", mediaUrl: "" }] },
@@ -63,7 +65,8 @@ const initialTemplates: Template[] = [
         level: "Intermedio",
         days: 4,
         plan: {
-             recommendations: "La consistencia es clave en la calistenia. Trabaja en la calidad de cada repetición.",
+             warmup: "Movilidad de muñecas y hombros es crucial. Haz círculos, flexiones y extensiones. Activa el core con planchas y hollow body holds (2 series de 30s).",
+             recommendations: "La consistencia es clave en la calistenia. Trabaja en la calidad de cada repetición y no te saltes los días de descanso.",
              weeklyPlan: [
                 { day: "Día 1: Tren Superior A", focus: "Flexiones y Dips", exercises: [{ name: "Flexiones Diamante", series: "4", reps: "Al fallo", rest: "120s", mediaUrl: "" }] },
                 { day: "Día 2: Tren Inferior", focus: "Sentadillas y Zancadas", exercises: [{ name: "Sentadilla Búlgara", series: "4", reps: "12-15 por pierna", rest: "90s", mediaUrl: "" }] },

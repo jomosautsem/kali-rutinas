@@ -42,7 +42,9 @@ const prompt = ai.definePrompt({
 
   Basado en los objetivos del usuario, nivel de condición física actual, días de entrenamiento disponibles por semana y estilo de entrenamiento preferido, crea un plan de entrenamiento detallado con el formato JSON solicitado.
 
-  Además del plan de ejercicios, proporciona una recomendación general en el campo 'recommendations'. Esta recomendación debe ser concisa (2-3 frases) y puede incluir consejos sobre calentamiento, hidratación, nutrición general o mentalidad.
+  Además del plan, proporciona dos secciones de texto importantes:
+  1. En el campo 'warmup', escribe una rutina de calentamiento y activación general (3-4 frases). Debe incluir movilidad articular y ejercicios de activación específicos para los principales grupos musculares.
+  2. En el campo 'recommendations', proporciona una recomendación general (2-3 frases) sobre consejos de post-entrenamiento, como enfriamiento, hidratación, nutrición o mentalidad.
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
 

@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -168,6 +168,15 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
     return (
         <>
             <div className="space-y-6">
+                 {plan.warmup && (
+                    <Alert className="bg-blue-500/5 border-blue-500/20">
+                        <Wind className="h-5 w-5 text-blue-400" />
+                        <AlertTitle className="font-headline text-blue-400">Calentamiento y Activación</AlertTitle>
+                        <AlertDescription className="text-foreground/80">
+                            {plan.warmup}
+                        </AlertDescription>
+                    </Alert>
+                )}
                 {plan.recommendations && (
                     <Alert className="bg-primary/5 border-primary/20">
                         <Lightbulb className="h-5 w-5 text-primary" />
