@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus, XCircle, PowerOff, Power } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +41,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ProgressAnalytics } from "./progress-analytics";
 import { EditUserDialog } from "./edit-user-dialog";
 import { AssignTemplateDialog } from "./assign-template-dialog";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
 
 type UserTableClientProps = {
   users: User[];
@@ -49,6 +51,7 @@ type UserTableClientProps = {
   onDeleteUser: (userId: string) => void;
   onSaveAndApprovePlan: (userId: string, plan: UserPlan) => void;
   onApproveUser: (userId: string, inviteCode: string) => void;
+  onToggleUserStatus: (userId: string, currentStatus: "activo" | "inactivo") => void;
 }
 
 const planStatusConfig = {
@@ -58,8 +61,14 @@ const planStatusConfig = {
     "n/a": { label: "N/A", icon: () => null, className: "bg-transparent text-muted-foreground" },
 };
 
+const userStatusConfig = {
+    activo: { label: "Activo", icon: CheckCircle, className: "border-green-500 text-green-500" },
+    pendiente: { label: "Pendiente", icon: Clock, className: "border-yellow-500 text-yellow-500" },
+    inactivo: { label: "Inactivo", icon: XCircle, className: "border-red-500 text-red-500" },
+};
 
-export function UserTableClient({ users, templates, onEditUser, onDeleteUser, onSaveAndApprovePlan, onApproveUser }: UserTableClientProps) {
+
+export function UserTableClient({ users, templates, onEditUser, onDeleteUser, onSaveAndApprovePlan, onApproveUser, onToggleUserStatus }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPlanEditorOpen, setIsPlanEditorOpen] = useState(false)
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
@@ -131,19 +140,22 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
           <TableHeader>
             <TableRow>
               <TableHead>Usuario</TableHead>
-              <TableHead>Rol</TableHead>
-              <TableHead>Estado Usuario</TableHead>
+              <TableHead>Estado</TableHead>
               <TableHead>KaliCodigo</TableHead>
-              <TableHead>Estado del Plan</TableHead>
-              <TableHead>Registrado</TableHead>
+              <TableHead>Plan</TableHead>
+              <TableHead className="text-center">Acceso</TableHead>
               <TableHead>
                 <span className="sr-only">Acciones</span>
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
+            {users.map((user) => {
+               const statusConfig = userStatusConfig[user.status] || userStatusConfig.pendiente;
+               const planConfig = planStatusConfig[user.planStatus] || planStatusConfig['sin-plan'];
+
+              return (
+              <TableRow key={user.id} className={cn(user.status === 'inactivo' && 'bg-muted/30 opacity-60')}>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
@@ -157,36 +169,41 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                    {user.role === "admin" ? "Admin" : "Cliente"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={user.status === "activo" ? "outline" : "destructive"} className={cn(
-                      "font-semibold",
-                      user.status === 'activo' && 'border-green-500 text-green-500',
-                      user.status === 'pendiente' && 'border-yellow-500 text-yellow-500'
-                  )}>
-                    {user.status === 'activo' ? 'Activo' : 'Pendiente'}
-                  </Badge>
+                   <Badge variant="outline" className={cn("font-semibold gap-1.5", statusConfig.className)}>
+                     <statusConfig.icon className="h-3 w-3" />
+                     {statusConfig.label}
+                   </Badge>
                 </TableCell>
                  <TableCell>
                   <span className="font-mono text-xs">{user.inviteCode || "-"}</span>
                 </TableCell>
                 <TableCell>
                     {(() => {
-                        const config = planStatusConfig[user.planStatus];
-                        if (!config) return null; // Defensive check
-                        const Icon = config.icon;
+                        const Icon = planConfig.icon;
                         return (
-                            <Badge variant="outline" className={cn("gap-1.5", config.className)}>
+                            <Badge variant="outline" className={cn("gap-1.5", planConfig.className)}>
                                 <Icon className="h-3 w-3" />
-                                {config.label}
+                                {planConfig.label}
                             </Badge>
                         )
                     })()}
                 </TableCell>
-                <TableCell>{user.registeredAt}</TableCell>
+                 <TableCell className="text-center">
+                    {user.role === 'client' && user.status !== 'pendiente' && (
+                        <div className="flex flex-col items-center justify-center gap-1.5">
+                            <Switch
+                                id={`status-switch-${user.id}`}
+                                checked={user.status === 'activo'}
+                                onCheckedChange={() => onToggleUserStatus(user.id, user.status as "activo" | "inactivo")}
+                                disabled={user.status === 'pendiente'}
+                                aria-label="Activar o desactivar usuario"
+                            />
+                             <Label htmlFor={`status-switch-${user.id}`} className={cn("text-xs", user.status === 'activo' ? 'text-green-500' : 'text-red-500')}>
+                                {user.status === 'activo' ? 'Activado' : 'Desactivado'}
+                            </Label>
+                        </div>
+                    )}
+                </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -209,34 +226,38 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                             Aprobar Usuario
                         </DropdownMenuItem>
                       )}
-                      {user.role === 'client' && user.status === 'activo' && (
+                      {user.role === 'client' && user.status !== 'pendiente' && (
                         <>
-                          <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)}>
+                          <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)} disabled={user.status === 'inactivo'}>
                               <FileEdit className="mr-2 h-4 w-4" />
                               Editar/Generar Plan
                           </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => handleAssignTemplateOpen(user)}>
+                           <DropdownMenuItem onClick={() => handleAssignTemplateOpen(user)} disabled={user.status === 'inactivo'}>
                               <FilePlus className="mr-2 h-4 w-4" />
                               Asignar Plantilla
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleAnalyticsOpen(user)}>
+                          <DropdownMenuItem onClick={() => handleAnalyticsOpen(user)} disabled={user.status === 'inactivo'}>
                               <BarChart2 className="mr-2 h-4 w-4" />
                               Ver Progreso
                           </DropdownMenuItem>
                         </>
                       )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => handleDeleteClick(user)}
-                      >
-                        Eliminar usuario
-                      </DropdownMenuItem>
+                      {user.role !== 'admin' && (
+                        <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => handleDeleteClick(user)}
+                        >
+                            Eliminar usuario
+                        </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </div>

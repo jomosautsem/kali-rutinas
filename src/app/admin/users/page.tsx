@@ -156,6 +156,18 @@ export default function AdminUsersPage() {
     });
   };
 
+  const handleToggleUserStatus = (userId: string, currentStatus: "activo" | "inactivo") => {
+      const newStatus = currentStatus === "activo" ? "inactivo" : "activo";
+      const updatedUsers = users.map(user =>
+          user.id === userId ? { ...user, status: newStatus } : user
+      );
+      setUsers(updatedUsers);
+      localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+      toast({
+          title: `Usuario ${newStatus === "activo" ? "Activado" : "Desactivado"}`,
+          description: `El acceso para el usuario ha sido ${newStatus === "activo" ? "restaurado" : "revocado"}.`,
+      });
+  };
 
   return (
     <div className="space-y-6">
@@ -170,9 +182,10 @@ export default function AdminUsersPage() {
         users={users}
         templates={templates}
         onEditUser={handleEditUser}
-        onDeleteUser={handleDeleteUser} 
+        onDeleteUser={onDeleteUser} 
         onSaveAndApprovePlan={handleSaveAndApprovePlan}
         onApproveUser={handleApproveUser}
+        onToggleUserStatus={handleToggleUserStatus}
       />
     </div>
   )

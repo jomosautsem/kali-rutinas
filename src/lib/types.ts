@@ -40,7 +40,7 @@ export type User = {
   name: string; // Full name, derived from the other three
   email: string;
   role: "admin" | "client";
-  status: "activo" | "pendiente";
+  status: "activo" | "pendiente" | "inactivo";
   registeredAt: string;
   planStatus: "aprobado" | "pendiente" | "sin-plan" | "n/a";
   inviteCode?: string;

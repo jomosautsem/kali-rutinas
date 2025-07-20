@@ -60,6 +60,16 @@ export default function LoginPage() {
                 setIsLoading(false);
                 return;
             }
+
+            if (user.status === 'inactivo') {
+                toast({
+                    variant: "destructive",
+                    title: "Cuenta Desactivada",
+                    description: "Tu acceso ha sido desactivado. Por favor, contacta a un administrador.",
+                });
+                setIsLoading(false);
+                return;
+            }
             
             // In a real app, you would verify the password hash here
             
