@@ -66,7 +66,7 @@ export function ProgressAnalytics({ user, data, isOpen, onClose }: ProgressAnaly
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
-                    {data && chartData.length > 0 ? (
+                    {data && chartData.length > 0 && chartData.some(d => d.volume > 0) ? (
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-lg font-semibold">Volumen Total por Día</CardTitle>
@@ -78,13 +78,13 @@ export function ProgressAnalytics({ user, data, isOpen, onClose }: ProgressAnaly
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                             <XAxis 
                                                 dataKey="day" 
-                                                stroke="#888888" 
+                                                stroke="hsl(var(--muted-foreground))" 
                                                 fontSize={12} 
                                                 tickLine={false} 
                                                 axisLine={false}
                                             />
                                             <YAxis 
-                                                stroke="#888888" 
+                                                stroke="hsl(var(--muted-foreground))"
                                                 fontSize={12} 
                                                 tickLine={false} 
                                                 axisLine={false} 

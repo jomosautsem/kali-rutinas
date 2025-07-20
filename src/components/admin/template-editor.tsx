@@ -49,13 +49,12 @@ type TemplateEditorProps = {
 };
 
 const dayButtonColors = [
-    "bg-purple-600/80 hover:bg-purple-600",
-    "bg-fuchsia-600/80 hover:bg-fuchsia-600",
-    "bg-pink-600/80 hover:bg-pink-600",
-    "bg-rose-600/80 hover:bg-rose-600",
-    "bg-red-600/80 hover:bg-red-600",
-    "bg-orange-500/80 hover:bg-orange-500",
-    "bg-amber-500/80 hover:bg-amber-500",
+    "bg-yellow-500/80 hover:bg-yellow-500 text-yellow-950",
+    "bg-yellow-600/80 hover:bg-yellow-600 text-yellow-950",
+    "bg-amber-500/80 hover:bg-amber-500 text-amber-950",
+    "bg-amber-600/80 hover:bg-amber-600 text-amber-950",
+    "bg-orange-500/80 hover:bg-orange-500 text-orange-950",
+    "bg-orange-600/80 hover:bg-orange-600 text-orange-950",
 ];
 
 export function TemplateEditor({ isOpen, onClose, onSave, initialData }: TemplateEditorProps) {
@@ -181,10 +180,10 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
                         type="button"
                         onClick={() => setActiveDayIndex(index)}
                         className={cn(
-                          "text-white transition-all",
+                          "transition-all",
                           activeDayIndex === index
                             ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
-                            : "bg-gray-600/50 hover:bg-gray-600"
+                            : "bg-gray-600/50 hover:bg-gray-600 text-white"
                         )}
                       >
                         {weeklyPlanValues?.[index]?.day || `Día ${index + 1}`}

@@ -69,16 +69,16 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
       <div
-        className="absolute inset-0 z-0 opacity-20"
+        className="absolute inset-0 z-0 opacity-10"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 15% 30%, hsla(var(--primary) / 0.1), transparent 30%),
-            radial-gradient(circle at 85% 65%, hsla(var(--accent) / 0.1), transparent 40%)
+            radial-gradient(circle at 15% 30%, hsl(var(--primary)), transparent 40%),
+            radial-gradient(circle at 85% 65%, hsl(var(--primary)), transparent 40%)
           `,
         }}
       ></div>
 
-      <header className="px-4 lg:px-6 h-20 flex items-center z-10">
+      <header className="px-4 lg:px-6 h-20 flex items-center z-10 bg-background/80 backdrop-blur-sm sticky top-0 border-b border-border/50">
         <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
           <Logo className="h-12 w-12 text-primary" width={48} height={48} />
           <span className="font-bold text-lg font-headline">Dojo Dynamics</span>
@@ -107,7 +107,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl font-headline text-shadow"
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl font-headline"
                 style={{ textShadow: '0 0 30px hsla(var(--primary) / 0.5)' }}>
               Forja tu Mejor Versión
             </h1>

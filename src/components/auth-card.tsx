@@ -18,11 +18,11 @@ export function AuthCard({ title, description, children, footer }: AuthCardProps
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
         <div
-        className="absolute inset-0 z-0 opacity-20"
+        className="absolute inset-0 z-0 opacity-10"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 15% 30%, hsla(var(--primary) / 0.1), transparent 30%),
-            radial-gradient(circle at 85% 65%, hsla(var(--accent) / 0.1), transparent 40%)
+            radial-gradient(circle at 15% 30%, hsl(var(--primary)), transparent 40%),
+            radial-gradient(circle at 85% 65%, hsl(var(--primary)), transparent 40%)
           `,
         }}
       ></div>
