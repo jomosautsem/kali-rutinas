@@ -134,8 +134,8 @@ export default function Home() {
                     </p>
                 </div>
                 <div className="mt-12 grid gap-8 md:grid-cols-3">
-                    {features.map((feature, index) => (
-                        <div key={index} className="flex flex-col items-center text-center p-6">
+                    {features.map((feature) => (
+                        <div key={feature.title} className="flex flex-col items-center text-center p-6">
                             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-6">
                                 {feature.icon}
                             </div>
@@ -157,8 +157,8 @@ export default function Home() {
                     </p>
                 </div>
                 <div className="mt-12 grid gap-8 md:grid-cols-1 lg:grid-cols-3">
-                    {testimonials.map((testimonial, index) => (
-                        <Card key={index} className="bg-card/50">
+                    {testimonials.map((testimonial) => (
+                        <Card key={testimonial.name} className="bg-card/50">
                             <CardContent className="p-6 flex flex-col justify-between h-full">
                                 <blockquote className="text-lg italic border-l-2 border-primary pl-4">
                                     "{testimonial.quote}"
