@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
-import { ArrowRight, BarChart2, Sparkles, UserCheck, Instagram } from 'lucide-react';
+import { ArrowRight, BarChart2, Sparkles, UserCheck, Instagram, ArrowDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -125,7 +125,7 @@ export default function Home() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-center justify-center text-center px-4 py-20 md:py-32">
+          className="flex flex-col items-center justify-center text-center px-4 py-20 md:py-32 min-h-[calc(100vh-5rem)] relative">
             <motion.div variants={itemVariants} className="relative mb-8">
                 <div className="relative flex items-center justify-center w-32 h-32 md:w-40 md:h-40">
                     <Logo className="h-full w-full" width={160} height={160} />
@@ -151,6 +151,25 @@ export default function Home() {
                         Comienza tu Transformación <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                 </Button>
+            </motion.div>
+
+            <motion.div 
+              variants={itemVariants}
+              className="absolute bottom-10 left-1/2 -translate-x-1/2"
+            >
+              <Link href="#features" className="flex flex-col items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                <motion.span
+                  animate={{ y: [0, 5, 0] }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                  }}
+                >
+                  <ArrowDown className="h-6 w-6" />
+                </motion.span>
+                Descubre más
+              </Link>
             </motion.div>
         </motion.section>
 
