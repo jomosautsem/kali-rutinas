@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Logo } from "@/components/logo";
@@ -29,6 +30,39 @@ const navItems = [
     { href: "/admin/templates", icon: FileText, label: "Plantillas" },
     { href: "/admin/status", icon: Activity, label: "Estado del Sistema" },
 ]
+
+function AdminNav() {
+  const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    setOpenMobile(false);
+  }
+  
+  return (
+    <SidebarMenu>
+      {navItems.map((item) => (
+        <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton 
+              asChild 
+              tooltip={item.label} 
+              isActive={pathname.startsWith(item.href)} 
+              className={cn(
+                "relative",
+                pathname.startsWith(item.href) && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-2/3 before:w-1 before:bg-primary before:rounded-r-full"
+              )}
+            >
+            <Link href={item.href} onClick={handleLinkClick}>
+                <item.icon />
+                <span>{item.label}</span>
+            </Link>
+            </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
+}
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -52,26 +86,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </SidebarHeader>
           <SidebarContent>
-            <SidebarMenu>
-             {navItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton 
-                      asChild 
-                      tooltip={item.label} 
-                      isActive={pathname.startsWith(item.href)} 
-                      className={cn(
-                        "relative",
-                        pathname.startsWith(item.href) && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-2/3 before:w-1 before:bg-primary before:rounded-r-full"
-                      )}
-                    >
-                    <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                    </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <AdminNav />
           </SidebarContent>
         </Sidebar>
         <div className="flex flex-col w-full z-10">
