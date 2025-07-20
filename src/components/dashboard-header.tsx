@@ -37,9 +37,10 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   return (
     <>
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" asChild>
+        <Button variant="outline" asChild>
             <Link href="/" aria-label="Home">
-                <Home className="h-5 w-5" />
+                <Home className="h-4 w-4" />
+                <span>HOME</span>
             </Link>
         </Button>
         <DropdownMenu>
