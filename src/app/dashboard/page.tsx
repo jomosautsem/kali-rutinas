@@ -249,7 +249,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow>
-                                                                    <TableHead className="w-16">Set</TableHead>
+                                                                    <TableHead className="w-16">Serie</TableHead>
                                                                     <TableHead>Peso (kg)</TableHead>
                                                                     <TableHead>Reps Hechas</TableHead>
                                                                     <TableHead className="w-16 text-center">Hecho</TableHead>
@@ -297,7 +297,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                                                 size="sm" 
                                                                 onClick={() => handleAddSet(dayPlan.day, exercise.name)}>
                                                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                                                Añadir Set
+                                                                Añadir Serie
                                                             </Button>
                                                         </div>
                                                     </div>
