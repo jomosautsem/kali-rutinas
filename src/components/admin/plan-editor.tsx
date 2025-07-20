@@ -126,7 +126,7 @@ const MediaPreview = ({ url, alt, onPreviewClick }: { url: string, alt: string, 
 
 
 const dayButtonColors = [
-    "bg-red-500/80 hover:bg-red-500",
+    "bg-yellow-500/80 hover:bg-yellow-500",
     "bg-blue-500/80 hover:bg-blue-500",
     "bg-green-500/80 hover:bg-green-500",
     "bg-purple-500/80 hover:bg-purple-500",
@@ -277,11 +277,11 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {onboardingData && (
-                    <Alert variant="default" className="bg-blue-500/10 border-blue-500/20">
-                      <Lightbulb className="h-5 w-5 text-blue-500" />
-                      <AlertTitle className="text-blue-600 font-semibold">Datos del Cliente</AlertTitle>
+                    <Alert variant="default" className="bg-primary/10 border-primary/20">
+                      <Lightbulb className="h-5 w-5 text-primary" />
+                      <AlertTitle className="text-primary/90 font-semibold">Datos del Cliente</AlertTitle>
                       <AlertDescription>
-                        <ul className="text-sm space-y-1 mt-2 text-blue-700/80">
+                        <ul className="text-sm space-y-1 mt-2 text-primary-foreground/80">
                           <li><strong>Metas:</strong> {onboardingData.goals.join(', ')}</li>
                           <li><strong>Nivel:</strong> {onboardingData.currentFitnessLevel}</li>
                           <li><strong>Días:</strong> {onboardingData.trainingDays.join(', ')}</li>
@@ -341,7 +341,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                                     type="button"
                                     onClick={() => setActiveDayIndex(index)}
                                     className={cn(
-                                        "text-white transition-all",
+                                        "text-primary-foreground transition-all",
                                         activeDayIndex === index 
                                             ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
                                             : "bg-gray-600/50 hover:bg-gray-600"

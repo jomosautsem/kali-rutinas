@@ -125,7 +125,7 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-16 md:py-24 bg-secondary/20">
+        <section id="features" className="py-16 md:py-24 bg-card/50">
             <div className="container mx-auto px-4">
                 <div className="max-w-3xl mx-auto text-center">
                     <h2 className="text-3xl font-bold font-headline sm:text-4xl">Tu Gimnasio, Más Inteligente</h2>
@@ -158,7 +158,7 @@ export default function Home() {
                 </div>
                 <div className="mt-12 grid gap-8 md:grid-cols-1 lg:grid-cols-3">
                     {testimonials.map((testimonial) => (
-                        <Card key={testimonial.name} className="bg-card border border-border">
+                        <Card key={testimonial.name} className="bg-card border-border/50">
                             <CardContent className="p-6 flex flex-col justify-between h-full">
                                 <blockquote className="text-lg italic border-l-2 border-primary pl-4">
                                     "{testimonial.quote}"
@@ -185,7 +185,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="w-full py-8 border-t border-border/50 bg-secondary/20 z-10">
+      <footer className="w-full py-8 border-t border-border/50 bg-card/50 z-10">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
                 <Logo className="h-10 w-10 text-primary" width={40} height={40} />

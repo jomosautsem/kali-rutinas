@@ -122,7 +122,7 @@ const MediaPreview = ({ url, alt, onPreviewClick }: { url: string, alt: string, 
 
 
 const dayButtonColors = [
-    "bg-red-500/80 hover:bg-red-500",
+    "bg-primary/80 hover:bg-primary",
     "bg-blue-500/80 hover:bg-blue-500",
     "bg-green-500/80 hover:bg-green-500",
     "bg-purple-500/80 hover:bg-purple-500",
@@ -187,7 +187,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                     type="button"
                                     onClick={() => setActiveDayIndex(index)}
                                     className={cn(
-                                        "text-white transition-all",
+                                        "text-primary-foreground transition-all",
                                         activeDayIndex === index 
                                             ? `${dayButtonColors[index % dayButtonColors.length]} scale-105 shadow-lg`
                                             : "bg-gray-600/50 hover:bg-gray-600",
@@ -564,7 +564,13 @@ export default function DashboardPage() {
                 <CardContent>
                     {planStatus === 'aprobado' && userPlan ? (
                          <div className="grid gap-6 md:grid-cols-2">
-                             <div className="md:col-span-2 flex flex-col items-center justify-center p-8 text-center bg-secondary/50 rounded-lg">
+                            <div className="h-[400px] flex items-center justify-center">
+                                <ProgressSummary 
+                                    totalDays={userPlan.weeklyPlan.length} 
+                                    completedDays={completedDays.length}
+                                />
+                             </div>
+                             <div className="md:col-span-1 flex flex-col items-center justify-center p-8 text-center bg-secondary/50 rounded-lg">
                                 <h3 className="text-xl font-semibold">Analiza tu Rendimiento</h3>
                                 <p className="text-muted-foreground mt-2 mb-4 max-w-md">
                                     Explora gráficos detallados y descubre tus récords personales para optimizar tu entrenamiento.
@@ -575,12 +581,6 @@ export default function DashboardPage() {
                                         Ver mi Progreso Detallado
                                     </Link>
                                 </Button>
-                             </div>
-                             <div className="h-[400px] flex items-center justify-center">
-                                <ProgressSummary 
-                                    totalDays={userPlan.weeklyPlan.length} 
-                                    completedDays={completedDays.length}
-                                />
                              </div>
                          </div>
                     ) : (
