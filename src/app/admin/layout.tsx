@@ -77,9 +77,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex flex-col w-full z-10">
            <header className="flex h-16 items-center justify-between border-b border-border/30 bg-card/50 backdrop-blur-sm px-4 md:px-6 sticky top-0 z-40">
                 <div className="flex items-center gap-4">
-                  <div className="md:hidden">
-                      <SidebarTrigger />
-                  </div>
+                  <SidebarTrigger className="md:hidden" />
                   <h1 className="text-xl font-semibold font-headline">{pageTitle}</h1>
                 </div>
                 <div className="ml-auto flex items-center gap-4">
