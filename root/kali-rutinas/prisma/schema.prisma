@@ -1,3 +1,4 @@
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -10,48 +11,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User models and authentication
 model User {
-  id                String    @id @default(cuid())
-  firstName         String
-  paternalLastName  String
-  maternalLastName  String
-  name              String
-  email             String    @unique
-  password          String?
-  role              String    @default("client") // admin, client
-  status            String    @default("pendiente") // activo, pendiente, inactivo
-  registeredAt      DateTime  @default(now())
-  planStatus        String    @default("sin-plan") // aprobado, pendiente, sin-plan, n/a
-  inviteCode        String?   @unique
-  avatarUrl         String?
-
-  onboardingData    Json?
-  plan              UserPlan?
-  progressRecords   ProgressRecord[]
+  id               String    @id @default(cuid())
+  firstName        String
+  paternalLastName String
+  maternalLastName String
+  name             String
+  email            String    @unique
+  password         String?
+  role             String    @default("client") // admin, client
+  status           String    @default("pendiente") // activo, pendiente, inactivo
+  registeredAt     DateTime  @default(now())
+  planStatus       String    @default("sin-plan") // aprobado, pendiente, sin-plan, n/a
+  inviteCode       String?   @unique
+  avatarUrl        String?
+  onboardingData   Json?
+  plan             Json?
+  progress         Progress?
 }
 
-model UserPlan {
-  id              String      @id @default(cuid())
-  userId          String      @unique
-  user            User        @relation(fields: [userId], references: [id])
-  warmup          String?     @db.Text
-  recommendations String?     @db.Text
-  weeklyPlan      Json?
-}
-
-model ProgressRecord {
-  id              String      @id @default(cuid())
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  date            DateTime    @default(now())
-  progressData    Json
+model Progress {
+  id      String @id @default(cuid())
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id])
+  data    Json // JSON blob to store progress data
 }
 
 model Template {
-    id              String      @id @default(cuid())
-    title           String      @unique
-    description     String
-    level           String // Principiante, Intermedio, Avanzado
-    plan            Json
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  level       String // Principiante, Intermedio, Avanzado
+  days        Int
+  plan        Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
