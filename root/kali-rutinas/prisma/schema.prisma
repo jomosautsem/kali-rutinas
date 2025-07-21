@@ -1,9 +1,12 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -21,7 +24,7 @@ model User {
   inviteCode        String?
   avatarUrl         String?
   password          String?
-  plan              UserPlan? @relation(fields = [userPlanId], references: [id])
+  plan              UserPlan? @relation(fields: [userPlanId], references: [id])
   userPlanId        String?   @unique
   onboardingData    Json?
 }
