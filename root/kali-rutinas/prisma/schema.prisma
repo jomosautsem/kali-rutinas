@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  firstName         String
+  paternalLastName  String
+  maternalLastName  String
+  name              String
+  email             String    @unique
+  password          String? // Storing hashed passwords
+  role              String    @default("client") // "client" or "admin"
+  status            String    @default("pendiente") // "activo", "pendiente", "inactivo"
+  registeredAt      DateTime  @default(now())
+  planStatus        String    @default("sin-plan") // "aprobado", "pendiente", "sin-plan", "n/a"
+  inviteCode        String?   @unique
+  avatarUrl         String?
+  plan              Json? // Stores the entire UserPlan object
+  progress          Json? // Stores the entire ProgressData object
+  onboardingData    Json? // Stores the user's answers from the onboarding form
+  templates         Template[] // A user (admin) can create multiple templates
+}
+
+model Template {
+  id           String    @id @default(cuid())
+  title        String
+  description  String
+  level        String // "Principiante", "Intermedio", "Avanzado"
+  plan         Json // The UserPlan object for the template
+  authorId     String
+  author       User      @relation(fields: [authorId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
