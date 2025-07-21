@@ -311,10 +311,10 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
         />
       )}
       
-      {selectedUser && data?.progress && (
+      {selectedUser && selectedUserProgress?.progress && (
         <ProgressAnalytics
           user={selectedUser}
-          data={{ progress: data.progress, plan: data.plan }}
+          data={{ progress: selectedUserProgress.progress, plan: selectedUserProgress.plan }}
           isOpen={isAnalyticsOpen}
           onClose={() => setIsAnalyticsOpen(false)}
         />
