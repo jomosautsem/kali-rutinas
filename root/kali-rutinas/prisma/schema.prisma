@@ -1,7 +1,4 @@
 
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,38 +9,64 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(cuid())
-  firstName        String
-  paternalLastName String
-  maternalLastName String
-  name             String
-  email            String    @unique
-  password         String?
-  role             String    @default("client") // admin, client
-  status           String    @default("pendiente") // activo, pendiente, inactivo
-  registeredAt     DateTime  @default(now())
-  planStatus       String    @default("sin-plan") // aprobado, pendiente, sin-plan, n/a
-  inviteCode       String?   @unique
-  avatarUrl        String?
-  onboardingData   Json?
-  plan             Json?
-  progress         Progress?
+  id                String   @id @default(cuid())
+  firstName         String
+  paternalLastName  String
+  maternalLastName  String
+  name              String
+  email             String   @unique
+  role              String   @default("client") // admin, client
+  status            String   @default("pendiente") // activo, pendiente, inactivo
+  registeredAt      DateTime @default(now())
+  planStatus        String   @default("sin-plan") // aprobado, pendiente, sin-plan, n/a
+  inviteCode        String?
+  avatarUrl         String?
+  password          String?
+  onboardingData    OnboardingData?
+  plan              UserPlan?
 }
 
-model Progress {
-  id      String @id @default(cuid())
-  userId  String @unique
-  user    User   @relation(fields: [userId], references: [id])
-  data    Json // JSON blob to store progress data
+model OnboardingData {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id])
+  goals                  Json
+  currentFitnessLevel    String
+  trainingDays           Json
+  preferredWorkoutStyle  String
+  muscleFocus            Json?
+  age                    Int
+  weight                 Int
+  height                 Int
+  goalTerm               String
+  injuriesOrConditions   String?
 }
 
-model Template {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  level       String // Principiante, Intermedio, Avanzado
-  days        Int
-  plan        Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model UserPlan {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  warmup          String?   @db.Text
+  recommendations String?   @db.Text
+  weeklyPlan      DayPlan[]
+}
+
+model DayPlan {
+  id         String     @id @default(cuid())
+  planId     String
+  plan       UserPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  day        String
+  focus      String
+  exercises  Exercise[]
+}
+
+model Exercise {
+  id         String  @id @default(cuid())
+  dayPlanId  String
+  dayPlan    DayPlan @relation(fields: [dayPlanId], references: [id], onDelete: Cascade)
+  name       String
+  series     String
+  reps       String
+  rest       String
+  mediaUrl   String?
 }
