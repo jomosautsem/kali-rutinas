@@ -1,3 +1,5 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -9,64 +11,30 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(cuid())
+  id                String    @id @default(cuid())
   firstName         String
   paternalLastName  String
   maternalLastName  String
   name              String
-  email             String   @unique
-  role              String   @default("client") // admin, client
-  status            String   @default("pendiente") // activo, pendiente, inactivo
-  registeredAt      DateTime @default(now())
-  planStatus        String   @default("sin-plan") // aprobado, pendiente, sin-plan, n/a
+  email             String    @unique
+  role              String    @default("client")
+  status            String    @default("pendiente")
+  registeredAt      DateTime  @default(now())
+  planStatus        String    @default("sin-plan")
   inviteCode        String?
   avatarUrl         String?
   password          String?
-  onboardingData    OnboardingData?
-  plan              UserPlan?
-}
-
-model OnboardingData {
-  id                     String   @id @default(cuid())
-  userId                 String   @unique
-  user                   User     @relation(fields: [userId], references: [id])
-  goals                  Json
-  currentFitnessLevel    String
-  trainingDays           Json
-  preferredWorkoutStyle  String
-  muscleFocus            Json?
-  age                    Int
-  weight                 Int
-  height                 Int
-  goalTerm               String
-  injuriesOrConditions   String?
+  plan              UserPlan? @relation(fields: [userPlanId], references: [id])
+  userPlanId        String?   @unique
+  onboardingData    Json?
 }
 
 model UserPlan {
   id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id])
+  user            User?
   warmup          String?   @db.Text
   recommendations String?   @db.Text
-  weeklyPlan      DayPlan[]
-}
-
-model DayPlan {
-  id         String     @id @default(cuid())
-  planId     String
-  plan       UserPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
-  day        String
-  focus      String
-  exercises  Exercise[]
-}
-
-model Exercise {
-  id         String  @id @default(cuid())
-  dayPlanId  String
-  dayPlan    DayPlan @relation(fields: [dayPlanId], references: [id], onDelete: Cascade)
-  name       String
-  series     String
-  reps       String
-  rest       String
-  mediaUrl   String?
+  weeklyPlan      Json
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
