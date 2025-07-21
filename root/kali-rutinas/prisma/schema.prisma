@@ -1,4 +1,3 @@
-
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -11,6 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User models and authentication
 model User {
   id                String    @id @default(cuid())
   firstName         String
@@ -18,42 +18,40 @@ model User {
   maternalLastName  String
   name              String
   email             String    @unique
-  password          String
-  role              Role      @default(CLIENT)
-  status            Status    @default(PENDIENTE)
+  password          String?
+  role              String    @default("client") // admin, client
+  status            String    @default("pendiente") // activo, pendiente, inactivo
   registeredAt      DateTime  @default(now())
-  planStatus        PlanStatus @default(SIN_PLAN)
+  planStatus        String    @default("sin-plan") // aprobado, pendiente, sin-plan, n/a
   inviteCode        String?   @unique
   avatarUrl         String?
+
   onboardingData    Json?
-  plan              Json?     // Represents UserPlan
-  progress          Progress[]
+  plan              UserPlan?
+  progressRecords   ProgressRecord[]
 }
 
-model Progress {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date        DateTime @default(now())
-  progressData Json    // Represents ProgressData for a specific day/session
-  
-  @@index([userId])
+model UserPlan {
+  id              String      @id @default(cuid())
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id])
+  warmup          String?     @db.Text
+  recommendations String?     @db.Text
+  weeklyPlan      Json?
 }
 
-enum Role {
-  ADMIN
-  CLIENT
+model ProgressRecord {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  date            DateTime    @default(now())
+  progressData    Json
 }
 
-enum Status {
-  ACTIVO
-  PENDIENTE
-  INACTIVO
-}
-
-enum PlanStatus {
-  APROBADO
-  PENDIENTE
-  SIN_PLAN
-  NA
+model Template {
+    id              String      @id @default(cuid())
+    title           String      @unique
+    description     String
+    level           String // Principiante, Intermedio, Avanzado
+    plan            Json
 }
