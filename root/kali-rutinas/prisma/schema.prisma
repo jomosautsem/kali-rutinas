@@ -19,55 +19,62 @@ model User {
   name              String
   email             String    @unique
   password          String?
-  role              Role      @default(CLIENT)
-  status            Status    @default(PENDIENTE)
+  role              Role      @default(client)
+  status            Status    @default(pendiente)
   registeredAt      DateTime  @default(now())
-  planStatus        PlanStatus @default(SIN_PLAN)
+  planStatus        PlanStatus @default(sin_plan)
   inviteCode        String?   @unique
   avatarUrl         String?
-  onboardingData    Json?
-  plan              Json?     // Stores the UserPlan object
+  plan              UserPlan?
   progress          Progress[]
+  onboardingData    Json?
+}
+
+model UserPlan {
+  id              String      @id @default(cuid())
+  warmup          String?     @db.Text
+  recommendations String?     @db.Text
+  weeklyPlan      Json
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
 
 model Progress {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date        DateTime @default(now())
-  progressData Json    // Stores the ProgressData object
-  
-  @@unique([userId, date])
+  id            String    @id @default(cuid())
+  data          Json
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Template {
   id          String @id @default(cuid())
   title       String
-  description String
-  level       Level
-  plan        Json // Stores the UserPlan object
+  description String @db.Text
+  level       String
+  days        Int
+  plan        Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum Role {
-  ADMIN
-  CLIENT
+  admin
+  client
 }
 
 enum Status {
-  ACTIVO
-  PENDIENTE
-  INACTIVO
+  activo
+  pendiente
+  inactivo
 }
 
 enum PlanStatus {
-  APROBADO
-  PENDIENTE
-  SIN_PLAN
-  NA
-}
-
-enum Level {
-  PRINCIPIANTE
-  INTERMEDIO
-  AVANZADO
+  aprobado
+  pendiente
+  sin_plan
+  na
 }
