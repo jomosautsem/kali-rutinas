@@ -1,3 +1,4 @@
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -17,27 +18,56 @@ model User {
   maternalLastName  String
   name              String
   email             String    @unique
-  password          String? // Storing hashed passwords
-  role              String    @default("client") // "client" or "admin"
-  status            String    @default("pendiente") // "activo", "pendiente", "inactivo"
+  password          String?
+  role              Role      @default(CLIENT)
+  status            Status    @default(PENDIENTE)
   registeredAt      DateTime  @default(now())
-  planStatus        String    @default("sin-plan") // "aprobado", "pendiente", "sin-plan", "n/a"
+  planStatus        PlanStatus @default(SIN_PLAN)
   inviteCode        String?   @unique
   avatarUrl         String?
-  plan              Json? // Stores the entire UserPlan object
-  progress          Json? // Stores the entire ProgressData object
-  onboardingData    Json? // Stores the user's answers from the onboarding form
-  templates         Template[] // A user (admin) can create multiple templates
+  onboardingData    Json?
+  plan              Json?     // Stores the UserPlan object
+  progress          Progress[]
+}
+
+model Progress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime @default(now())
+  progressData Json    // Stores the ProgressData object
+  
+  @@unique([userId, date])
 }
 
 model Template {
-  id           String    @id @default(cuid())
-  title        String
-  description  String
-  level        String // "Principiante", "Intermedio", "Avanzado"
-  plan         Json // The UserPlan object for the template
-  authorId     String
-  author       User      @relation(fields: [authorId], references: [id])
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id          String @id @default(cuid())
+  title       String
+  description String
+  level       Level
+  plan        Json // Stores the UserPlan object
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum Status {
+  ACTIVO
+  PENDIENTE
+  INACTIVO
+}
+
+enum PlanStatus {
+  APROBADO
+  PENDIENTE
+  SIN_PLAN
+  NA
+}
+
+enum Level {
+  PRINCIPIANTE
+  INTERMEDIO
+  AVANZADO
 }
