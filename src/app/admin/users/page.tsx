@@ -18,76 +18,34 @@ const initialMockUsers: User[] = [
   { id: "user-ethan-5", firstName: "Ethan", paternalLastName: "Hunt", maternalLastName: "Carter", name: "Ethan Hunt Carter", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan", avatarUrl: "/images/avatars/avatar-05.png" },
 ];
 
-const initialTemplates: Template[] = [
-    {
-        id: "template-1",
-        title: "HIIT de Cuerpo Completo",
-        description: "Entrenamiento de intervalos de alta intensidad para todos los grupos musculares.",
-        level: "Avanzado",
-        days: 5,
-        plan: {
-            recommendations: "Asegúrate de calentar bien antes de cada sesión y mantenerte hidratado.",
-            weeklyPlan: [
-                { day: "Día 1: HIIT Total", focus: "Cardio y Resistencia", exercises: [{ name: "Burpees", series: "5", reps: "20", rest: "30s", mediaUrl: "" }] },
-                { day: "Día 2: Piernas y Glúteos", focus: "Fuerza y Potencia", exercises: [{ name: "Sentadillas con Salto", series: "4", reps: "15", rest: "45s", mediaUrl: "" }] },
-                { day: "Día 3: Core y Abdomen", focus: "Estabilidad y Fuerza", exercises: [{ name: "Plancha", series: "4", reps: "60s", rest: "30s", mediaUrl: "" }] },
-                { day: "Día 4: Tren Superior", focus: "Fuerza y Resistencia", exercises: [{ name: "Flexiones", series: "4", reps: "15", rest: "45s", mediaUrl: "" }] },
-                { day: "Día 5: Cardio Intenso", focus: "Resistencia Cardiovascular", exercises: [{ name: "Sprints", series: "8", reps: "30s", rest: "60s", mediaUrl: "" }] },
-            ]
-        }
-    },
-    {
-        id: "template-2",
-        title: "Fuerza para Principiantes",
-        description: "Una rutina de 3 días para quienes se inician en el levantamiento de pesas.",
-        level: "Principiante",
-        days: 3,
-        plan: {
-            recommendations: "Concéntrate en la técnica correcta antes de aumentar el peso. El descanso es clave.",
-            weeklyPlan: [
-                { day: "Día 1: Empuje", focus: "Pecho, Hombros, Tríceps", exercises: [{ name: "Press de Banca", series: "3", reps: "8-10", rest: "90s", mediaUrl: "" }] },
-                { day: "Día 2: Tirón", focus: "Espalda, Bíceps", exercises: [{ name: "Remo con Barra", series: "3", reps: "8-10", rest: "90s", mediaUrl: "" }] },
-                { day: "Día 3: Pierna", focus: "Cuádriceps, Isquios, Glúteos", exercises: [{ name: "Sentadilla", series: "3", reps: "8-10", rest: "90s", mediaUrl: "" }] },
-            ]
-        }
-    },
-    {
-        id: "template-3",
-        title: "Calistenia Intermedia",
-        description: "Domina tu peso corporal con progresiones para nivel intermedio.",
-        level: "Intermedio",
-        days: 4,
-        plan: {
-             recommendations: "La consistencia es clave en la calistenia. Trabaja en la calidad de cada repetición.",
-             weeklyPlan: [
-                { day: "Día 1: Tren Superior A", focus: "Flexiones y Dips", exercises: [{ name: "Flexiones Diamante", series: "4", reps: "Al fallo", rest: "120s", mediaUrl: "" }] },
-                { day: "Día 2: Tren Inferior", focus: "Sentadillas y Zancadas", exercises: [{ name: "Sentadilla Búlgara", series: "4", reps: "12-15 por pierna", rest: "90s", mediaUrl: "" }] },
-                { day: "Día 3: Tren Superior B", focus: "Dominadas y Remos", exercises: [{ name: "Dominadas", series: "5", reps: "Al fallo", rest: "120s", mediaUrl: "" }] },
-                { day: "Día 4: Habilidades y Core", focus: "Handstand y L-Sit", exercises: [{ name: "Práctica de L-Sit", series: "5", reps: "30s", rest: "60s", mediaUrl: "" }] },
-             ]
-        }
-    }
-];
+const TEMPLATES_STORAGE_KEY = "trainingTemplates";
+
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
-  const [templates, setTemplates] = useState<Template[]>(initialTemplates);
+  const [templates, setTemplates] = useState<Template[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    // This is a client-side only effect to load users from localStorage
+    // This is a client-side only effect to load data from localStorage
     if (typeof window !== 'undefined') {
       try {
+        // Load Users
         const storedUsers = localStorage.getItem("registeredUsers");
         if (storedUsers) {
           setUsers(JSON.parse(storedUsers));
         } else {
-          // If no users in localStorage, set the initial mock users
           localStorage.setItem("registeredUsers", JSON.stringify(initialMockUsers));
           setUsers(initialMockUsers);
         }
+
+        // Load Templates
+        const storedTemplates = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+        if (storedTemplates) {
+          setTemplates(JSON.parse(storedTemplates));
+        }
       } catch (error) {
-        console.error("Failed to parse users from localStorage", error);
+        console.error("Failed to parse data from localStorage", error);
         setUsers(initialMockUsers);
       }
     }
@@ -191,4 +149,4 @@ export default function AdminUsersPage() {
   )
 }
 
-    
+      

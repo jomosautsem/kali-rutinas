@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TemplateGeneratorAI } from "@/components/admin/template-generator-ai";
@@ -77,15 +77,38 @@ const initialTemplates: Template[] = [
     }
 ];
 
+const TEMPLATES_STORAGE_KEY = "trainingTemplates";
 
 export default function AdminTemplatesPage() {
-    const [templates, setTemplates] = useState<Template[]>(initialTemplates);
+    const [templates, setTemplates] = useState<Template[]>([]);
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
     const { toast } = useToast();
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const storedTemplates = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+                if (storedTemplates) {
+                    setTemplates(JSON.parse(storedTemplates));
+                } else {
+                    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(initialTemplates));
+                    setTemplates(initialTemplates);
+                }
+            } catch (error) {
+                console.error("Failed to parse templates from localStorage", error);
+                setTemplates(initialTemplates);
+            }
+        }
+    }, []);
+
+    const updateAndStoreTemplates = (newTemplates: Template[]) => {
+        setTemplates(newTemplates);
+        localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(newTemplates));
+    };
+
     const handleCreateClick = () => {
-        setSelectedTemplate(null); // No template is selected, so we are creating a new one
+        setSelectedTemplate(null);
         setIsEditorOpen(true);
     };
 
@@ -95,29 +118,29 @@ export default function AdminTemplatesPage() {
     };
 
     const handleSaveTemplate = (templateData: Template) => {
+        let updatedTemplates;
         if (selectedTemplate) {
-            // Editing existing template
-            const updatedTemplates = templates.map(t =>
+            updatedTemplates = templates.map(t =>
                 t.id === templateData.id ? { ...templateData, days: templateData.plan.weeklyPlan.length } : t
             );
-            setTemplates(updatedTemplates);
             toast({ title: "Plantilla Actualizada", description: `Se guardaron los cambios para "${templateData.title}".` });
         } else {
-            // Creating a new template
             const newTemplate: Template = {
                 ...templateData,
                 id: `template-${Date.now()}`,
                 days: templateData.plan.weeklyPlan.length,
             };
-            setTemplates(prev => [...prev, newTemplate]);
+            updatedTemplates = [...templates, newTemplate];
             toast({ title: "Plantilla Creada", description: "La nueva plantilla manual ha sido añadida." });
         }
+        updateAndStoreTemplates(updatedTemplates);
         setIsEditorOpen(false);
         setSelectedTemplate(null);
     }
     
     const handleDeleteTemplate = (templateId: string) => {
-        setTemplates(prev => prev.filter(t => t.id !== templateId));
+        const newTemplates = templates.filter(t => t.id !== templateId);
+        updateAndStoreTemplates(newTemplates);
         toast({
             variant: "destructive",
             title: "Plantilla Eliminada",
@@ -207,3 +230,5 @@ export default function AdminTemplatesPage() {
         </div>
     )
 }
+
+      
