@@ -130,6 +130,7 @@ export default function OnboardingPage() {
       height: undefined,
       goalTerm: "mediano",
       injuriesOrConditions: "",
+      exercisesPerDay: 5, // Default value
     },
     mode: "onChange",
   });
@@ -137,15 +138,18 @@ export default function OnboardingPage() {
   const watchedWorkoutStyle = form.watch("preferredWorkoutStyle");
 
   const processStep = async () => {
+    // If it's the last step, just submit. The resolver will handle full validation.
+    if (currentStep === steps.length - 1) {
+      await form.handleSubmit(onSubmit)();
+      return;
+    }
+    
+    // For other steps, validate only the fields in the current step before proceeding
     const fieldsToValidate = steps[currentStep].fields as (keyof OnboardingFormValues)[];
     const isValid = await form.trigger(fieldsToValidate, { shouldFocus: true });
     
-    if (!isValid) return;
-
-    if (currentStep < steps.length - 1) {
+    if (isValid) {
       setCurrentStep(currentStep + 1);
-    } else {
-      await form.handleSubmit(onSubmit)();
     }
   }
   
