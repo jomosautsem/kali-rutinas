@@ -153,23 +153,30 @@ export default function Home() {
                 </Button>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               variants={itemVariants}
-              className="absolute bottom-10 left-1/2 -translate-x-1/2"
+              className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center gap-2"
             >
-              <Link href="#features" className="flex flex-col items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-                <motion.span
-                  animate={{ y: [0, 5, 0] }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatType: "loop",
-                  }}
+              <Link href="#features" className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-yellow-400 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="relative rounded-full h-14 w-14 bg-background text-foreground"
                 >
-                  <ArrowDown className="h-6 w-6" />
-                </motion.span>
-                Descubre más
+                  <motion.span
+                    animate={{ y: [0, 5, 0] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      repeatType: "loop",
+                    }}
+                  >
+                    <ArrowDown className="h-6 w-6" />
+                  </motion.span>
+                </Button>
               </Link>
+              <span className="text-sm text-muted-foreground">Descubre más</span>
             </motion.div>
         </motion.section>
 
