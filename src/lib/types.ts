@@ -78,6 +78,9 @@ export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
         message: "Debes seleccionar al menos un día de entrenamiento.",
     })
     .describe('Los días específicos de la semana que el usuario puede dedicar al entrenamiento.'),
+  trainingTimePerDay: z
+    .string({ required_error: "Debes seleccionar el tiempo de entrenamiento."})
+    .describe('El tiempo aproximado que el usuario tiene para entrenar por día.'),
   preferredWorkoutStyle: z
     .string()
     .describe('El estilo de entrenamiento preferido por el usuario, ej., levantamiento de pesas, cardio, HIIT, yoga.'),

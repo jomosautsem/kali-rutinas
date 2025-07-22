@@ -50,6 +50,7 @@ export function ViewOnboardingDataDialog({ user, data, isOpen, onClose }: ViewOn
               <DataRow label="Plazo" value={data.goalTerm} />
               <DataRow label="Nivel Físico" value={data.currentFitnessLevel} />
               <DataRow label="Días de Entrenamiento" value={data.trainingDays.join(", ")} />
+              <DataRow label="Tiempo por Sesión" value={data.trainingTimePerDay} />
               <DataRow label="Estilo Preferido" value={data.preferredWorkoutStyle} />
               {data.muscleFocus && data.muscleFocus.length > 0 && (
                 <DataRow label="Enfoque Muscular" value={data.muscleFocus.join(", ")} />

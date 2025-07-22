@@ -91,7 +91,7 @@ const muscleFocusOptions = [
 const steps = [
     { id: "step-1", title: "Metas", fields: ["goals"], icon: Trophy },
     { id: "step-2", title: "Plazo", fields: ["goalTerm"], icon: Clock },
-    { id: "step-3", title: "Tu Nivel", fields: ["currentFitnessLevel", "trainingDays"], icon: HeartPulse },
+    { id: "step-3", title: "Tu Nivel", fields: ["currentFitnessLevel", "trainingDays", "trainingTimePerDay"], icon: HeartPulse },
     { id: "step-4", title: "Tu Estilo", fields: ["preferredWorkoutStyle", "otherWorkoutStyle", "muscleFocus"], icon: Dumbbell },
     { id: "step-5", title: "Tus Datos", fields: ["age", "weight", "height"], icon: User },
     { id: "step-6", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
@@ -122,6 +122,7 @@ export default function OnboardingPage() {
       goals: [],
       currentFitnessLevel: "principiante",
       trainingDays: [],
+      trainingTimePerDay: "60 minutos",
       preferredWorkoutStyle: "fuerza",
       muscleFocus: [],
       otherWorkoutStyle: "",
@@ -286,6 +287,21 @@ export default function OnboardingPage() {
                                 onChange={field.onChange}
                               />
                             </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                       <FormField control={form.control} name="trainingTimePerDay" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tiempo de Entrenamiento por Día</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Selecciona tu tiempo disponible" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="40 minutos">40 minutos</SelectItem>
+                              <SelectItem value="60 minutos">60 minutos</SelectItem>
+                              <SelectItem value="90 minutos">90 minutos</SelectItem>
+                              <SelectItem value="120 minutos">120 minutos</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )} />

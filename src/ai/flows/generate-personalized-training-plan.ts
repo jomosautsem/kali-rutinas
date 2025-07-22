@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
   tools: [searchExerciseVideo],
   prompt: `Eres un entrenador personal que se especializa en crear planes de entrenamiento personalizados y detallados.
 
-  Basado en los objetivos del usuario, nivel de condición física actual, días de entrenamiento disponibles por semana y estilo de entrenamiento preferido, crea un plan de entrenamiento detallado con el formato JSON solicitado.
+  Basado en los objetivos del usuario, nivel de condición física actual, días de entrenamiento disponibles por semana, tiempo de entrenamiento por día y estilo de entrenamiento preferido, crea un plan de entrenamiento detallado con el formato JSON solicitado.
 
   Además del plan, proporciona dos secciones de texto importantes:
   1. En el campo 'warmup', escribe una rutina de calentamiento y activación general (3-4 frases). Debe incluir movilidad articular y ejercicios de activación específicos para los principales grupos musculares.
@@ -48,7 +48,7 @@ const prompt = ai.definePrompt({
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
 
-  Para cada día de entrenamiento, debes incluir exactamente {{{exercisesPerDay}}} ejercicios.
+  Para cada día de entrenamiento, debes incluir exactamente {{{exercisesPerDay}}} ejercicios. Adapta la complejidad y el volumen de los ejercicios para que se ajusten al tiempo de entrenamiento disponible por día.
 
   Para cada ejercicio, especifica las series y las repeticiones en los campos 'series' y 'reps' respectivamente. Por ejemplo, series: "4", reps: "8-12".
   
@@ -57,6 +57,7 @@ const prompt = ai.definePrompt({
   Objetivos: {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
   Días de Entrenamiento: {{#each trainingDays}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
+  Tiempo por sesión: {{{trainingTimePerDay}}}
   Número de ejercicios por día: {{{exercisesPerDay}}}
   Estilo de Entrenamiento Preferido: {{{preferredWorkoutStyle}}}
   {{#if muscleFocus}}Enfoque Muscular Específico: {{#each muscleFocus}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
