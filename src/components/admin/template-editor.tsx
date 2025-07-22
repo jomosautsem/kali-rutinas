@@ -35,7 +35,7 @@ const templateSchema = z.object({
                 series: z.string(),
                 reps: z.string(),
                 rest: z.string(),
-                mediaUrl: z.string().optional(),
+                mediaUrl: z.string().url().or(z.literal("")).optional(),
             }))
         }))
     })
@@ -279,11 +279,13 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
   );
 }
 
-function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number; control: Control<Template>; register: UseFormRegister<Template> }) {
+function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number; control: any; register: UseFormRegister<Template> }) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: `plan.weeklyPlan.${dayIndex}.exercises`
   });
+
+  const { setValue } = useFormContext();
 
   const watchedExercises = useWatch({
       control,
@@ -294,9 +296,6 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
     <div className="space-y-2 pt-4">
       {fields.map((field, exerciseIndex) => {
         const exerciseName = watchedExercises?.[exerciseIndex]?.name;
-        const generatedUrl = exerciseName 
-            ? `https://www.youtube.com/results?search_query=${encodeURIComponent(`${exerciseName} ejercicio tutorial`)}`
-            : "";
         
         return (
             <div key={field.id} className="flex items-center gap-2 p-2 rounded-md bg-card/50">
@@ -304,6 +303,13 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
                 {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
                 placeholder="Ejercicio"
                 className="flex-grow"
+                onBlur={(e) => {
+                    const name = e.target.value;
+                    if (name) {
+                        const newUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${name} ejercicio tutorial`)}`;
+                        setValue(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`, newUrl, { shouldValidate: true });
+                    }
+                }}
             />
             <Input
                 {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
@@ -315,17 +321,16 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
                 placeholder="Reps"
                 className="w-24"
             />
-            <Input
-                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
-                value={generatedUrl}
-                placeholder="URL Video/Imagen"
-                className="flex-grow bg-muted/50"
-                readOnly
-            />
-            <Input
+             <Input
                 {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
                 placeholder="Descanso"
                 className="w-24"
+            />
+             <Input
+                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
+                placeholder="URL (se genera auto.)"
+                className="flex-grow bg-muted/50"
+                readOnly
             />
             <Button
                 type="button"
