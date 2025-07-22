@@ -424,6 +424,7 @@ export default function DashboardPage() {
   const [completedDays, setCompletedDays] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const { toast } = useToast();
 
   const containerVariants = {
@@ -547,11 +548,7 @@ export default function DashboardPage() {
           u.email === userEmail ? { ...u, customPlanRequest: 'requested' } : u
         );
         localStorage.setItem("registeredUsers", JSON.stringify(users));
-        toast({
-            title: "Solicitud Enviada",
-            description: "Tu solicitud de rutina personalizada ha sido enviada al administrador. Se pondrá en contacto contigo pronto.",
-        });
-        // Optionally, update local user state to reflect the change immediately in the UI if needed
+        setIsRequestModalOpen(true);
         if(user) {
             setUser({...user, customPlanRequest: 'requested'});
         }
@@ -577,6 +574,7 @@ export default function DashboardPage() {
   }
 
   return (
+    <>
     <motion.div
       variants={containerVariants}
       initial="hidden"
@@ -664,5 +662,23 @@ export default function DashboardPage() {
         </Tabs>
       </motion.div>
     </motion.div>
+    
+    <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
+        <DialogContent>
+            <DialogHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
+                </div>
+                <DialogTitle className="text-2xl font-headline">¡Felicidades!</DialogTitle>
+            </DialogHeader>
+            <div className="text-center text-muted-foreground py-4">
+                <p>Tu rutina totalmente personalizada está siendo creada y analizada por un coach y Kali Gym.</p>
+            </div>
+            <div className="flex justify-center">
+                <Button onClick={() => setIsRequestModalOpen(false)}>Entendido</Button>
+            </div>
+        </DialogContent>
+    </Dialog>
+    </>
   )
 }
