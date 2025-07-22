@@ -29,7 +29,12 @@ const searchExerciseVideo = ai.defineTool(
 export async function generatePersonalizedTrainingPlan(
   input: GeneratePersonalizedTrainingPlanInput
 ): Promise<GeneratePersonalizedTrainingPlanOutput> {
-  return generatePersonalizedTrainingPlanFlow(input);
+  // Definitive fix: Ensure the input is always valid by correcting old data
+  const correctedInput: GeneratePersonalizedTrainingPlanInput = {
+      ...input,
+      exercisesPerDay: Math.max(input.exercisesPerDay || 0, 8), 
+  };
+  return generatePersonalizedTrainingPlanFlow(correctedInput);
 }
 
 const prompt = ai.definePrompt({
@@ -42,9 +47,10 @@ const prompt = ai.definePrompt({
 
   Basado en los objetivos del usuario, nivel de condición física actual, días de entrenamiento disponibles por semana, tiempo de entrenamiento por día y estilo de entrenamiento preferido, crea un plan de entrenamiento detallado con el formato JSON solicitado.
 
-  Además del plan, proporciona dos secciones de texto importantes:
-  1. En el campo 'warmup', escribe una rutina de calentamiento y activación general (3-4 frases). Debe incluir movilidad articular y ejercicios de activación específicos para los principales grupos musculares.
-  2. En el campo 'recommendations', proporciona una recomendación general (2-3 frases) sobre consejos de post-entrenamiento, como enfriamiento, hidratación, nutrición o mentalidad.
+  Además del plan, proporciona tres secciones de texto importantes:
+  1. En el campo 'planJustification', explica en 2-3 frases por qué la estructura del plan (ejercicios, series, repeticiones) es ideal para el 'preferredWorkoutStyle' del usuario (ej., por qué es bueno para hipertrofia, fuerza, etc.).
+  2. En el campo 'warmup', escribe una rutina de calentamiento y activación general (3-4 frases). Debe incluir movilidad articular y ejercicios de activación específicos para los principales grupos musculares.
+  3. En el campo 'recommendations', proporciona una recomendación general (2-3 frases) sobre consejos de post-entrenamiento, como enfriamiento, hidratación, nutrición o mentalidad.
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
 
@@ -99,5 +105,3 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
     return sanitizedPlan;
   }
 );
-
-    

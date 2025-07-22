@@ -27,6 +27,7 @@ export const DayPlanSchema = z.object({
 export type DayPlan = z.infer<typeof DayPlanSchema>;
 
 export const UserPlanSchema = z.object({
+  planJustification: z.string().optional().describe('Una breve explicación de por qué el plan es adecuado para el estilo de entrenamiento elegido por el usuario.'),
   warmup: z.string().optional().describe('Instrucciones de calentamiento y activación muscular antes del entrenamiento.'),
   recommendations: z.string().optional().describe('Sugerencias generales o recomendaciones para el plan.'),
   weeklyPlan: z.array(DayPlanSchema).describe('Un plan de entrenamiento semanal completo, dividido por días.'),
@@ -139,5 +140,3 @@ export const GenerateTrainingTemplateInputSchema = z.object({
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres.").describe("Una descripción detallada de la plantilla de entrenamiento deseada."),
 });
 export type GenerateTrainingTemplateInput = z.infer<typeof GenerateTrainingTemplateInputSchema>;
-
-    

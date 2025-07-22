@@ -177,6 +177,15 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                         </AlertDescription>
                     </Alert>
                 )}
+                 {plan.planJustification && (
+                    <Alert className="bg-purple-500/5 border-purple-500/20">
+                        <Sparkles className="h-5 w-5 text-purple-400" />
+                        <AlertTitle className="font-headline text-purple-400">¿Por qué este plan?</AlertTitle>
+                        <AlertDescription className="text-foreground/80">
+                            {plan.planJustification}
+                        </AlertDescription>
+                    </Alert>
+                )}
                 {plan.recommendations && (
                     <Alert className="bg-primary/5 border-primary/20">
                         <Lightbulb className="h-5 w-5 text-primary" />
@@ -710,5 +719,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
