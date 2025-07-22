@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, UserPlus } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -562,7 +562,7 @@ export default function DashboardPage() {
       animate="visible"
       className="space-y-6"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex items-center justify-between flex-wrap gap-4">
         {user ? (
           <h1 className="text-2xl md:text-3xl font-bold font-headline">
             Bienvenido, <span className="text-primary">{user.firstName}</span>
@@ -570,9 +570,17 @@ export default function DashboardPage() {
         ) : (
           <Skeleton className="h-9 w-64" />
         )}
-        {planStatus !== 'pendiente' && (
-          <PlanGenerator onPlanGenerated={handlePlanGenerated} />
-        )}
+        <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href="/onboarding">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Empezar Onboarding
+              </Link>
+            </Button>
+            {planStatus !== 'pendiente' && (
+              <PlanGenerator onPlanGenerated={handlePlanGenerated} />
+            )}
+        </div>
       </motion.div>
       
       <motion.div variants={itemVariants}>
@@ -640,3 +648,5 @@ export default function DashboardPage() {
     </motion.div>
   )
 }
+
+    
