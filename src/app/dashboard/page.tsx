@@ -375,7 +375,7 @@ const SinPlan = () => (
     </Alert>
 )
 
-const ProgressSummary = ({ totalDays, completedDays, onToggleDay, progress, onProgressChange, onSaveChanges, user }: { totalDays: number; completedDaysCount: number; }) => {
+const ProgressSummary = ({ totalDays, completedDaysCount }: { totalDays: number; completedDaysCount: number; }) => {
     const progressPercentage = totalDays > 0 ? (completedDaysCount / totalDays) * 100 : 0;
     const allDaysCompleted = totalDays > 0 && completedDaysCount === totalDays;
 
