@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react"
 import { UserTableClient } from "@/components/admin/user-table-client"
 import type { User, UserPlan } from "@/lib/types";
-import { AddUserDialog } from "@/components/admin/add-user-dialog";
 import { useToast } from "@/hooks/use-toast";
 import type { Template } from "@/app/admin/templates/page";
 
@@ -50,21 +49,6 @@ export default function AdminUsersPage() {
     }
   }, []);
 
-  const handleAddUser = (newUser: Omit<User, 'id' | 'role' | 'status' | 'registeredAt' | 'planStatus' | 'name'>) => {
-    const userWithDefaults: User = {
-        ...newUser,
-        id: `user-${newUser.email}-${Date.now()}`,
-        name: `${newUser.firstName} ${newUser.paternalLastName} ${newUser.maternalLastName}`.trim(),
-        role: "client",
-        status: "activo",
-        registeredAt: new Date().toISOString().split("T")[0],
-        planStatus: "sin-plan",
-    };
-    const updatedUsers = [...users, userWithDefaults];
-    setUsers(updatedUsers);
-    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
-  }
-  
   const handleEditUser = (updatedUser: User) => {
      const updatedUsers = users.map(user =>
       user.id === updatedUser.id ? { ...user, ...updatedUser, name: `${updatedUser.firstName} ${updatedUser.paternalLastName} ${updatedUser.maternalLastName}`.trim() } : user
@@ -133,7 +117,6 @@ export default function AdminUsersPage() {
           <h1 className="text-3xl font-bold font-headline">Gestión de Usuarios</h1>
           <p className="text-muted-foreground">Ver, gestionar y confirmar cuentas de usuario.</p>
         </div>
-        <AddUserDialog onAddUser={handleAddUser} />
       </div>
       <UserTableClient 
         users={users}
