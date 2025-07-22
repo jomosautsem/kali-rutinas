@@ -188,6 +188,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                                             type="number"
                                             placeholder="Ej. 5"
                                             {...field}
+                                            value={field.value ?? ""}
                                             onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}
                                         />
                                       </FormControl>
