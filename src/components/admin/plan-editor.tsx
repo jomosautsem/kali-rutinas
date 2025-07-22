@@ -207,9 +207,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     if (!user) return;
     setIsGenerating(true);
     try {
-        const generationInput: GeneratePersonalizedTrainingPlanInput | null = onboardingData;
-
-        if (!generationInput) {
+        if (!onboardingData) {
             toast({
                 variant: "destructive",
                 title: "Error",
@@ -219,9 +217,9 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
         }
 
         // Definitive fix: Ensure exercisesPerDay is valid before calling the AI
-        const correctedInput = {
-            ...generationInput,
-            exercisesPerDay: Math.max(generationInput.exercisesPerDay || 0, 8),
+        const correctedInput: GeneratePersonalizedTrainingPlanInput = {
+            ...onboardingData,
+            exercisesPerDay: Math.max(onboardingData.exercisesPerDay || 0, 8),
         };
 
         const newPlan = await generatePersonalizedTrainingPlan(correctedInput);
@@ -511,5 +509,3 @@ function ExercisesFieldArray({ dayIndex, control, register, onPreviewClick }: { 
         </div>
     )
 }
-
-    

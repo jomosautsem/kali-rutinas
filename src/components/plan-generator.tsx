@@ -127,7 +127,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
         }
 
         try {
-             // Definitive fix: Ensure the input is always valid
+             // Definitive fix: Ensure the input is always valid by correcting old data
             const finalInput: GeneratePersonalizedTrainingPlanInput = {
                 ...onboardingData,
                 exercisesPerDay: Math.max(values.exercisesPerDay, 8),
@@ -238,5 +238,3 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
         </Dialog>
     )
 }
-
-    

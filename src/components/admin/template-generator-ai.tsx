@@ -54,10 +54,11 @@ export function TemplateGeneratorAI({ users, onSaveTemplate }: TemplateGenerator
     }
 
     const onboardingData = JSON.parse(onboardingDataString);
-    // Add a default exercisesPerDay if not present
-    const generationInput: GeneratePersonalizedTrainingPlanInput = {
+    
+    // Definitive fix: Ensure exercisesPerDay is valid before calling the AI
+    const correctedInput: GeneratePersonalizedTrainingPlanInput = {
       ...onboardingData,
-      exercisesPerDay: onboardingData.exercisesPerDay || 8, 
+      exercisesPerDay: Math.max(onboardingData.exercisesPerDay || 0, 8), 
     };
 
     setIsLoading(true);
@@ -65,7 +66,7 @@ export function TemplateGeneratorAI({ users, onSaveTemplate }: TemplateGenerator
     setIsDialogOpen(false); // Close the dialog to show loading state on the main page
 
     try {
-      const result = await generatePersonalizedTrainingPlan(generationInput);
+      const result = await generatePersonalizedTrainingPlan(correctedInput);
       setGeneratedPlan(result);
       setSelectedUser(user);
       toast({
