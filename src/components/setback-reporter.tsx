@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -150,10 +151,13 @@ export function SetbackReporter() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading} className="w-full">
-                <Sparkles className="mr-2 h-4 w-4" />
-                Obtener Consejo
-              </Button>
+              <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={isLoading}>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Obtener Consejo
+                  </Button>
+              </DialogFooter>
             </form>
           </Form>
         )}

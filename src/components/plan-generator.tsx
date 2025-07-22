@@ -90,7 +90,7 @@ const steps = [
     { id: "step-4", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
 ];
 
-const WarningView = ({ onAccept }: { onAccept: () => void }) => (
+const WarningView = ({ onAccept, onCancel }: { onAccept: () => void; onCancel: () => void; }) => (
     <div className="flex flex-col items-center justify-center text-center p-4 space-y-6 h-full">
         <DialogHeader>
             <DialogTitle className="font-headline text-2xl">Antes de Continuar</DialogTitle>
@@ -104,9 +104,12 @@ const WarningView = ({ onAccept }: { onAccept: () => void }) => (
                 Eres responsable de entrenar de forma segura.
             </AlertDescription>
         </Alert>
-        <Button onClick={onAccept} className="w-full">
-            Entiendo y acepto, deseo continuar
-        </Button>
+        <div className="flex w-full gap-4">
+            <Button onClick={onCancel} variant="outline" className="w-full">Cancelar</Button>
+            <Button onClick={onAccept} className="w-full">
+                Entiendo y acepto, deseo continuar
+            </Button>
+        </div>
     </div>
 );
 
@@ -126,15 +129,19 @@ const PlanGeneratedConfirmation = ({ onClose }: { onClose: () => void }) => (
 );
 
 
-const FormNavigation = ({ currentStep, totalSteps, isLoading, onBack, isDirty }: { currentStep: number; totalSteps: number; isLoading: boolean; onBack: () => void; isDirty: boolean; }) => {
+const FormNavigation = ({ currentStep, totalSteps, isLoading, onBack, isDirty, onCancel }: { currentStep: number; totalSteps: number; isLoading: boolean; onBack: () => void; isDirty: boolean; onCancel: () => void; }) => {
     const isLastStep = currentStep === totalSteps - 1;
     return (
         <div className="flex justify-between items-center pt-4 mt-auto border-t">
             <div>
-                {currentStep > 0 && (
+                {currentStep > 0 ? (
                     <Button type="button" variant="outline" onClick={onBack} disabled={isLoading}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Anterior
+                    </Button>
+                ) : (
+                    <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+                        Cancelar
                     </Button>
                 )}
             </div>
@@ -287,7 +294,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
         }
 
         if (!hasAcceptedWarning) {
-            return <WarningView onAccept={() => setHasAcceptedWarning(true)} />;
+            return <WarningView onAccept={() => setHasAcceptedWarning(true)} onCancel={() => handleOpenChange(false)} />;
         }
 
         return (
@@ -404,6 +411,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                             isLoading={isLoading}
                             onBack={prevStep}
                             isDirty={isDirty}
+                            onCancel={() => handleOpenChange(false)}
                         />
                     </form>
                 </FormProvider>
