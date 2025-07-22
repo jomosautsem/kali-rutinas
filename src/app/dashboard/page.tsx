@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, UserPlus } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -571,10 +571,10 @@ export default function DashboardPage() {
           <Skeleton className="h-9 w-64" />
         )}
         <div className="flex items-center gap-2">
-            <Button asChild variant="outline">
+            <Button asChild className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
               <Link href="/onboarding">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Empezar Onboarding
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Rutina Personalizada
               </Link>
             </Button>
             {planStatus !== 'pendiente' && (
@@ -648,5 +648,3 @@ export default function DashboardPage() {
     </motion.div>
   )
 }
-
-    
