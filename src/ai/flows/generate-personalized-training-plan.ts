@@ -60,7 +60,7 @@ const prompt = ai.definePrompt({
   Tiempo por sesión: {{{trainingTimePerDay}}}
   Número de ejercicios por día: {{{exercisesPerDay}}}
   Estilo de Entrenamiento Preferido: {{{preferredWorkoutStyle}}}
-  {{#if muscleFocus}}Enfoque Muscular Específico: {{#each muscleFocus}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
+  {{#if muscleFocus}}Enfoque Muscular Específico: {{#each muscleFocus}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}. Si se solicita un enfoque en 'cuerpo completo con enfoque en tren superior/inferior', diseña rutinas de cuerpo completo pero da prioridad o mayor volumen a los ejercicios del área especificada.{{/if}}
   {{#if injuriesOrConditions}}Consideraciones Importantes (lesiones/condiciones): {{{injuriesOrConditions}}}. Adapta el plan para evitar ejercicios que puedan agravar estas condiciones.{{/if}}
   Edad: {{{age}}}
   Peso (kg): {{{weight}}}
