@@ -86,9 +86,6 @@ const muscleFocusOptions = [
     { value: "hombros", label: "Hombros" },
     { value: "brazos", label: "Brazos (Completo)" },
     { value: "abdomen", label: "Abdomen" },
-    { value: "cuerpo completo (general)", label: "Cuerpo Completo (General)" },
-    { value: "cuerpo completo con enfoque en tren superior", label: "Enfoque Tren Superior" },
-    { value: "cuerpo completo con enfoque en tren inferior", label: "Enfoque Tren Inferior" },
 ]
 
 const steps = [
@@ -440,3 +437,5 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
+
+    
