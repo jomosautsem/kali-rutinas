@@ -537,6 +537,27 @@ export default function DashboardPage() {
         });
     }
   };
+  
+  const handleCustomPlanRequest = () => {
+    if (typeof window !== 'undefined' && userEmail) {
+      const storedUsers = localStorage.getItem("registeredUsers");
+      if (storedUsers) {
+        let users: User[] = JSON.parse(storedUsers);
+        users = users.map(u => 
+          u.email === userEmail ? { ...u, customPlanRequest: 'requested' } : u
+        );
+        localStorage.setItem("registeredUsers", JSON.stringify(users));
+        toast({
+            title: "Solicitud Enviada",
+            description: "Tu solicitud de rutina personalizada ha sido enviada al administrador. Se pondrá en contacto contigo pronto.",
+        });
+        // Optionally, update local user state to reflect the change immediately in the UI if needed
+        if(user) {
+            setUser({...user, customPlanRequest: 'requested'});
+        }
+      }
+    }
+  };
 
 
   const renderPlanContent = () => {
@@ -571,11 +592,9 @@ export default function DashboardPage() {
           <Skeleton className="h-9 w-64" />
         )}
         <div className="flex items-center gap-2">
-            <Button asChild className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
-              <Link href="/onboarding">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Rutina Personalizada
-              </Link>
+            <Button onClick={handleCustomPlanRequest} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Rutina Personalizada
             </Button>
             {planStatus !== 'pendiente' && (
               <PlanGenerator onPlanGenerated={handlePlanGenerated} />

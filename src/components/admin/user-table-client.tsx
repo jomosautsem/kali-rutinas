@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus, XCircle, PowerOff, Power } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus, XCircle, PowerOff, Power, Sparkles } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -169,10 +169,18 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                   </div>
                 </TableCell>
                 <TableCell>
-                   <Badge variant="outline" className={cn("font-semibold gap-1.5", statusConfig.className)}>
-                     <statusConfig.icon className="h-3 w-3" />
-                     {statusConfig.label}
-                   </Badge>
+                   <div className="flex flex-col gap-1.5">
+                    <Badge variant="outline" className={cn("font-semibold gap-1.5", statusConfig.className)}>
+                      <statusConfig.icon className="h-3 w-3" />
+                      {statusConfig.label}
+                    </Badge>
+                     {user.customPlanRequest === 'requested' && (
+                        <Badge variant="secondary" className="gap-1.5 bg-blue-500/20 border-blue-500/30 text-blue-300">
+                           <Sparkles className="h-3 w-3" />
+                           Plan Personalizado
+                        </Badge>
+                     )}
+                   </div>
                 </TableCell>
                  <TableCell>
                   <span className="font-mono text-xs">{user.inviteCode || "-"}</span>

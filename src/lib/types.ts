@@ -47,6 +47,7 @@ export type User = {
   inviteCode?: string;
   avatarUrl?: string;
   password?: string;
+  customPlanRequest?: 'requested' | 'none';
 };
 
 export type ProgressData = {
