@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
-import { GeneratePersonalizedTrainingPlanInputSchema, type GeneratePersonalizedTrainingPlanInput } from "@/lib/types"
+import { GeneratePersonalizedTrainingPlanInputSchema, type GeneratePersonalizedTrainingPlanInput, type UserPlan } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
 
 import { Button } from "@/components/ui/button"
@@ -25,7 +25,7 @@ import {
 import { Sparkles, CheckCircle, Loader2, AlertTriangle, Send } from "lucide-react"
 
 type PlanGeneratorProps = {
-  onPlanGenerated: () => void;
+  onPlanGenerated: (newPlan: UserPlan) => void;
 };
 
 const formSchema = z.object({
@@ -49,7 +49,7 @@ const WarningView = ({ onAccept, onCancel }: { onAccept: () => void; onCancel: (
             <AlertTriangle className="h-5 w-5" />
             <AlertTitle className="font-bold">Advertencia Importante</AlertTitle>
             <AlertDescription>
-                Este generador creará un plan de entrenamiento basado únicamente en la información que proporcionaste al registrarte. El plan generado por la IA (Inteligencia Artificial) no será revisado por un coach o administrador de Kali Gym. Eres responsable de entrenar de forma segura.
+                 Este generador creará un plan de entrenamiento basado únicamente en la información que proporcionaste al registrarte. El plan generado por la IA (Inteligencia Artificial) **no será revisado por un coach**. Eres responsable de entrenar de forma segura.
             </AlertDescription>
         </Alert>
         <div className="flex w-full gap-4">
@@ -65,13 +65,12 @@ const WarningView = ({ onAccept, onCancel }: { onAccept: () => void; onCancel: (
 const PlanGeneratedConfirmation = ({ onClose }: { onClose: () => void }) => (
     <div className="flex flex-col items-center justify-center text-center p-8 space-y-4 h-full">
         <CheckCircle className="h-16 w-16 text-green-500 animate-pulse" />
-        <h3 className="text-xl font-bold font-headline">¡Plan Enviado para Revisión!</h3>
+        <h3 className="text-xl font-bold font-headline">¡Tu Plan está Listo!</h3>
         <p className="text-muted-foreground">
-            Tu plan personalizado ha sido creado y enviado a Kali Gym.
-            Recibirás una notificación cuando sea aprobado.
+            Tu nuevo plan de entrenamiento ha sido generado y ya está disponible en tu panel.
         </p>
         <Button onClick={onClose} className="mt-4">
-            Entendido
+            Empezar a Entrenar
         </Button>
     </div>
 );
@@ -134,14 +133,13 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
             };
 
             const plan = await generatePersonalizedTrainingPlan(finalInput);
-            localStorage.setItem(`userPlan_${email}`, JSON.stringify(plan));
             
             toast({
-                title: "Plan Enviado para Aprobación",
-                description: "Tu plan actualizado se ha guardado y está pendiente de revisión.",
+                title: "¡Plan Generado con Éxito!",
+                description: "Tu nuevo plan de entrenamiento está listo en tu panel.",
             });
 
-            onPlanGenerated();
+            onPlanGenerated(plan);
             setView('success');
 
         } catch (error) {
@@ -238,3 +236,5 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
         </Dialog>
     )
 }
+
+    

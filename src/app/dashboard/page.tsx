@@ -493,18 +493,26 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const handlePlanGenerated = () => {
-    if (typeof window !== 'undefined') {
-      const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
+  const handlePlanGenerated = (newPlan: UserPlan) => {
+    if (typeof window !== 'undefined' && userEmail) {
       const storedUsers = localStorage.getItem("registeredUsers");
-      if (loggedInUserEmail && storedUsers) {
+      if (storedUsers) {
         let users: User[] = JSON.parse(storedUsers);
-        users = users.map(u => u.email === loggedInUserEmail ? { ...u, planStatus: 'pendiente' } : u);
+        users = users.map(u => 
+          u.email === userEmail ? { ...u, planStatus: 'aprobado' } : u
+        );
         localStorage.setItem("registeredUsers", JSON.stringify(users));
-        setPlanStatus('pendiente');
-        // Reset progress when a new plan is generated
-        localStorage.removeItem(`completedDays_${loggedInUserEmail}`);
-        localStorage.removeItem(`progress_${loggedInUserEmail}`);
+
+        // Update the plan in state and localStorage
+        setUserPlan(newPlan);
+        localStorage.setItem(`userPlan_${userEmail}`, JSON.stringify(newPlan));
+        
+        // Update status
+        setPlanStatus('aprobado');
+        
+        // Reset progress for the new plan
+        localStorage.removeItem(`completedDays_${userEmail}`);
+        localStorage.removeItem(`progress_${userEmail}`);
         setCompletedDays([]);
         setProgress({});
       }
@@ -627,7 +635,7 @@ export default function DashboardPage() {
                         <CardDescription>
                             {planStatus === 'aprobado' 
                                 ? "Este es tu horario de entrenamiento personalizado para la semana."
-                                : "Tu plan de entrenamiento aparecerá aquí una vez que sea aprobado."
+                                : "Tu plan de entrenamiento aparecerá aquí una vez que esté listo."
                             }
                         </CardDescription>
                     </CardHeader>
@@ -719,3 +727,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
