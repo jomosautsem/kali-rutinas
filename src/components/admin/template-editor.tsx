@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { useForm, useFieldArray, useWatch, Control, UseFormRegister, FormProvider } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, Control, UseFormRegister, FormProvider, useFormContext } from "react-hook-form";
 import type { UserPlan } from "@/lib/types";
 import type { Template } from "@/app/admin/templates/page"; // Import Template type
 import { zodResolver } from "@hookform/resolvers/zod";
