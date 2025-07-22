@@ -375,9 +375,9 @@ const SinPlan = () => (
     </Alert>
 )
 
-const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; completedDays: number; }) => {
-    const progressPercentage = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
-    const allDaysCompleted = totalDays > 0 && completedDays === totalDays;
+const ProgressSummary = ({ totalDays, completedDays, onToggleDay, progress, onProgressChange, onSaveChanges, user }: { totalDays: number; completedDaysCount: number; }) => {
+    const progressPercentage = totalDays > 0 ? (completedDaysCount / totalDays) * 100 : 0;
+    const allDaysCompleted = totalDays > 0 && completedDaysCount === totalDays;
 
     return (
         <div className="flex flex-col items-center justify-between h-full p-6 text-center space-y-4">
@@ -407,7 +407,7 @@ const ProgressSummary = ({ totalDays, completedDays }: { totalDays: number; comp
                     />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold font-headline">{completedDays}</span>
+                    <span className="text-3xl font-bold font-headline">{completedDaysCount}</span>
                     <span className="text-sm text-muted-foreground">de {totalDays}</span>
                 </div>
             </div>
@@ -658,7 +658,7 @@ export default function DashboardPage() {
                                 <div className="h-[400px] flex items-center justify-center">
                                     <ProgressSummary 
                                         totalDays={userPlan.weeklyPlan.length} 
-                                        completedDays={completedDays.length}
+                                        completedDaysCount={completedDays.length}
                                     />
                                 </div>
                                 <div className="md:col-span-1 flex flex-col items-center justify-center p-8 text-center bg-secondary/50 rounded-lg">
