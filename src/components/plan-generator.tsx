@@ -32,7 +32,7 @@ const formSchema = z.object({
   exercisesPerDay: z
     .number({ required_error: "El número de ejercicios es requerido." })
     .int("Debe ser un número entero.")
-    .min(3, "Como mínimo 3 ejercicios por día.")
+    .min(8, "Como mínimo 8 ejercicios por día.")
     .max(10, "Como máximo 10 ejercicios por día."),
 });
 
@@ -89,7 +89,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            exercisesPerDay: 5,
+            exercisesPerDay: 8,
         },
         mode: "onChange",
     });
@@ -196,7 +196,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {[5, 6, 7, 8, 9, 10].map(num => (
+                                            {[8, 9, 10].map(num => (
                                                 <SelectItem key={num} value={String(num)}>
                                                     {num} ejercicios
                                                 </SelectItem>

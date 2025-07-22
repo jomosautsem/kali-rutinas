@@ -131,7 +131,7 @@ export default function OnboardingPage() {
       height: undefined,
       goalTerm: "mediano",
       injuriesOrConditions: "",
-      exercisesPerDay: 5, // Default value
+      exercisesPerDay: 8, // Default value
     },
     mode: "onChange",
   });
@@ -437,5 +437,3 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
-
-    
