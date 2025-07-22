@@ -106,6 +106,17 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
   }
   
   const handleAssignTemplateOpen = (user: User) => {
+    const data = localStorage.getItem(`onboardingData_${user.email}`);
+    if (data) {
+        try {
+            setSelectedOnboardingData(JSON.parse(data));
+        } catch (e) {
+            console.error("Failed to parse onboarding data for template assignment:", e);
+            setSelectedOnboardingData(null);
+        }
+    } else {
+        setSelectedOnboardingData(null);
+    }
     setSelectedUser(user);
     setIsAssignTemplateDialogOpen(true);
   }
@@ -338,6 +349,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
         <AssignTemplateDialog
           user={selectedUser}
           templates={templates}
+          onboardingData={selectedOnboardingData}
           isOpen={isAssignTemplateDialogOpen}
           onClose={() => setIsAssignTemplateDialogOpen(false)}
           onAssign={(plan) => onSaveAndApprovePlan(selectedUser.id, plan)}

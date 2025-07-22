@@ -1,8 +1,8 @@
 
 "use client"
 
-import { useState } from "react";
-import type { User, UserPlan } from "@/lib/types";
+import { useState, useMemo } from "react";
+import type { User, UserPlan, GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
 import type { Template } from "@/app/admin/templates/page";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilePlus, Dumbbell, Calendar, AlertTriangle } from "lucide-react";
+import { FilePlus, Dumbbell, Calendar, AlertTriangle, AlertCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -28,23 +28,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 type AssignTemplateDialogProps = {
   user: User | null;
   templates: Template[];
+  onboardingData: GeneratePersonalizedTrainingPlanInput | null;
   isOpen: boolean;
   onClose: () => void;
   onAssign: (plan: UserPlan) => void;
 };
 
-export function AssignTemplateDialog({ user, templates, isOpen, onClose, onAssign }: AssignTemplateDialogProps) {
+export function AssignTemplateDialog({ user, templates, onboardingData, isOpen, onClose, onAssign }: AssignTemplateDialogProps) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
 
+  const filteredTemplates = useMemo(() => {
+    if (!onboardingData || !onboardingData.trainingDays) {
+      return templates; // Si no hay datos, mostrar todas las plantillas
+    }
+    const userTrainingDaysCount = onboardingData.trainingDays.length;
+    return templates.filter(t => t.plan.weeklyPlan.length === userTrainingDaysCount);
+  }, [templates, onboardingData]);
+
   const handleAssign = () => {
-    const template = templates.find(t => t.id === selectedTemplateId);
+    const template = filteredTemplates.find(t => t.id === selectedTemplateId);
     if (template) {
       onAssign(template.plan);
       onClose();
     }
   };
 
-  const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
+  const selectedTemplate = filteredTemplates.find(t => t.id === selectedTemplateId);
 
   if (!user) return null;
 
@@ -57,28 +66,39 @@ export function AssignTemplateDialog({ user, templates, isOpen, onClose, onAssig
             Asignar Plantilla a {user.name}
           </DialogTitle>
           <DialogDescription>
-            Selecciona una plantilla de la lista para asignarla como el plan de entrenamiento de este usuario. Esto reemplazará su plan actual.
+            Selecciona una plantilla para asignarla. Se muestran solo las plantillas que coinciden con los 
+            <span className="font-bold"> {onboardingData?.trainingDays.length || 'N/A'} días</span> de entrenamiento del usuario.
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-4">
-          <div>
-            <label htmlFor="template-select" className="text-sm font-medium">
-              Plantillas Disponibles
-            </label>
-            <Select onValueChange={setSelectedTemplateId} value={selectedTemplateId}>
-              <SelectTrigger id="template-select" className="mt-1">
-                <SelectValue placeholder="Selecciona una plantilla..." />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map(template => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.title} ({template.level})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {filteredTemplates.length > 0 ? (
+            <div>
+              <label htmlFor="template-select" className="text-sm font-medium">
+                Plantillas Disponibles
+              </label>
+              <Select onValueChange={setSelectedTemplateId} value={selectedTemplateId}>
+                <SelectTrigger id="template-select" className="mt-1">
+                  <SelectValue placeholder="Selecciona una plantilla..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredTemplates.map(template => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.title} ({template.level})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-6 border-2 border-dashed rounded-lg">
+                <AlertCircle className="h-10 w-10 mb-3" />
+                <p className="font-semibold">No se encontraron plantillas compatibles</p>
+                <p className="text-sm">
+                    No hay plantillas que tengan exactamente {onboardingData?.trainingDays.length} días de entrenamiento.
+                </p>
+            </div>
+          )}
 
           {selectedTemplate && (
             <Card className="bg-secondary/50">
