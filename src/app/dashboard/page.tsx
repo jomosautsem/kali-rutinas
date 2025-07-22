@@ -593,7 +593,6 @@ export default function DashboardPage() {
         )}
         <div className="flex items-center gap-2">
             <Button onClick={handleCustomPlanRequest} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
-                <Sparkles className="mr-2 h-4 w-4" />
                 Rutina Personalizada
             </Button>
             {planStatus !== 'pendiente' && (
