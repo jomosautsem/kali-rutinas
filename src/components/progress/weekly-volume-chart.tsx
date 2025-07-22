@@ -7,7 +7,8 @@ import type { UserPlan, ProgressData } from "@/lib/types";
 import { calculateWeeklyVolume } from "@/lib/progress-utils";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 type WeeklyVolumeChartProps = {
   plan: UserPlan;
@@ -26,7 +27,17 @@ export function WeeklyVolumeChart({ plan, progress }: WeeklyVolumeChartProps) {
           Visualización del volumen de entrenamiento total (peso x reps) completado por día.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        <Alert className="bg-blue-900/10 border-blue-500/20">
+            <Info className="h-5 w-5 text-blue-400" />
+            <AlertTitle className="font-headline text-blue-300">¿Qué es el Volumen de Entrenamiento?</AlertTitle>
+            <AlertDescription className="text-foreground/80">
+                Esta métrica representa el trabajo total que has realizado. Se calcula multiplicando
+                <span className="font-semibold text-primary/80"> (Peso x Repeticiones x Series) </span> 
+                para cada ejercicio. ¡Es normal ver números altos! Un mayor volumen a lo largo del tiempo indica que estás progresando.
+            </AlertDescription>
+        </Alert>
+
         {hasData ? (
             <div className="h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
