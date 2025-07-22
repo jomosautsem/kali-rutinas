@@ -285,46 +285,60 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
     name: `plan.weeklyPlan.${dayIndex}.exercises`
   });
 
+  const watchedExercises = useWatch({
+      control,
+      name: `plan.weeklyPlan.${dayIndex}.exercises`
+  });
+
   return (
     <div className="space-y-2 pt-4">
-      {fields.map((field, exerciseIndex) => (
-        <div key={field.id} className="flex items-center gap-2 p-2 rounded-md bg-card/50">
-          <Input
-            {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
-            placeholder="Ejercicio"
-            className="flex-grow"
-          />
-          <Input
-            {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
-            placeholder="Series"
-            className="w-20"
-          />
-          <Input
-            {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
-            placeholder="Reps"
-            className="w-24"
-          />
-          <Input
-            {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
-            placeholder="URL Video/Imagen"
-            className="flex-grow"
-          />
-          <Input
-            {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
-            placeholder="Descanso"
-            className="w-24"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => remove(exerciseIndex)}
-            className="text-muted-foreground hover:text-destructive flex-shrink-0"
-          >
-            <XCircle className="h-4 w-4" />
-          </Button>
-        </div>
-      ))}
+      {fields.map((field, exerciseIndex) => {
+        const exerciseName = watchedExercises?.[exerciseIndex]?.name;
+        const generatedUrl = exerciseName 
+            ? `https://www.youtube.com/results?search_query=${encodeURIComponent(`${exerciseName} ejercicio tutorial`)}`
+            : "";
+        
+        return (
+            <div key={field.id} className="flex items-center gap-2 p-2 rounded-md bg-card/50">
+            <Input
+                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
+                placeholder="Ejercicio"
+                className="flex-grow"
+            />
+            <Input
+                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
+                placeholder="Series"
+                className="w-20"
+            />
+            <Input
+                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
+                placeholder="Reps"
+                className="w-24"
+            />
+            <Input
+                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
+                value={generatedUrl}
+                placeholder="URL Video/Imagen"
+                className="flex-grow bg-muted/50"
+                readOnly
+            />
+            <Input
+                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
+                placeholder="Descanso"
+                className="w-24"
+            />
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => remove(exerciseIndex)}
+                className="text-muted-foreground hover:text-destructive flex-shrink-0"
+            >
+                <XCircle className="h-4 w-4" />
+            </Button>
+            </div>
+        );
+      })}
       <Button
         type="button"
         variant="outline"
