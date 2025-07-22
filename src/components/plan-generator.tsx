@@ -13,8 +13,14 @@ import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 import { Sparkles, CheckCircle, Loader2, AlertTriangle, Send } from "lucide-react"
 
@@ -183,15 +189,20 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>Ejercicios por Día de Entrenamiento</FormLabel>
-                                      <FormControl>
-                                        <Input 
-                                            type="number"
-                                            placeholder="Ej. 5"
-                                            {...field}
-                                            value={field.value ?? ""}
-                                            onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}
-                                        />
-                                      </FormControl>
+                                      <Select onValueChange={(value) => field.onChange(parseInt(value, 10))} defaultValue={String(field.value)}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecciona una cantidad" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {[5, 6, 7, 8, 9, 10].map(num => (
+                                                <SelectItem key={num} value={String(num)}>
+                                                    {num} ejercicios
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                      </Select>
                                       <FormMessage />
                                     </FormItem>
                                   )}
