@@ -2,51 +2,75 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { generateTrainingTemplate } from "@/ai/flows/generate-training-template"
-import { GenerateTrainingTemplateInputSchema } from "@/lib/types"
-import type { z } from "zod"
-import type { UserPlan } from "@/lib/types"
+import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan";
+import type { User, UserPlan, GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
-import { Sparkles, Lightbulb, ClipboardCopy, Save } from "lucide-react"
-
-type FormData = z.infer<typeof GenerateTrainingTemplateInputSchema>;
+import { Sparkles, Lightbulb, ClipboardCopy, Save, User as UserIcon, AlertCircle, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Label } from "../ui/label";
 
 type TemplateGeneratorAIProps = {
+  users: User[];
   onSaveTemplate: (plan: UserPlan, description: string) => void;
 };
 
 
-export function TemplateGeneratorAI({ onSaveTemplate }: TemplateGeneratorAIProps) {
+export function TemplateGeneratorAI({ users, onSaveTemplate }: TemplateGeneratorAIProps) {
   const [generatedPlan, setGeneratedPlan] = useState<UserPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
   const { toast } = useToast();
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(GenerateTrainingTemplateInputSchema),
-    defaultValues: {
-      description: "Un plan de 4 días enfocado en hipertrofia, dividiendo los grupos musculares en empuje, tirón, pierna y cuerpo completo.",
-    },
-  });
+  const activeUsers = users.filter(u => u.status === 'activo' && u.role === 'client');
 
-  const descriptionValue = form.watch("description");
+  async function handleGenerate() {
+    if (!selectedUserId) {
+        toast({ variant: "destructive", title: "Selecciona un usuario" });
+        return;
+    }
+    
+    const user = users.find(u => u.id === selectedUserId);
+    if (!user) {
+        toast({ variant: "destructive", title: "Usuario no encontrado" });
+        return;
+    }
 
-  async function onSubmit(values: FormData) {
+    const onboardingDataString = localStorage.getItem(`onboardingData_${user.email}`);
+    if (!onboardingDataString) {
+        toast({
+            variant: "destructive",
+            title: "Datos no encontrados",
+            description: `El usuario ${user.name} no tiene datos de onboarding para generar un plan.`
+        });
+        return;
+    }
+
+    const onboardingData = JSON.parse(onboardingDataString);
+    // Add a default exercisesPerDay if not present
+    const generationInput: GeneratePersonalizedTrainingPlanInput = {
+      ...onboardingData,
+      exercisesPerDay: onboardingData.exercisesPerDay || 5, 
+    };
+
     setIsLoading(true);
     setGeneratedPlan(null);
+    setIsDialogOpen(false); // Close the dialog to show loading state on the main page
+
     try {
-      const result = await generateTrainingTemplate(values);
+      const result = await generatePersonalizedTrainingPlan(generationInput);
       setGeneratedPlan(result);
+      setSelectedUser(user);
       toast({
         title: "¡Plantilla Generada!",
-        description: "Revisa la nueva plantilla y guárdala si te gusta.",
+        description: `Plan creado basado en el perfil de ${user.name}.`,
       });
     } catch (error) {
       console.error("Error generating template:", error);
@@ -57,6 +81,7 @@ export function TemplateGeneratorAI({ onSaveTemplate }: TemplateGeneratorAIProps
       });
     } finally {
       setIsLoading(false);
+      setSelectedUserId('');
     }
   }
 
@@ -70,9 +95,10 @@ export function TemplateGeneratorAI({ onSaveTemplate }: TemplateGeneratorAIProps
   }
 
   const handleSave = () => {
-    if (generatedPlan) {
-      onSaveTemplate(generatedPlan, descriptionValue);
+    if (generatedPlan && selectedUser) {
+      onSaveTemplate(generatedPlan, `Plantilla de ${selectedUser.name}`);
       setGeneratedPlan(null); // Clear the generated plan after saving
+      setSelectedUser(null);
     }
   };
 
@@ -80,37 +106,55 @@ export function TemplateGeneratorAI({ onSaveTemplate }: TemplateGeneratorAIProps
     <div className="grid md:grid-cols-2 gap-8 items-start">
       <div>
         <CardHeader className="px-0 pt-0">
-          <CardTitle className="font-headline">Generar con IA</CardTitle>
-          <CardDescription>Describe el tipo de plantilla que necesitas y la IA creará un plan de entrenamiento completo.</CardDescription>
+          <CardTitle className="font-headline">Generar con IA desde Perfil</CardTitle>
+          <CardDescription>Crea plantillas basadas en los datos reales de tus clientes. Selecciona un usuario para generar un plan de entrenamiento adaptado a sus metas y características.</CardDescription>
         </CardHeader>
         <CardContent className="px-0 pb-0">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción de la Plantilla</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Ej: Plan de calistenia para principiantes de 3 días..." {...field} rows={4} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading} className="w-full">
-                <Sparkles className="mr-2 h-4 w-4" />
-                {isLoading ? "Generando..." : "Generar Plantilla"}
-              </Button>
-            </form>
-          </Form>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button className="w-full">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Generar Plantilla desde Usuario
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Seleccionar Usuario</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="user-select">Usuario Activo</Label>
+                            <Select onValueChange={setSelectedUserId}>
+                                <SelectTrigger id="user-select">
+                                    <SelectValue placeholder="Selecciona un cliente..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {activeUsers.length > 0 ? (
+                                        activeUsers.map(user => (
+                                            <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
+                                        ))
+                                    ) : (
+                                        <div className="px-4 py-2 text-sm text-muted-foreground">No hay usuarios activos.</div>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                         <Button onClick={handleGenerate} disabled={!selectedUserId || isLoading}>
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
+                            Generar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </CardContent>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="font-headline">Resultado Generado</CardTitle>
+           {selectedUser && <CardDescription>Basado en el perfil de: <span className="font-semibold text-primary">{selectedUser.name}</span></CardDescription>}
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -157,7 +201,7 @@ export function TemplateGeneratorAI({ onSaveTemplate }: TemplateGeneratorAIProps
               </div>
               <Button className="w-full" onClick={handleSave}>
                 <Save className="mr-2 h-4 w-4" />
-                Guardar Plantilla
+                Guardar como Plantilla
               </Button>
             </div>
           ) : (

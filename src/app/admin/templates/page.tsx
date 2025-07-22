@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { TemplateGeneratorAI } from "@/components/admin/template-generator-ai";
 import { TemplateEditor } from "@/components/admin/template-editor";
 import { PlusCircle, Dumbbell, Calendar, Trash2 } from "lucide-react";
-import type { UserPlan } from "@/lib/types";
+import type { User, UserPlan } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -81,6 +81,7 @@ const TEMPLATES_STORAGE_KEY = "trainingTemplates";
 
 export default function AdminTemplatesPage() {
     const [templates, setTemplates] = useState<Template[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
     const { toast } = useToast();
@@ -88,6 +89,7 @@ export default function AdminTemplatesPage() {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             try {
+                // Load templates
                 const storedTemplates = localStorage.getItem(TEMPLATES_STORAGE_KEY);
                 if (storedTemplates) {
                     setTemplates(JSON.parse(storedTemplates));
@@ -95,9 +97,17 @@ export default function AdminTemplatesPage() {
                     localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(initialTemplates));
                     setTemplates(initialTemplates);
                 }
+                
+                // Load users
+                 const storedUsers = localStorage.getItem("registeredUsers");
+                if (storedUsers) {
+                    setUsers(JSON.parse(storedUsers));
+                }
+
             } catch (error) {
-                console.error("Failed to parse templates from localStorage", error);
+                console.error("Failed to parse data from localStorage", error);
                 setTemplates(initialTemplates);
+                setUsers([]);
             }
         }
     }, []);
@@ -169,8 +179,8 @@ export default function AdminTemplatesPage() {
     const handleSaveAITemplate = (plan: UserPlan, description: string) => {
         const newTemplate: Template = {
             id: `template-ai-${Date.now()}`,
-            title: `IA: ${description.substring(0, 20)}...`,
-            description: `Generado por IA: ${description}`,
+            title: `${description}`,
+            description: `Generado por IA para el perfil de ${description}`,
             level: "Intermedio", // Default level for AI generated templates
             days: plan.weeklyPlan.length,
             plan: {
@@ -265,7 +275,7 @@ export default function AdminTemplatesPage() {
                     <CardTitle className="font-headline">Generador de Plantillas con IA</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <TemplateGeneratorAI onSaveTemplate={handleSaveAITemplate} />
+                    <TemplateGeneratorAI users={users} onSaveTemplate={handleSaveAITemplate} />
                 </CardContent>
             </Card>
 
