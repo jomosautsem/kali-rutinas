@@ -34,11 +34,11 @@ const initialTemplates: Template[] = [
             warmup: "Comienza con 5 minutos de cardio ligero (saltar la cuerda o trotar). Sigue con círculos de brazos, rotaciones de torso y sentadillas sin peso para activar las articulaciones principales.",
             recommendations: "Asegúrate de calentar bien antes de cada sesión y mantenerte hidratado. Realiza estiramientos suaves al finalizar.",
             weeklyPlan: [
-                { day: "Día 1: HIIT Total", focus: "Cardio y Resistencia", exercises: [{ name: "Burpees", series: "5", reps: "20", rest: "30s", mediaUrl: "" }] },
-                { day: "Día 2: Piernas y Glúteos", focus: "Fuerza y Potencia", exercises: [{ name: "Sentadillas con Salto", series: "4", reps: "15", rest: "45s", mediaUrl: "" }] },
-                { day: "Día 3: Core y Abdomen", focus: "Estabilidad y Fuerza", exercises: [{ name: "Plancha", series: "4", reps: "60s", rest: "30s", mediaUrl: "" }] },
-                { day: "Día 4: Tren Superior", focus: "Fuerza y Resistencia", exercises: [{ name: "Flexiones", series: "4", reps: "15", rest: "45s", mediaUrl: "" }] },
-                { day: "Día 5: Cardio Intenso", focus: "Resistencia Cardiovascular", exercises: [{ name: "Sprints", series: "8", reps: "30s", rest: "60s", mediaUrl: "" }] },
+                { day: "Día 1: HIIT Total", focus: "Cardio y Resistencia", exercises: [{ name: "Burpees", series: "5", reps: "20", rest: "30s", mediaUrl: "https://www.youtube.com/results?search_query=Burpees+ejercicio+tutorial" }] },
+                { day: "Día 2: Piernas y Glúteos", focus: "Fuerza y Potencia", exercises: [{ name: "Sentadillas con Salto", series: "4", reps: "15", rest: "45s", mediaUrl: "https://www.youtube.com/results?search_query=Sentadillas+con+Salto+ejercicio+tutorial" }] },
+                { day: "Día 3: Core y Abdomen", focus: "Estabilidad y Fuerza", exercises: [{ name: "Plancha", series: "4", reps: "60s", rest: "30s", mediaUrl: "https://www.youtube.com/results?search_query=Plancha+ejercicio+tutorial" }] },
+                { day: "Día 4: Tren Superior", focus: "Fuerza y Resistencia", exercises: [{ name: "Flexiones", series: "4", reps: "15", rest: "45s", mediaUrl: "https://www.youtube.com/results?search_query=Flexiones+ejercicio+tutorial" }] },
+                { day: "Día 5: Cardio Intenso", focus: "Resistencia Cardiovascular", exercises: [{ name: "Sprints", series: "8", reps: "30s", rest: "60s", mediaUrl: "https://www.youtube.com/results?search_query=Sprints+ejercicio+tutorial" }] },
             ]
         }
     },
@@ -52,9 +52,9 @@ const initialTemplates: Template[] = [
             warmup: "5-10 minutos en la caminadora o bicicleta estática. Realiza 2 series de 15 repeticiones de bisagras de cadera, band pull-aparts y rotaciones de hombros con poco peso.",
             recommendations: "Concéntrate en la técnica correcta antes de aumentar el peso. El descanso es clave para la recuperación y el crecimiento.",
             weeklyPlan: [
-                { day: "Día 1: Empuje", focus: "Pecho, Hombros, Tríceps", exercises: [{ name: "Press de Banca", series: "3", reps: "8-10", rest: "90s", mediaUrl: "" }] },
-                { day: "Día 2: Tirón", focus: "Espalda, Bíceps", exercises: [{ name: "Remo con Barra", series: "3", reps: "8-10", rest: "90s", mediaUrl: "" }] },
-                { day: "Día 3: Pierna", focus: "Cuádriceps, Isquios, Glúteos", exercises: [{ name: "Sentadilla", series: "3", reps: "8-10", rest: "90s", mediaUrl: "" }] },
+                { day: "Día 1: Empuje", focus: "Pecho, Hombros, Tríceps", exercises: [{ name: "Press de Banca", series: "3", reps: "8-10", rest: "90s", mediaUrl: "https://www.youtube.com/results?search_query=Press+de+Banca+ejercicio+tutorial" }] },
+                { day: "Día 2: Tirón", focus: "Espalda, Bíceps", exercises: [{ name: "Remo con Barra", series: "3", reps: "8-10", rest: "90s", mediaUrl: "https://www.youtube.com/results?search_query=Remo+con+Barra+ejercicio+tutorial" }] },
+                { day: "Día 3: Pierna", focus: "Cuádriceps, Isquios, Glúteos", exercises: [{ name: "Sentadilla", series: "3", reps: "8-10", rest: "90s", mediaUrl: "https://www.youtube.com/results?search_query=Sentadilla+ejercicio+tutorial" }] },
             ]
         }
     },
@@ -68,10 +68,10 @@ const initialTemplates: Template[] = [
              warmup: "Movilidad de muñecas y hombros es crucial. Haz círculos, flexiones y extensiones. Activa el core con planchas y hollow body holds (2 series de 30s).",
              recommendations: "La consistencia es clave en la calistenia. Trabaja en la calidad de cada repetición y no te saltes los días de descanso.",
              weeklyPlan: [
-                { day: "Día 1: Tren Superior A", focus: "Flexiones y Dips", exercises: [{ name: "Flexiones Diamante", series: "4", reps: "Al fallo", rest: "120s", mediaUrl: "" }] },
-                { day: "Día 2: Tren Inferior", focus: "Sentadillas y Zancadas", exercises: [{ name: "Sentadilla Búlgara", series: "4", reps: "12-15 por pierna", rest: "90s", mediaUrl: "" }] },
-                { day: "Día 3: Tren Superior B", focus: "Dominadas y Remos", exercises: [{ name: "Dominadas", series: "5", reps: "Al fallo", rest: "120s", mediaUrl: "" }] },
-                { day: "Día 4: Habilidades y Core", focus: "Handstand y L-Sit", exercises: [{ name: "Práctica de L-Sit", series: "5", reps: "30s", rest: "60s", mediaUrl: "" }] },
+                { day: "Día 1: Tren Superior A", focus: "Flexiones y Dips", exercises: [{ name: "Flexiones Diamante", series: "4", reps: "Al fallo", rest: "120s", mediaUrl: "https://www.youtube.com/results?search_query=Flexiones+Diamante+ejercicio+tutorial" }] },
+                { day: "Día 2: Tren Inferior", focus: "Sentadillas y Zancadas", exercises: [{ name: "Sentadilla Búlgara", series: "4", reps: "12-15 por pierna", rest: "90s", mediaUrl: "https://www.youtube.com/results?search_query=Sentadilla+Búlgara+ejercicio+tutorial" }] },
+                { day: "Día 3: Tren Superior B", focus: "Dominadas y Remos", exercises: [{ name: "Dominadas", series: "5", reps: "Al fallo", rest: "120s", mediaUrl: "https://www.youtube.com/results?search_query=Dominadas+ejercicio+tutorial" }] },
+                { day: "Día 4: Habilidades y Core", focus: "Handstand y L-Sit", exercises: [{ name: "Práctica de L-Sit", series: "5", reps: "30s", rest: "60s", mediaUrl: "https://www.youtube.com/results?search_query=Práctica+de+L-Sit+ejercicio+tutorial" }] },
              ]
         }
     }
@@ -118,17 +118,35 @@ export default function AdminTemplatesPage() {
     };
 
     const handleSaveTemplate = (templateData: Template) => {
+        // Automatically add mediaUrl to each exercise
+        const planWithMedia = {
+            ...templateData.plan,
+            weeklyPlan: templateData.plan.weeklyPlan.map(day => ({
+                ...day,
+                exercises: day.exercises.map(exercise => {
+                    const query = encodeURIComponent(`${exercise.name} ejercicio tutorial`);
+                    const mediaUrl = `https://www.youtube.com/results?search_query=${query}`;
+                    return { ...exercise, mediaUrl };
+                })
+            }))
+        };
+        
+        const finalTemplateData = { 
+            ...templateData, 
+            plan: planWithMedia,
+            days: planWithMedia.weeklyPlan.length,
+        };
+
         let updatedTemplates;
         if (selectedTemplate) {
             updatedTemplates = templates.map(t =>
-                t.id === templateData.id ? { ...templateData, days: templateData.plan.weeklyPlan.length } : t
+                t.id === finalTemplateData.id ? finalTemplateData : t
             );
-            toast({ title: "Plantilla Actualizada", description: `Se guardaron los cambios para "${templateData.title}".` });
+            toast({ title: "Plantilla Actualizada", description: `Se guardaron los cambios para "${finalTemplateData.title}".` });
         } else {
-            const newTemplate: Template = {
-                ...templateData,
+            const newTemplate = {
+                ...finalTemplateData,
                 id: `template-${Date.now()}`,
-                days: templateData.plan.weeklyPlan.length,
             };
             updatedTemplates = [...templates, newTemplate];
             toast({ title: "Plantilla Creada", description: "La nueva plantilla manual ha sido añadida." });
