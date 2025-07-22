@@ -75,14 +75,8 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
     inputSchema: GeneratePersonalizedTrainingPlanInputSchema,
     outputSchema: GeneratePersonalizedTrainingPlanOutputSchema,
   },
-  async input => {
-    // Ensure exercisesPerDay is at least 8 to handle old data from localStorage
-    const correctedInput = {
-      ...input,
-      exercisesPerDay: Math.max(input.exercisesPerDay, 8),
-    };
-
-    const {output} = await prompt(correctedInput);
+  async (input) => {
+    const {output} = await prompt(input);
 
     if (!output) {
       throw new Error("La IA no pudo generar un plan.");
@@ -105,3 +99,5 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
     return sanitizedPlan;
   }
 );
+
+    

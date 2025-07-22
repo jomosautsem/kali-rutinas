@@ -207,17 +207,24 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     if (!user) return;
     setIsGenerating(true);
     try {
-        const generationInput: GeneratePersonalizedTrainingPlanInput = onboardingData || {
-            goals: ["ganar masa muscular", "ganar fuerza"],
-            currentFitnessLevel: "intermedio",
-            trainingDays: ["lunes", "martes", "jueves", "viernes"],
-            preferredWorkoutStyle: "Levantamiento de pesas",
-            age: 28,
-            weight: 80,
-            height: 180,
-            goalTerm: "mediano"
+        const generationInput: GeneratePersonalizedTrainingPlanInput | null = onboardingData;
+
+        if (!generationInput) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "No se encontraron datos de onboarding para este usuario."
+            });
+            return;
+        }
+
+        // Definitive fix: Ensure exercisesPerDay is valid before calling the AI
+        const correctedInput = {
+            ...generationInput,
+            exercisesPerDay: Math.max(generationInput.exercisesPerDay || 0, 8),
         };
-        const newPlan = await generatePersonalizedTrainingPlan(generationInput);
+
+        const newPlan = await generatePersonalizedTrainingPlan(correctedInput);
         
         form.reset(newPlan);
         setActiveDayIndex(0);
@@ -504,3 +511,5 @@ function ExercisesFieldArray({ dayIndex, control, register, onPreviewClick }: { 
         </div>
     )
 }
+
+    
