@@ -3,13 +3,25 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, FileText, CheckCircle, ArrowRight, UserCheck } from "lucide-react"
+import { Users, FileText, CheckCircle, ArrowRight, UserCheck, Sparkles, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import type { User } from "@/lib/types";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { ChartContainer } from "@/components/ui/chart";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+
+type PendingTask = {
+    id: string;
+    type: 'approveUser' | 'customPlan' | 'reviewPlan';
+    title: string;
+    description: string;
+    icon: React.ElementType;
+    color: string;
+    user: User;
+}
 
 const AdminDashboardPage = () => {
   const [stats, setStats] = useState([
@@ -18,10 +30,11 @@ const AdminDashboardPage = () => {
     { title: "Planes Pendientes", value: "0", icon: CheckCircle, color: "text-yellow-400" },
     { title: "Usuarios Pendientes", value: "0", icon: UserCheck, color: "text-orange-400" },
   ]);
-  const [recentActivity, setRecentActivity] = useState<User[]>([]);
+  const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
+  const { toast } = useToast();
 
-  useEffect(() => {
+  const loadDashboardData = () => {
     if (typeof window !== 'undefined') {
       const storedUsers = localStorage.getItem("registeredUsers");
       const users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
@@ -29,30 +42,82 @@ const AdminDashboardPage = () => {
       const totalUsers = users.length;
       const approvedPlans = users.filter(u => u.planStatus === 'aprobado').length;
       const pendingPlans = users.filter(u => u.planStatus === 'pendiente').length;
-      const pendingUsers = users.filter(u => u.status === 'pendiente').length;
+      const pendingUsersCount = users.filter(u => u.status === 'pendiente').length;
 
       setStats([
         { title: "Usuarios Totales", value: totalUsers.toString(), icon: Users, color: "text-blue-400" },
         { title: "Planes Aprobados", value: approvedPlans.toString(), icon: FileText, color: "text-green-400" },
         { title: "Planes Pendientes", value: pendingPlans.toString(), icon: CheckCircle, color: "text-yellow-400" },
-        { title: "Usuarios Pendientes", value: pendingUsers.toString(), icon: UserCheck, color: "text-orange-400" },
+        { title: "Usuarios Pendientes", value: pendingUsersCount.toString(), icon: UserCheck, color: "text-orange-400" },
       ]);
-      
-      const recentPendingUsers = users
-        .filter(u => u.status === 'pendiente')
-        .sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime())
-        .slice(0, 5);
-        
-      setRecentActivity(recentPendingUsers);
       
       const activeUsers = users.filter(u => u.status === 'activo').length;
       setChartData([
         { name: "Totales", value: totalUsers },
         { name: "Activos", value: activeUsers },
-        { name: "Pendientes", value: pendingUsers }
+        { name: "Pendientes", value: pendingUsersCount }
       ]);
+      
+      const tasks: PendingTask[] = [];
+      users.forEach(user => {
+          if (user.status === 'pendiente') {
+              tasks.push({
+                  id: `approve-${user.id}`,
+                  type: 'approveUser',
+                  title: 'Aprobar nuevo usuario',
+                  description: `El usuario ${user.name} se ha registrado y necesita aprobación.`,
+                  icon: UserCheck,
+                  color: "text-orange-400",
+                  user: user,
+              });
+          }
+          if (user.customPlanRequest === 'requested') {
+              tasks.push({
+                  id: `custom-${user.id}`,
+                  type: 'customPlan',
+                  title: 'Rutina personalizada solicitada',
+                  description: `${user.name} ha solicitado una rutina totalmente personalizada.`,
+                  icon: Sparkles,
+                  color: "text-blue-400",
+                  user: user,
+              });
+          }
+          if (user.planStatus === 'pendiente') {
+              tasks.push({
+                  id: `review-${user.id}`,
+                  type: 'reviewPlan',
+                  title: 'Revisar plan generado',
+                  description: `Se ha generado un plan con IA para ${user.name} que requiere tu revisión.`,
+                  icon: FileText,
+                  color: "text-yellow-400",
+                  user: user,
+              });
+          }
+      });
+      setPendingTasks(tasks);
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'registeredUsers') {
+        loadDashboardData();
+        toast({
+            title: "Datos Actualizados",
+            description: "La lista de usuarios ha cambiado."
+        });
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    };
+
+  }, [toast]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -102,6 +167,36 @@ const AdminDashboardPage = () => {
         ))}
       </motion.div>
 
+       <motion.div variants={itemVariants}>
+            <Card>
+            <CardHeader>
+                <CardTitle className="font-headline">Lista de Tareas Pendientes</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {pendingTasks.length > 0 ? (
+                pendingTasks.map(task => (
+                   <div key={task.id} className="flex items-center p-3 rounded-md bg-secondary/30">
+                    <task.icon className={cn("h-6 w-6 mr-4", task.color)} />
+                    <div className="flex-grow">
+                        <p className="font-semibold">{task.title}</p>
+                        <p className="text-sm text-muted-foreground">{task.description}</p>
+                    </div>
+                    <Link href="/admin/users" className="ml-auto">
+                        <Button size="sm" variant="secondary">Revisar</Button>
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center text-center py-8 text-muted-foreground">
+                    <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
+                    <p className="font-semibold">¡Todo al día!</p>
+                    <p className="text-sm">No tienes tareas pendientes por el momento.</p>
+                </div>
+              )}
+            </CardContent>
+            </Card>
+        </motion.div>
+
       <motion.div 
         variants={containerVariants}
         className="grid gap-8 md:grid-cols-3"
@@ -147,7 +242,7 @@ const AdminDashboardPage = () => {
                 </Link>
                 <Link href="/admin/templates" className="block">
                 <Button variant="outline" className="w-full justify-between hover:border-primary">
-                    Actualizar Plantillas <ArrowRight />
+                    Gestionar Plantillas <ArrowRight />
                 </Button>
                 </Link>
                 <Link href="/admin/status" className="block">
@@ -160,32 +255,10 @@ const AdminDashboardPage = () => {
         </motion.div>
       </motion.div>
       
-       <motion.div variants={itemVariants}>
-            <Card>
-            <CardHeader>
-                <CardTitle className="font-headline">Nuevas Aprobaciones Pendientes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recentActivity.length > 0 ? (
-                recentActivity.map(user => (
-                   <div key={user.id} className="flex items-center p-3 rounded-md bg-secondary/30">
-                    <UserCheck className="h-5 w-5 mr-4 text-orange-400" />
-                    <p className="text-sm text-muted-foreground">
-                      Nuevo usuario <span className="font-semibold text-foreground">{user.name}</span> necesita aprobación.
-                    </p>
-                    <Link href="/admin/users" className="ml-auto">
-                        <Button size="sm" variant="secondary">Revisar</Button>
-                    </Link>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No hay nuevos usuarios pendientes.</p>
-              )}
-            </CardContent>
-            </Card>
-        </motion.div>
     </motion.div>
   )
 }
 
 export default AdminDashboardPage;
+
+    
