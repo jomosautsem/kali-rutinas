@@ -69,7 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pageTitle = navItems.find(item => pathname.startsWith(item.href))?.label || 'Admin';
 
   const mockUser = {
-    name: "Admin User",
+    name: "Jorge Morales",
     email: "kalicentrodeportivotemixco@gmail.com",
     avatarUrl: "/images/avatars/avatar-04.png",
   }
@@ -107,3 +107,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </SidebarProvider>
   );
 }
+
+    
