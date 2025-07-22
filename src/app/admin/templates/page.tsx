@@ -166,6 +166,36 @@ export default function AdminTemplatesPage() {
         });
     };
 
+    const handleSaveAITemplate = (plan: UserPlan, description: string) => {
+        const newTemplate: Template = {
+            id: `template-ai-${Date.now()}`,
+            title: `IA: ${description.substring(0, 20)}...`,
+            description: `Generado por IA: ${description}`,
+            level: "Intermedio", // Default level for AI generated templates
+            days: plan.weeklyPlan.length,
+            plan: {
+                ...plan,
+                weeklyPlan: plan.weeklyPlan.map(day => ({
+                    ...day,
+                    exercises: day.exercises.map(exercise => {
+                        const query = encodeURIComponent(`${exercise.name} ejercicio tutorial`);
+                        return {
+                            ...exercise,
+                            mediaUrl: exercise.mediaUrl || `https://www.youtube.com/results?search_query=${query}`
+                        };
+                    })
+                }))
+            }
+        };
+
+        const updatedTemplates = [...templates, newTemplate];
+        updateAndStoreTemplates(updatedTemplates);
+        toast({
+            title: "Plantilla de IA Guardada",
+            description: "La nueva plantilla generada por IA ha sido añadida a tu lista."
+        });
+    }
+
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
@@ -235,7 +265,7 @@ export default function AdminTemplatesPage() {
                     <CardTitle className="font-headline">Generador de Plantillas con IA</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <TemplateGeneratorAI />
+                    <TemplateGeneratorAI onSaveTemplate={handleSaveAITemplate} />
                 </CardContent>
             </Card>
 
@@ -248,5 +278,3 @@ export default function AdminTemplatesPage() {
         </div>
     )
 }
-
-      

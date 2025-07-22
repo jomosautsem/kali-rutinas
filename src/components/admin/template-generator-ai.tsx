@@ -15,11 +15,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
-import { Sparkles, Lightbulb, ClipboardCopy } from "lucide-react"
+import { Sparkles, Lightbulb, ClipboardCopy, Save } from "lucide-react"
 
 type FormData = z.infer<typeof GenerateTrainingTemplateInputSchema>;
 
-export function TemplateGeneratorAI() {
+type TemplateGeneratorAIProps = {
+  onSaveTemplate: (plan: UserPlan, description: string) => void;
+};
+
+
+export function TemplateGeneratorAI({ onSaveTemplate }: TemplateGeneratorAIProps) {
   const [generatedPlan, setGeneratedPlan] = useState<UserPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -30,6 +35,8 @@ export function TemplateGeneratorAI() {
       description: "Un plan de 4 días enfocado en hipertrofia, dividiendo los grupos musculares en empuje, tirón, pierna y cuerpo completo.",
     },
   });
+
+  const descriptionValue = form.watch("description");
 
   async function onSubmit(values: FormData) {
     setIsLoading(true);
@@ -61,6 +68,13 @@ export function TemplateGeneratorAI() {
         description: "El JSON de la plantilla ha sido copiado.",
     })
   }
+
+  const handleSave = () => {
+    if (generatedPlan) {
+      onSaveTemplate(generatedPlan, descriptionValue);
+      setGeneratedPlan(null); // Clear the generated plan after saving
+    }
+  };
 
   return (
     <div className="grid md:grid-cols-2 gap-8 items-start">
@@ -116,6 +130,15 @@ export function TemplateGeneratorAI() {
                         Copiar JSON
                     </Button>
                 </div>
+              {generatedPlan.warmup && (
+                <div className="p-3 rounded-md bg-secondary/50 border">
+                    <h4 className="font-semibold flex items-center gap-2 mb-2">
+                        <Sparkles className="text-primary"/>
+                        Calentamiento
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{generatedPlan.warmup}</p>
+                </div>
+              )}
               {generatedPlan.recommendations && (
                 <div className="p-3 rounded-md bg-secondary/50 border">
                   <h4 className="font-semibold flex items-center gap-2 mb-2">
@@ -132,7 +155,10 @@ export function TemplateGeneratorAI() {
                     </div>
                 ))}
               </div>
-              <Button className="w-full">Guardar Plantilla</Button>
+              <Button className="w-full" onClick={handleSave}>
+                <Save className="mr-2 h-4 w-4" />
+                Guardar Plantilla
+              </Button>
             </div>
           ) : (
             <div className="text-center text-muted-foreground py-10">
