@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SetbackReporter } from "@/components/setback-reporter";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
@@ -424,7 +424,7 @@ export default function DashboardPage() {
   const [completedDays, setCompletedDays] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [requestModalState, setRequestModalState] = useState<'closed' | 'confirming' | 'success'>('closed');
   const { toast } = useToast();
 
   const containerVariants = {
@@ -548,7 +548,7 @@ export default function DashboardPage() {
           u.email === userEmail ? { ...u, customPlanRequest: 'requested' } : u
         );
         localStorage.setItem("registeredUsers", JSON.stringify(users));
-        setIsRequestModalOpen(true);
+        setRequestModalState('success');
         if(user) {
             setUser({...user, customPlanRequest: 'requested'});
         }
@@ -573,6 +573,12 @@ export default function DashboardPage() {
     }
   }
 
+  const handleOpenModalChange = (isOpen: boolean) => {
+      if (!isOpen) {
+          setRequestModalState('closed');
+      }
+  }
+
   return (
     <>
     <motion.div
@@ -590,7 +596,7 @@ export default function DashboardPage() {
           <Skeleton className="h-9 w-64" />
         )}
         <div className="flex items-center gap-2">
-            <Button onClick={handleCustomPlanRequest} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
+            <Button onClick={() => setRequestModalState('confirming')} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
                 Rutina Personalizada
             </Button>
             {planStatus !== 'pendiente' && (
@@ -663,24 +669,42 @@ export default function DashboardPage() {
       </motion.div>
     </motion.div>
     
-    <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
+    <Dialog open={requestModalState !== 'closed'} onOpenChange={handleOpenModalChange}>
         <DialogContent>
-            <DialogHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
+            {requestModalState === 'confirming' && (
+                <>
+                <DialogHeader>
+                    <DialogTitle className="font-headline text-2xl text-center">Confirmar Solicitud</DialogTitle>
+                    <DialogDescription className="text-center pt-2">
+                        ¿Estás seguro de que quieres solicitar una rutina totalmente personalizada a un entrenador? Se notificará al administrador.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2 sm:justify-center pt-4">
+                    <Button variant="outline" onClick={() => setRequestModalState('closed')}>Cancelar</Button>
+                    <Button onClick={handleCustomPlanRequest}>Sí, confirmar solicitud</Button>
+                </DialogFooter>
+                </>
+            )}
+             {requestModalState === 'success' && (
+                <>
+                <DialogHeader className="text-center">
+                    <div className="flex justify-center mb-4">
+                    <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
+                    </div>
+                    <DialogTitle className="text-2xl font-headline">¡Felicidades!</DialogTitle>
+                </DialogHeader>
+                <div className="text-center text-muted-foreground py-4 space-y-4">
+                    <p>Tu rutina totalmente personalizada está siendo creada y analizada por un coach y Kali Gym.</p>
+                    <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-300">
+                        <p className="font-bold text-sm uppercase">Para agilizar tu plan</p>
+                        <p className="text-sm">Puedes confirmar por WhatsApp con tu nombre completo.</p>
+                    </div>
                 </div>
-                <DialogTitle className="text-2xl font-headline">¡Felicidades!</DialogTitle>
-            </DialogHeader>
-            <div className="text-center text-muted-foreground py-4 space-y-4">
-                <p>Tu rutina totalmente personalizada está siendo creada y analizada por un coach y Kali Gym.</p>
-                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-300">
-                    <p className="font-bold text-sm uppercase">Para agilizar tu plan</p>
-                    <p className="text-sm">Puedes confirmar por WhatsApp con tu nombre completo.</p>
+                <div className="flex justify-center">
+                    <Button onClick={() => setRequestModalState('closed')}>Entendido</Button>
                 </div>
-            </div>
-            <div className="flex justify-center">
-                <Button onClick={() => setIsRequestModalOpen(false)}>Entendido</Button>
-            </div>
+                </>
+             )}
         </DialogContent>
     </Dialog>
     </>
