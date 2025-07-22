@@ -57,7 +57,7 @@ export function TemplateGeneratorAI({ users, onSaveTemplate }: TemplateGenerator
     // Add a default exercisesPerDay if not present
     const generationInput: GeneratePersonalizedTrainingPlanInput = {
       ...onboardingData,
-      exercisesPerDay: onboardingData.exercisesPerDay || 5, 
+      exercisesPerDay: onboardingData.exercisesPerDay || 8, 
     };
 
     setIsLoading(true);
