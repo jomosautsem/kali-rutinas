@@ -280,7 +280,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                       <Lightbulb className="h-5 w-5 text-primary" />
                       <AlertTitle className="text-primary/90 font-semibold">Datos del Cliente</AlertTitle>
                       <AlertDescription>
-                        <ul className="text-sm space-y-1 mt-2 text-primary-foreground/80">
+                        <ul className="text-sm space-y-1 mt-2 text-foreground/80">
                           <li><strong>Metas:</strong> {onboardingData.goals.join(', ')}</li>
                           <li><strong>Nivel:</strong> {onboardingData.currentFitnessLevel}</li>
                           <li><strong>Días:</strong> {onboardingData.trainingDays.join(', ')}</li>
