@@ -115,7 +115,8 @@ export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
     .int("Debe ser un número entero.")
     .min(8, "Como mínimo 8 ejercicios por día.")
     .max(10, "Como máximo 10 ejercicios por día.")
-    .describe('El número de ejercicios que el usuario desea realizar por día de entrenamiento.'),
+    .describe('El número de ejercicios que el usuario desea realizar por día de entrenamiento.')
+    .default(8),
 });
 export type GeneratePersonalizedTrainingPlanInput = z.infer<typeof GeneratePersonalizedTrainingPlanInputSchema>;
 
