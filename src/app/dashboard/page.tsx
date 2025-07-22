@@ -671,8 +671,12 @@ export default function DashboardPage() {
                 </div>
                 <DialogTitle className="text-2xl font-headline">¡Felicidades!</DialogTitle>
             </DialogHeader>
-            <div className="text-center text-muted-foreground py-4">
+            <div className="text-center text-muted-foreground py-4 space-y-4">
                 <p>Tu rutina totalmente personalizada está siendo creada y analizada por un coach y Kali Gym.</p>
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-300">
+                    <p className="font-bold text-sm uppercase">Para agilizar tu plan</p>
+                    <p className="text-sm">Puedes confirmar por WhatsApp con tu nombre completo.</p>
+                </div>
             </div>
             <div className="flex justify-center">
                 <Button onClick={() => setIsRequestModalOpen(false)}>Entendido</Button>
@@ -682,3 +686,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
