@@ -43,9 +43,7 @@ const WarningView = ({ onAccept, onCancel }: { onAccept: () => void; onCancel: (
             <AlertTriangle className="h-5 w-5" />
             <AlertTitle className="font-bold">Advertencia Importante</AlertTitle>
             <AlertDescription>
-                Este generador creará un plan de entrenamiento basado <span className="font-bold">únicamente en la información que proporciones</span>.
-                El plan generado por la IA <span className="font-bold">no será revisado</span> por un coach o administrador de Kali Gym.
-                Eres responsable de entrenar de forma segura.
+                Este generador creará un plan de entrenamiento basado únicamente en la información que proporcionaste al registrate. El plan generado por la IA (Inteligencia Artificial) no será revisado por un coach o administrador de Kali Gym. Eres responsable de entrenar de forma segura.
             </AlertDescription>
         </Alert>
         <div className="flex w-full gap-4">
