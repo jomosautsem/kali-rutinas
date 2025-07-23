@@ -27,9 +27,12 @@ export default function ProgressPage() {
                 const currentUser = users.find(u => u.email === loggedInUserEmail);
                 setUser(currentUser || null);
 
+                // Try to load a plan, even if it's from a past cycle, to get exercise names
                 const storedPlan = localStorage.getItem(`userPlan_${loggedInUserEmail}`);
-                setUserPlan(storedPlan ? JSON.parse(storedPlan) : null);
-
+                if (storedPlan) {
+                    setUserPlan(JSON.parse(storedPlan));
+                }
+                
                 const progressHistory: ProgressData[] = [];
                 for (let i = 1; i <= 4; i++) {
                     const storedProgress = localStorage.getItem(`progress_week${i}_${loggedInUserEmail}`);
@@ -65,7 +68,7 @@ export default function ProgressPage() {
         );
     }
     
-    if (!userPlan || allProgressData.length === 0) {
+    if (allProgressData.length === 0) {
         return (
              <Alert>
                 <BarChart className="h-4 w-4" />
@@ -79,6 +82,23 @@ export default function ProgressPage() {
             </Alert>
         )
     }
+
+    // A mock plan for structure if no active plan exists but progress data does
+    const planForAnalysis: UserPlan = userPlan || {
+        weeklyPlan: allProgressData.flatMap((weekProgress) =>
+            Object.keys(weekProgress).map(day => ({
+                day: day,
+                focus: "Análisis de Progreso",
+                exercises: Object.keys(weekProgress[day]).map(ex => ({
+                    name: ex,
+                    series: '',
+                    reps: '',
+                    rest: '',
+                    mediaUrl: '',
+                })),
+            }))
+        ),
+    };
 
     const combinedProgress = allProgressData.reduce((acc, current, weekIndex) => {
         for (const day in current) {
@@ -116,15 +136,12 @@ export default function ProgressPage() {
             </Alert>
 
 
-            <PersonalRecords plan={userPlan} progress={combinedProgress} />
+            <PersonalRecords plan={planForAnalysis} progress={combinedProgress} />
 
-            <WeeklyVolumeChart plan={userPlan} allProgress={allProgressData} />
+            <WeeklyVolumeChart plan={planForAnalysis} allProgress={allProgressData} />
 
-            <ExerciseProgressChart plan={userPlan} progress={combinedProgress} />
+            <ExerciseProgressChart plan={planForAnalysis} progress={combinedProgress} />
             
         </div>
     )
 }
-
-
-    

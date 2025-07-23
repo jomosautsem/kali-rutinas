@@ -410,7 +410,8 @@ const SinPlan = () => (
     </Alert>
 )
 
-const ProgressSummary = ({ totalDays, completedDaysCount, user }: { totalDays: number; completedDaysCount: number; user: User | null }) => {
+const ProgressSummary = ({ totalDays, completedDays, user }: { totalDays: number; completedDays: string[]; user: User | null }) => {
+    const completedDaysCount = completedDays.length;
     const progressPercentage = totalDays > 0 ? (completedDaysCount / totalDays) * 100 : 0;
     const allDaysCompleted = totalDays > 0 && completedDaysCount === totalDays;
 
@@ -620,6 +621,39 @@ export default function DashboardPage() {
       window.scrollTo(0, 0);
   }
 
+  const handleFinishCycle = () => {
+    if (!user || !userEmail) return;
+
+    // 1. Update user data in localStorage (users list)
+    const storedUsers = localStorage.getItem("registeredUsers");
+    let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+    
+    const updatedUser = {
+      ...user,
+      planStatus: 'sin-plan',
+      currentWeek: undefined,
+      planStartDate: undefined,
+      planEndDate: undefined,
+    };
+    
+    users = users.map(u => u.email === user.email ? updatedUser : u);
+    localStorage.setItem("registeredUsers", JSON.stringify(users));
+
+    // 2. Remove the user's active plan
+    localStorage.removeItem(`userPlan_${userEmail}`);
+
+    // 3. Update local state to reflect the changes instantly
+    setUser(updatedUser);
+    setUserPlan(null);
+    setPlanStatus('sin-plan');
+    setCompletedDays([]);
+    setProgress({});
+    setActiveDayIndex(0);
+    
+    // 4. Close the modal
+    setCycleModalState('closed');
+  }
+
   const handleProgressChange = (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => {
     setProgress(prev => {
         const newProgress = { ...prev };
@@ -766,7 +800,7 @@ export default function DashboardPage() {
                                 <div className="h-[400px] flex items-center justify-center">
                                     <ProgressSummary 
                                         totalDays={userPlan.weeklyPlan.length} 
-                                        completedDaysCount={completedDays.length}
+                                        completedDays={completedDays}
                                         user={user}
                                     />
                                 </div>
@@ -786,6 +820,12 @@ export default function DashboardPage() {
                         ) : (
                             <div className="flex flex-col items-center justify-center h-64 text-center">
                                 <p className="text-muted-foreground">Tu progreso aparecerá aquí una vez que empieces a entrenar.</p>
+                                <Button asChild className="mt-4">
+                                     <Link href="/dashboard/progress">
+                                        <TrendingUp className="mr-2 h-5 w-5" />
+                                        Ver Historial de Progreso
+                                    </Link>
+                                </Button>
                             </div>
                         )}
                     </CardContent>
@@ -867,7 +907,7 @@ export default function DashboardPage() {
                     </blockquote>
                 </div>
                 <div className="flex justify-center">
-                    <Button onClick={() => setCycleModalState('closed')}>¡A por el siguiente reto!</Button>
+                    <Button onClick={handleFinishCycle}>¡A por el siguiente reto!</Button>
                 </div>
                 </>
              )}
@@ -876,9 +916,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
-
-    
-
-    
