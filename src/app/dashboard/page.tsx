@@ -552,7 +552,10 @@ export default function DashboardPage() {
       localStorage.setItem(`completedDays_week${currentWeek}_${userEmail}`, JSON.stringify(newCompletedDays));
 
       // Check if the week is complete
-      if (userPlan.weeklyPlan.every(d => newCompletedDays.includes(d.day))) {
+      const allDaysInPlan = userPlan.weeklyPlan.map(d => d.day);
+      const isWeekComplete = allDaysInPlan.length > 0 && allDaysInPlan.every(d => newCompletedDays.includes(d));
+
+      if (isWeekComplete) {
            if (currentWeek < 4) {
                toast({
                    title: `¡Semana ${currentWeek} Completada!`,
