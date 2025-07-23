@@ -25,7 +25,7 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Clear previous session data
+    // Clear previous session data to prevent session bleed
     if (typeof window !== 'undefined') {
       sessionStorage.clear();
     }
