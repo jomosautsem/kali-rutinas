@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react";
-import { useForm, useFieldArray, FormProvider } from "react-hook-form";
+import { useForm, useFieldArray, FormProvider, useFormContext } from "react-hook-form";
 import type { UserPlan } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -169,5 +169,3 @@ export default function CreatePlanPage() {
         </FormProvider>
     )
 }
-
-    
