@@ -19,6 +19,7 @@ import Link from "next/link";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 
 type PlanEditorProps = {
   user: User | null;
@@ -272,10 +273,27 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
             <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto space-y-6 pr-4">
                  <div className="flex justify-end sticky top-0 py-2 bg-card z-10">
-                    <Button type="button" onClick={handleGeneratePlan} disabled={isGenerating}>
-                        {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                        {isGenerating ? "Generando..." : "Regenerar Plan con IA"}
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button type="button" variant="default" disabled={isGenerating}>
+                                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                {isGenerating ? "Generando..." : "Regenerar Plan con IA"}
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Esta acción generará un nuevo plan de entrenamiento con IA. 
+                                <span className="font-bold text-destructive"> Todos los cambios no guardados en el editor actual se perderán.</span>
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleGeneratePlan}>Sí, Regenerar</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -321,10 +339,26 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                 {fields.length === 0 && !isGenerating && (
                     <div className="flex flex-col items-center justify-center h-full text-center p-8 border-2 border-dashed rounded-lg">
                         <p className="text-muted-foreground mb-4">Este usuario aún no tiene un plan.</p>
-                        <Button type="button" onClick={handleGeneratePlan} disabled={isGenerating}>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Generar Plan con IA
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button type="button">
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    Generar Plan con IA
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirmar Generación</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Se generará un plan basado en los datos de onboarding del usuario. ¿Deseas continuar?
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleGeneratePlan}>Sí, Generar</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 )}
 
