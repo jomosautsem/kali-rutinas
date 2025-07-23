@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect } from "react";
@@ -796,6 +797,9 @@ export default function DashboardPage() {
             <Button onClick={() => setRequestModalState('confirming')} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
                 Rutina Personalizada
             </Button>
+            <Button asChild className="bg-gradient-to-r from-blue-500 to-green-400 text-white font-bold shadow-lg hover:from-blue-600 hover:to-green-500">
+                <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
+            </Button>
             {planStatus === 'sin-plan' && (
               <PlanGenerator onPlanGenerated={handlePlanGenerated} />
             )}
@@ -964,3 +968,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
