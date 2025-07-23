@@ -581,6 +581,16 @@ export default function DashboardPage() {
         
         setPlanStatus('aprobado');
         
+        // Update plan history for AI variation
+        const planHistoryString = localStorage.getItem(`planHistory_${userEmail}`);
+        let planHistory: UserPlan[] = planHistoryString ? JSON.parse(planHistoryString) : [];
+        planHistory.push(newPlan);
+        if (planHistory.length > 3) {
+            planHistory.shift(); // Keep only the last 3
+        }
+        localStorage.setItem(`planHistory_${userEmail}`, JSON.stringify(planHistory));
+
+
         // Reset progress for the new plan
         for (let i = 1; i <= 4; i++) {
             localStorage.removeItem(`completedDays_week${i}_${userEmail}`);
@@ -939,7 +949,5 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
 
     

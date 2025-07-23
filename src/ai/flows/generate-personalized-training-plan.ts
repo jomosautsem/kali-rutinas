@@ -50,6 +50,18 @@ const prompt = ai.definePrompt({
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
 
   Para cada día de entrenamiento, debes incluir exactamente {{{exercisesPerDay}}} ejercicios. Adapta la complejidad y el volumen de los ejercicios para que se ajusten al tiempo de entrenamiento disponible por día.
+  
+  {{#if history}}
+  MUY IMPORTANTE: El usuario ya ha recibido los siguientes planes. Para asegurar la variedad y evitar el aburrimiento, genera un plan que utilice ejercicios DIFERENTES a los que se enumeran a continuación. No repitas los siguientes ejercicios:
+  {{#each history}}
+    Plan {{add @index 1}}:
+    {{#each this.weeklyPlan}}
+      {{#each this.exercises}}
+      - {{this.name}}
+      {{/each}}
+    {{/each}}
+  {{/each}}
+  {{/if}}
 
   Para cada ejercicio, especifica las series y las repeticiones en los campos 'series' y 'reps' respectivamente. Por ejemplo, series: "4", reps: "8-12".
   
@@ -100,3 +112,5 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
     return sanitizedPlan;
   }
 );
+
+    

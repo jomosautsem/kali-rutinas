@@ -145,6 +145,7 @@ export default function OnboardingPage() {
       goalTerm: "mediano",
       injuriesOrConditions: "",
       exercisesPerDay: 8, // Default value
+      history: [],
     },
     mode: "onChange",
   });
@@ -181,6 +182,10 @@ export default function OnboardingPage() {
     }
 
     try {
+      // Get plan history from local storage
+      const planHistoryString = localStorage.getItem(`planHistory_${userEmail}`);
+      const history = planHistoryString ? JSON.parse(planHistoryString) : [];
+
       const finalWorkoutStyle = values.preferredWorkoutStyle === 'otro' 
         ? values.otherWorkoutStyle
         : values.preferredWorkoutStyle;
@@ -188,11 +193,11 @@ export default function OnboardingPage() {
       const dataToSave = {
         ...values,
         preferredWorkoutStyle: finalWorkoutStyle,
+        history, // Add history to the input
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
-      localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
-
+      
       if (pageMode === 'newPlan') {
         const plan = await generatePersonalizedTrainingPlan(dataToSave);
         localStorage.setItem(`userPlan_${userEmail}`, JSON.stringify(plan));
@@ -215,6 +220,8 @@ export default function OnboardingPage() {
         router.push("/dashboard");
 
       } else { // pageMode === 'register'
+        // Just save onboarding data, do not generate plan or change status
+        localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
         setIsSuccess(true);
         toast({ title: "¡Información Guardada!", description: "Tus datos han sido enviados para revisión." });
         setTimeout(() => router.push("/login"), 3000); 
