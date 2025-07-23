@@ -29,12 +29,7 @@ const searchExerciseVideo = ai.defineTool(
 export async function generatePersonalizedTrainingPlan(
   input: GeneratePersonalizedTrainingPlanInput
 ): Promise<GeneratePersonalizedTrainingPlanOutput> {
-  // Definitive fix: Ensure the input is always valid by correcting old data
-  const correctedInput: GeneratePersonalizedTrainingPlanInput = {
-      ...input,
-      exercisesPerDay: Math.max(input.exercisesPerDay || 0, 8), 
-  };
-  return generatePersonalizedTrainingPlanFlow(correctedInput);
+  return generatePersonalizedTrainingPlanFlow(input);
 }
 
 const prompt = ai.definePrompt({

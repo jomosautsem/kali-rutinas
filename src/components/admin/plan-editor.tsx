@@ -216,7 +216,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
             return;
         }
 
-        // Definitive fix: Ensure exercisesPerDay is valid before calling the AI
         const correctedInput: GeneratePersonalizedTrainingPlanInput = {
             ...onboardingData,
             exercisesPerDay: Math.max(onboardingData.exercisesPerDay || 0, 8),

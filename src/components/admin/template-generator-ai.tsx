@@ -55,7 +55,6 @@ export function TemplateGeneratorAI({ users, onSaveTemplate }: TemplateGenerator
 
     const onboardingData = JSON.parse(onboardingDataString);
     
-    // Definitive fix: Ensure exercisesPerDay is valid before calling the AI
     const correctedInput: GeneratePersonalizedTrainingPlanInput = {
       ...onboardingData,
       exercisesPerDay: Math.max(onboardingData.exercisesPerDay || 0, 8), 
