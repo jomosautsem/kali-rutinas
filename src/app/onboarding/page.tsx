@@ -7,7 +7,7 @@ import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { motion, AnimatePresence } from "framer-motion"
-import { GeneratePersonalizedTrainingPlanInputSchema, type UserPlan } from "@/lib/types"
+import { GeneratePersonalizedTrainingPlanInputSchema, type UserPlan, type User } from "@/lib/types"
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
 
 import { Button } from "@/components/ui/button"
@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User, Trophy, Scale, Ruler, Clock } from "lucide-react"
+import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { Textarea } from "@/components/ui/textarea"
@@ -94,7 +94,7 @@ const steps = [
     { id: "step-2", title: "Plazo", fields: ["goalTerm"], icon: Clock },
     { id: "step-3", title: "Tu Nivel", fields: ["currentFitnessLevel", "trainingDays", "trainingTimePerDay"], icon: HeartPulse },
     { id: "step-4", title: "Tu Estilo", fields: ["preferredWorkoutStyle", "otherWorkoutStyle", "muscleFocus"], icon: Dumbbell },
-    { id: "step-5", title: "Tus Datos", fields: ["age", "weight", "height"], icon: User },
+    { id: "step-5", title: "Tus Datos", fields: ["age", "weight", "height"], icon: UserIcon },
     { id: "step-6", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
 ];
 
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
     if (!emailToUse) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Error de Sesión",
         description: "No se encontró un usuario válido. Por favor, regístrate o inicia sesión.",
       });
       router.push("/login");
@@ -197,20 +197,23 @@ export default function OnboardingPage() {
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
+      // Save onboarding data regardless of flow
       localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
 
+      // --- FLOW SEPARATION ---
       if (pageMode === 'newPlan') {
+        // --- EXISTING USER FLOW: GENERATE PLAN ---
         const plan = await generatePersonalizedTrainingPlan(dataToSave);
         localStorage.setItem(`userPlan_${userEmail}`, JSON.stringify(plan));
         
         const storedUsers = localStorage.getItem("registeredUsers");
-        let users = storedUsers ? JSON.parse(storedUsers) : [];
+        let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
         const today = new Date();
         const endDate = new Date();
-        endDate.setDate(today.getDate() + 28);
-        users = users.map((u: any) => u.email === userEmail ? {
+        endDate.setDate(today.getDate() + 28); // 4 weeks
+        users = users.map((u: User) => u.email === userEmail ? {
             ...u, 
-            planStatus: 'aprobado',
+            planStatus: 'aprobado', // Approve the plan automatically for existing users
             planStartDate: today.toISOString(),
             planEndDate: endDate.toISOString(),
             currentWeek: 1
@@ -221,8 +224,7 @@ export default function OnboardingPage() {
         router.push("/dashboard");
 
       } else {
-        // This is the flow for a NEW user. Just save data and show success message.
-        // DO NOT generate plan, DO NOT change status.
+        // --- NEW USER FLOW: SAVE DATA AND WAIT FOR APPROVAL ---
         setIsSuccess(true);
         toast({ title: "¡Información Guardada!", description: "Tus datos han sido enviados para revisión." });
         setTimeout(() => router.push("/login"), 3000); 
@@ -401,7 +403,7 @@ export default function OnboardingPage() {
                                     <FormLabel>Edad</FormLabel>
                                     <FormControl>
                                         <div className="relative">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                             <Input 
                                                 type="number" 
                                                 placeholder="Tu edad" 

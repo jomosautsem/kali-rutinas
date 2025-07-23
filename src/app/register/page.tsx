@@ -70,7 +70,9 @@ export default function RegisterPage() {
         title: "Registro Exitoso",
         description: "Ahora, cuéntanos un poco sobre tus metas.",
       })
+      
       // Redirect to onboarding with user's email as a query parameter
+      // DO NOT create a session here. This is a critical security step.
       router.push(`/onboarding?email=${encodeURIComponent(email)}`)
 
     } catch (error) {
