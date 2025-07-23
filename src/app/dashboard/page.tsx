@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlanDownloader } from "@/components/plan-downloader";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import ReactConfetti from "react-confetti";
 
 
 const isVideo = (url: string) => {
@@ -472,6 +473,7 @@ export default function DashboardPage() {
   const [requestModalState, setRequestModalState] = useState<'closed' | 'confirming' | 'success'>('closed');
   const [cycleModalState, setCycleModalState] = useState<'closed' | 'week_complete' | 'cycle_complete'>('closed');
   const [activeDayIndex, setActiveDayIndex] = useState(0);
+  const [confetti, setConfetti] = useState(false);
   const { toast } = useToast();
 
   const containerVariants = {
@@ -621,6 +623,7 @@ export default function DashboardPage() {
                setCycleModalState('week_complete');
            } else {
                // Week 4 completed, end of cycle
+               setConfetti(true);
                setCycleModalState('cycle_complete');
            }
       }
@@ -768,11 +771,13 @@ export default function DashboardPage() {
   const handleCycleModalChange = (isOpen: boolean) => {
       if (!isOpen) {
           setCycleModalState('closed');
+          setConfetti(false);
       }
   }
 
   return (
     <>
+    {confetti && <ReactConfetti recycle={false} onConfettiComplete={() => setConfetti(false)} />}
     <motion.div
       variants={containerVariants}
       initial="hidden"
@@ -928,9 +933,19 @@ export default function DashboardPage() {
              {cycleModalState === 'cycle_complete' && (
                 <>
                  <DialogHeader className="text-center">
-                    <div className="flex justify-center mb-4">
+                    <motion.div 
+                        className="flex justify-center mb-4"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 260,
+                            damping: 20,
+                            delay: 0.2
+                        }}
+                    >
                         <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
-                    </div>
+                    </motion.div>
                     <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus 4 Semanas!</DialogTitle>
                 </DialogHeader>
                 <div className="text-center text-muted-foreground py-4 space-y-4">
@@ -949,5 +964,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
