@@ -8,14 +8,14 @@ import { ExerciseProgressChart } from "@/components/progress/exercise-progress-c
 import { PersonalRecords } from "@/components/progress/personal-records";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { BarChart, ArrowLeft } from "lucide-react";
+import { BarChart, ArrowLeft, Trophy, Info } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function ProgressPage() {
     const [user, setUser] = useState<User | null>(null);
     const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
-    const [progressData, setProgressData] = useState<ProgressData | null>(null);
+    const [allProgressData, setAllProgressData] = useState<ProgressData[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -30,8 +30,14 @@ export default function ProgressPage() {
                 const storedPlan = localStorage.getItem(`userPlan_${loggedInUserEmail}`);
                 setUserPlan(storedPlan ? JSON.parse(storedPlan) : null);
 
-                const storedProgress = localStorage.getItem(`progress_${loggedInUserEmail}`);
-                setProgressData(storedProgress ? JSON.parse(storedProgress) : null);
+                const progressHistory: ProgressData[] = [];
+                for (let i = 1; i <= 4; i++) {
+                    const storedProgress = localStorage.getItem(`progress_week${i}_${loggedInUserEmail}`);
+                    if (storedProgress) {
+                        progressHistory.push(JSON.parse(storedProgress));
+                    }
+                }
+                setAllProgressData(progressHistory);
             }
         }
         setLoading(false);
@@ -55,7 +61,7 @@ export default function ProgressPage() {
         );
     }
     
-    if (!userPlan || !progressData) {
+    if (!userPlan || allProgressData.length === 0) {
         return (
              <Alert>
                 <BarChart className="h-4 w-4" />
@@ -69,6 +75,21 @@ export default function ProgressPage() {
             </Alert>
         )
     }
+
+    // Combine all progress data for overall analysis
+    const combinedProgress = allProgressData.reduce((acc, current) => {
+        for (const day in current) {
+            if (!acc[day]) acc[day] = {};
+            for (const exercise in current[day]) {
+                if (!acc[day][exercise]) acc[day][exercise] = {};
+                // This simple merge might overwrite sets if day/exercise keys clash
+                // A more sophisticated merge might be needed depending on the analysis
+                Object.assign(acc[day][exercise], current[day][exercise]);
+            }
+        }
+        return acc;
+    }, {} as ProgressData);
+
     
     return (
         <div className="space-y-6">
@@ -84,12 +105,21 @@ export default function ProgressPage() {
                     </Link>
                 </Button>
             </div>
+            
+             <Alert className="bg-amber-900/10 border-amber-500/20">
+                <Trophy className="h-5 w-5 text-amber-400" />
+                <AlertTitle className="font-headline text-amber-300">¿Qué es el 1RM Estimado?</AlertTitle>
+                <AlertDescription className="text-foreground/80">
+                   El "1RM" o "Máximo de una Repetición" es el peso máximo que teóricamente podrías levantar una sola vez. Usamos una fórmula estándar (Epley) para estimar este valor basado en el peso y las repeticiones que registras. ¡Es una excelente manera de medir tu aumento de fuerza máxima!
+                </AlertDescription>
+            </Alert>
 
-            <PersonalRecords plan={userPlan} progress={progressData} />
 
-            <WeeklyVolumeChart plan={userPlan} progress={progressData} />
+            <PersonalRecords plan={userPlan} progress={combinedProgress} />
 
-            <ExerciseProgressChart plan={userPlan} progress={progressData} />
+            <WeeklyVolumeChart plan={userPlan} progress={combinedProgress} />
+
+            <ExerciseProgressChart plan={userPlan} progress={combinedProgress} />
             
         </div>
     )

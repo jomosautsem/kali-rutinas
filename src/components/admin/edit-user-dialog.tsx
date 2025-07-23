@@ -24,9 +24,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon } from "lucide-react";
 import type { User } from "@/lib/types";
 import { AvatarSelector } from "./avatar-selector";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar } from "../ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "El nombre es requerido."),
@@ -34,6 +38,9 @@ const formSchema = z.object({
   maternalLastName: z.string().min(2, "El apellido materno es requerido."),
   email: z.string().email("Por favor, ingresa un correo electrónico válido."),
   avatarUrl: z.string().optional().or(z.literal("")),
+  planStartDate: z.date().optional(),
+  planEndDate: z.date().optional(),
+  currentWeek: z.number().optional(),
 });
 
 type EditUserDialogProps = {
@@ -54,6 +61,9 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
       maternalLastName: "",
       email: "",
       avatarUrl: "",
+      planStartDate: undefined,
+      planEndDate: undefined,
+      currentWeek: 1
     },
   });
   
@@ -65,6 +75,9 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
         maternalLastName: user.maternalLastName,
         email: user.email,
         avatarUrl: user.avatarUrl || "",
+        planStartDate: user.planStartDate ? new Date(user.planStartDate) : undefined,
+        planEndDate: user.planEndDate ? new Date(user.planEndDate) : undefined,
+        currentWeek: user.currentWeek || 1,
       });
     }
   }, [user, form, isOpen]);
@@ -75,9 +88,11 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
     if (!user) return;
     
     try {
-      const updatedUserData = {
+      const updatedUserData: User = {
         ...user,
         ...values,
+        planStartDate: values.planStartDate?.toISOString(),
+        planEndDate: values.planEndDate?.toISOString(),
       };
       onEditUser(updatedUserData);
       toast({
@@ -103,7 +118,7 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
         <DialogHeader>
           <DialogTitle>Editar Usuario</DialogTitle>
           <DialogDescription>
-            Actualiza la información del usuario <span className="font-bold">{user.name}</span>.
+            Actualiza la información y el ciclo de entrenamiento del usuario <span className="font-bold">{user.name}</span>.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -160,6 +175,111 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
                 </FormItem>
               )}
             />
+            
+            <div className="space-y-2 rounded-md border p-4">
+                <h4 className="font-medium text-sm">Ciclo de Entrenamiento</h4>
+                <FormField
+                control={form.control}
+                name="planStartDate"
+                render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                    <FormLabel>Fecha de Inicio del Plan</FormLabel>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                        <FormControl>
+                            <Button
+                            variant={"outline"}
+                            className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                            )}
+                            >
+                            {field.value ? (
+                                format(field.value, "PPP")
+                            ) : (
+                                <span>Elige una fecha</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                        </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date("1900-01-01")}
+                            initialFocus
+                        />
+                        </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+
+                <FormField
+                control={form.control}
+                name="planEndDate"
+                render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                    <FormLabel>Fecha de Fin del Plan</FormLabel>
+                     <Popover>
+                        <PopoverTrigger asChild>
+                        <FormControl>
+                            <Button
+                            variant={"outline"}
+                            className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                            )}
+                            >
+                            {field.value ? (
+                                format(field.value, "PPP")
+                            ) : (
+                                <span>Elige una fecha</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                        </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date("1900-01-01")}
+                            initialFocus
+                        />
+                        </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="currentWeek"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Semana Actual</FormLabel>
+                        <FormControl>
+                            <Input 
+                                type="number" 
+                                min="1" 
+                                max="4" 
+                                {...field}
+                                onChange={e => field.onChange(parseInt(e.target.value, 10))}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+
+
             <Controller
               control={form.control}
               name="avatarUrl"

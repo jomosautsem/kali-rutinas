@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Info } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Info, Calendar } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlanDownloader } from "@/components/plan-downloader";
 import { motion } from "framer-motion";
+import { format } from "date-fns";
 
 
 const isVideo = (url: string) => {
@@ -168,6 +169,15 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
     return (
         <>
             <div className="space-y-6">
+                 {user?.planStartDate && user.planEndDate && (
+                     <Alert className="bg-card/50 border-border/50">
+                        <Calendar className="h-5 w-5 text-muted-foreground" />
+                        <AlertTitle className="font-headline text-foreground">Ciclo de Entrenamiento: Semana {user.currentWeek || 1} de 4</AlertTitle>
+                        <AlertDescription className="text-muted-foreground text-xs mt-1">
+                            {format(new Date(user.planStartDate), "PPP")} - {format(new Date(user.planEndDate), "PPP")}
+                        </AlertDescription>
+                    </Alert>
+                 )}
                  {plan.warmup && (
                     <Alert className="bg-blue-500/5 border-blue-500/20">
                         <Wind className="h-5 w-5 text-blue-400" />
@@ -375,7 +385,7 @@ const SinPlan = () => (
     </Alert>
 )
 
-const ProgressSummary = ({ totalDays, completedDaysCount }: { totalDays: number; completedDaysCount: number; }) => {
+const ProgressSummary = ({ totalDays, completedDaysCount, user }: { totalDays: number; completedDaysCount: number; user: User | null }) => {
     const progressPercentage = totalDays > 0 ? (completedDaysCount / totalDays) * 100 : 0;
     const allDaysCompleted = totalDays > 0 && completedDaysCount === totalDays;
 
@@ -412,7 +422,7 @@ const ProgressSummary = ({ totalDays, completedDaysCount }: { totalDays: number;
                 </div>
             </div>
             <div>
-              <p className="font-semibold">Días Completados</p>
+              <p className="font-semibold">Días Completados (Semana {user?.currentWeek || 1})</p>
               <p className="text-xs text-muted-foreground mt-1">
                   {allDaysCompleted ? "¡Felicidades, completaste la semana!" : "¡Sigue así para alcanzar tus metas!"}
               </p>
@@ -475,11 +485,12 @@ export default function DashboardPage() {
               if (storedPlan) {
                   setUserPlan(JSON.parse(storedPlan));
               }
-              const storedCompletedDays = localStorage.getItem(`completedDays_${currentUser.email}`);
+              const currentWeek = currentUser.currentWeek || 1;
+              const storedCompletedDays = localStorage.getItem(`completedDays_week${currentWeek}_${currentUser.email}`);
               if(storedCompletedDays) {
                   setCompletedDays(JSON.parse(storedCompletedDays));
               }
-              const storedProgress = localStorage.getItem(`progress_${currentUser.email}`);
+              const storedProgress = localStorage.getItem(`progress_week${currentWeek}_${currentUser.email}`);
               if(storedProgress) {
                   setProgress(JSON.parse(storedProgress));
               }
@@ -494,38 +505,82 @@ export default function DashboardPage() {
   }, []);
 
   const handlePlanGenerated = (newPlan: UserPlan) => {
-    if (typeof window !== 'undefined' && userEmail) {
-      const storedUsers = localStorage.getItem("registeredUsers");
-      if (storedUsers) {
-        let users: User[] = JSON.parse(storedUsers);
-        users = users.map(u => 
-          u.email === userEmail ? { ...u, planStatus: 'aprobado' } : u
-        );
-        localStorage.setItem("registeredUsers", JSON.stringify(users));
+    if (typeof window !== 'undefined' && userEmail && user) {
+        const today = new Date();
+        const endDate = new Date();
+        endDate.setDate(today.getDate() + 28); // 4 weeks
 
-        // Update the plan in state and localStorage
+        const updatedUser: User = {
+            ...user,
+            planStatus: 'aprobado',
+            planStartDate: today.toISOString(),
+            planEndDate: endDate.toISOString(),
+            currentWeek: 1
+        };
+
+        const storedUsers = localStorage.getItem("registeredUsers");
+        let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+        users = users.map(u => u.email === userEmail ? updatedUser : u);
+        
+        localStorage.setItem("registeredUsers", JSON.stringify(users));
+        setUser(updatedUser);
         setUserPlan(newPlan);
         localStorage.setItem(`userPlan_${userEmail}`, JSON.stringify(newPlan));
         
-        // Update status
         setPlanStatus('aprobado');
         
         // Reset progress for the new plan
-        localStorage.removeItem(`completedDays_${userEmail}`);
-        localStorage.removeItem(`progress_${userEmail}`);
+        for (let i = 1; i <= 4; i++) {
+            localStorage.removeItem(`completedDays_week${i}_${userEmail}`);
+            localStorage.removeItem(`progress_week${i}_${userEmail}`);
+        }
         setCompletedDays([]);
         setProgress({});
-      }
     }
   };
 
   const handleToggleDay = (day: string) => {
+      if (!user || !userPlan) return;
+
       const newCompletedDays = completedDays.includes(day)
           ? completedDays.filter(d => d !== day)
           : [...completedDays, day];
+      
       setCompletedDays(newCompletedDays);
+      const currentWeek = user.currentWeek || 1;
       if (userEmail) {
-          localStorage.setItem(`completedDays_${userEmail}`, JSON.stringify(newCompletedDays));
+          localStorage.setItem(`completedDays_week${currentWeek}_${userEmail}`, JSON.stringify(newCompletedDays));
+      }
+
+      // Check if the week is complete
+      if (userPlan.weeklyPlan.every(d => newCompletedDays.includes(d.day))) {
+           if (currentWeek < 4) {
+               toast({
+                   title: `¡Semana ${currentWeek} Completada!`,
+                   description: "¡Felicidades! Preparando todo para tu próxima semana. Refresca la página para empezar."
+               });
+               const nextWeek = currentWeek + 1;
+               const updatedUser = { ...user, currentWeek: nextWeek };
+               
+               const storedUsers = localStorage.getItem("registeredUsers");
+               let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+               users = users.map(u => u.email === user.email ? updatedUser : u);
+               localStorage.setItem("registeredUsers", JSON.stringify(users));
+               setUser(updatedUser);
+               
+               // Reset for next week
+               setCompletedDays([]);
+               setProgress({});
+               localStorage.removeItem(`completedDays_week${nextWeek}_${userEmail}`);
+               localStorage.removeItem(`progress_week${nextWeek}_${userEmail}`);
+
+           } else {
+               toast({
+                   title: "¡Ciclo de 4 Semanas Completado!",
+                   description: "¡Increíble trabajo! Has finalizado tu ciclo de entrenamiento."
+               });
+               // Handle end of 4-week cycle
+           }
       }
   }
 
@@ -547,8 +602,9 @@ export default function DashboardPage() {
   };
 
   const handleSaveChanges = () => {
-    if (userEmail) {
-        localStorage.setItem(`progress_${userEmail}`, JSON.stringify(progress));
+    if (userEmail && user) {
+        const currentWeek = user.currentWeek || 1;
+        localStorage.setItem(`progress_week${currentWeek}_${userEmail}`, JSON.stringify(progress));
         toast({
             title: "¡Progreso Guardado!",
             description: "Tus avances han sido registrados correctamente.",
@@ -634,7 +690,7 @@ export default function DashboardPage() {
                         <CardTitle className="font-headline">Tu Plan de Entrenamiento</CardTitle>
                         <CardDescription>
                             {planStatus === 'aprobado' 
-                                ? "Este es tu horario de entrenamiento personalizado para la semana."
+                                ? `Este es tu horario de entrenamiento para la semana ${user?.currentWeek || 1}.`
                                 : "Tu plan de entrenamiento aparecerá aquí una vez que esté listo."
                             }
                         </CardDescription>
@@ -659,6 +715,7 @@ export default function DashboardPage() {
                                     <ProgressSummary 
                                         totalDays={userPlan.weeklyPlan.length} 
                                         completedDaysCount={completedDays.length}
+                                        user={user}
                                     />
                                 </div>
                                 <div className="md:col-span-1 flex flex-col items-center justify-center p-8 text-center bg-secondary/50 rounded-lg">
@@ -727,7 +784,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
-
-

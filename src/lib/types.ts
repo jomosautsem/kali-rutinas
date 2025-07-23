@@ -49,6 +49,9 @@ export type User = {
   avatarUrl?: string;
   password?: string;
   customPlanRequest?: 'requested' | 'none';
+  planStartDate?: string;
+  planEndDate?: string;
+  currentWeek?: number;
 };
 
 export type ProgressData = {
