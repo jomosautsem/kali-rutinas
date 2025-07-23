@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Info } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -318,7 +318,7 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                             )
                                         })}
                                     </div>
-                                    <div className="flex justify-between items-center pt-6 mt-4 border-t">
+                                    <div className="flex justify-end items-center gap-4 pt-6 mt-4 border-t">
                                         <div className="flex items-center space-x-2">
                                             <Checkbox 
                                             id={`complete-${dayPlan.day}`} 
@@ -729,4 +729,5 @@ export default function DashboardPage() {
 }
 
     
+
 
