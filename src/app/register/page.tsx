@@ -65,13 +65,13 @@ export default function RegisterPage() {
 
       const updatedUsers = [...users, newUser]
       localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers))
-      sessionStorage.setItem("onboardingUserEmail", email);
-
+      
       toast({
         title: "Registro Exitoso",
         description: "Ahora, cuéntanos un poco sobre tus metas.",
       })
-      router.push("/onboarding")
+      // Redirect to onboarding with user's email as a query parameter
+      router.push(`/onboarding?email=${encodeURIComponent(email)}`)
 
     } catch (error) {
       console.error("Registration failed:", error)

@@ -100,36 +100,40 @@ const steps = [
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
+  
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [pageMode, setPageMode] = useState<'register' | 'newPlan'>('register');
+  const [pageMode, setPageMode] = useState<'register' | 'newPlan' | 'loading'>('loading');
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   
   useEffect(() => {
-    const email = sessionStorage.getItem("onboardingUserEmail");
-    if (!email) {
+    const emailFromParams = searchParams.get('email');
+    const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
+
+    const emailToUse = loggedInUserEmail || emailFromParams;
+    setUserEmail(emailToUse);
+
+    if (!emailToUse) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se encontró usuario. Por favor, inicia sesión de nuevo.",
+        description: "No se encontró un usuario válido. Por favor, regístrate o inicia sesión.",
       });
       router.push("/login");
       return;
     }
-
-    const storedUsers = localStorage.getItem("registeredUsers");
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
-    const currentUser = users.find((u: any) => u.email === email);
     
-    // If user has a planStatus, they are an existing user generating a new plan
-    if (currentUser && currentUser.planStatus) {
+    // If a logged-in user is found in session, they are an existing user generating a new plan
+    if (loggedInUserEmail) {
         setPageMode('newPlan');
     } else {
         setPageMode('register');
     }
 
-  }, [router, toast]);
+  }, [router, toast, searchParams]);
 
   const form = useForm<OnboardingFormValues>({
     resolver: zodResolver(formSchema),
@@ -175,8 +179,8 @@ export default function OnboardingPage() {
 
   async function onSubmit(values: OnboardingFormValues) {
     setIsLoading(true);
-    const email = sessionStorage.getItem("onboardingUserEmail");
-    if (!email) {
+    
+    if (!userEmail) {
       toast({ variant: "destructive", title: "Error fatal", description: "Se perdió la sesión de usuario." });
       setIsLoading(false);
       return;
@@ -193,19 +197,18 @@ export default function OnboardingPage() {
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
-      localStorage.setItem(`onboardingData_${email}`, JSON.stringify(dataToSave));
+      localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
 
       if (pageMode === 'newPlan') {
-        // For existing users, generate plan immediately
         const plan = await generatePersonalizedTrainingPlan(dataToSave);
-        localStorage.setItem(`userPlan_${email}`, JSON.stringify(plan));
+        localStorage.setItem(`userPlan_${userEmail}`, JSON.stringify(plan));
         
         const storedUsers = localStorage.getItem("registeredUsers");
         let users = storedUsers ? JSON.parse(storedUsers) : [];
         const today = new Date();
         const endDate = new Date();
         endDate.setDate(today.getDate() + 28);
-        users = users.map((u: any) => u.email === email ? {
+        users = users.map((u: any) => u.email === userEmail ? {
             ...u, 
             planStatus: 'aprobado',
             planStartDate: today.toISOString(),
@@ -218,10 +221,10 @@ export default function OnboardingPage() {
         router.push("/dashboard");
 
       } else {
-        // For new users, go to success/pending page
-        toast({ title: "¡Información Guardada!", description: "Tus datos han sido enviados para revisión." });
+        // This is the flow for a NEW user. Just save data and show success message.
+        // DO NOT generate plan, DO NOT change status.
         setIsSuccess(true);
-        sessionStorage.removeItem("onboardingUserEmail");
+        toast({ title: "¡Información Guardada!", description: "Tus datos han sido enviados para revisión." });
         setTimeout(() => router.push("/login"), 3000); 
       }
     } catch (error) {
@@ -231,13 +234,22 @@ export default function OnboardingPage() {
     }
   }
   
+  if (pageMode === 'loading') {
+      return (
+        <AuthCard title="Cargando..." description="Verificando tu información..." footer={<></>}>
+             <div className="text-center space-y-4 py-8">
+                <Loader2 className="h-16 w-16 mx-auto text-primary animate-spin" />
+             </div>
+        </AuthCard>
+      )
+  }
 
   if (isSuccess) {
     return (
       <AuthCard title="¡Todo Listo!" description="Gracias por completar tu información." footer={<></>}>
         <div className="text-center space-y-4 py-8">
             <CheckCircle className="h-16 w-16 mx-auto text-green-500" />
-            <p className="text-muted-foreground">Tu cuenta está ahora pendiente de aprobación. Serás redirigido a la página de inicio de sesión en unos segundos.</p>
+            <p className="text-muted-foreground">Tu cuenta está ahora pendiente de aprobación por un administrador. Serás redirigido a la página de inicio de sesión en unos segundos.</p>
         </div>
       </AuthCard>
     )
