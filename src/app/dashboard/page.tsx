@@ -444,6 +444,7 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [requestModalState, setRequestModalState] = useState<'closed' | 'confirming' | 'success'>('closed');
+  const [isCycleCompleteModalOpen, setIsCycleCompleteModalOpen] = useState(false);
   const { toast } = useToast();
 
   const containerVariants = {
@@ -540,7 +541,7 @@ export default function DashboardPage() {
   };
 
   const handleToggleDay = (day: string) => {
-      if (!user || !userPlan) return;
+      if (!user || !userPlan || !userEmail) return;
 
       const newCompletedDays = completedDays.includes(day)
           ? completedDays.filter(d => d !== day)
@@ -548,16 +549,14 @@ export default function DashboardPage() {
       
       setCompletedDays(newCompletedDays);
       const currentWeek = user.currentWeek || 1;
-      if (userEmail) {
-          localStorage.setItem(`completedDays_week${currentWeek}_${userEmail}`, JSON.stringify(newCompletedDays));
-      }
+      localStorage.setItem(`completedDays_week${currentWeek}_${userEmail}`, JSON.stringify(newCompletedDays));
 
       // Check if the week is complete
       if (userPlan.weeklyPlan.every(d => newCompletedDays.includes(d.day))) {
            if (currentWeek < 4) {
                toast({
                    title: `¡Semana ${currentWeek} Completada!`,
-                   description: "¡Felicidades! Preparando todo para tu próxima semana. Refresca la página para empezar."
+                   description: "¡Felicidades! Refresca la página para empezar tu próxima semana."
                });
                const nextWeek = currentWeek + 1;
                const updatedUser = { ...user, currentWeek: nextWeek };
@@ -568,18 +567,12 @@ export default function DashboardPage() {
                localStorage.setItem("registeredUsers", JSON.stringify(users));
                setUser(updatedUser);
                
-               // Reset for next week
                setCompletedDays([]);
                setProgress({});
-               localStorage.removeItem(`completedDays_week${nextWeek}_${userEmail}`);
-               localStorage.removeItem(`progress_week${nextWeek}_${userEmail}`);
 
            } else {
-               toast({
-                   title: "¡Ciclo de 4 Semanas Completado!",
-                   description: "¡Increíble trabajo! Has finalizado tu ciclo de entrenamiento."
-               });
-               // Handle end of 4-week cycle
+               // Week 4 completed, end of cycle
+               setIsCycleCompleteModalOpen(true);
            }
       }
   }
@@ -649,6 +642,12 @@ export default function DashboardPage() {
   const handleOpenModalChange = (isOpen: boolean) => {
       if (!isOpen) {
           setRequestModalState('closed');
+      }
+  }
+
+  const handleCycleCompleteModalChange = (isOpen: boolean) => {
+      if (!isOpen) {
+          setIsCycleCompleteModalOpen(false);
       }
   }
 
@@ -779,6 +778,26 @@ export default function DashboardPage() {
                 </div>
                 </>
              )}
+        </DialogContent>
+    </Dialog>
+
+     <Dialog open={isCycleCompleteModalOpen} onOpenChange={handleCycleCompleteModalChange}>
+        <DialogContent>
+             <DialogHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
+                </div>
+                <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus 4 Semanas!</DialogTitle>
+            </DialogHeader>
+            <div className="text-center text-muted-foreground py-4 space-y-4">
+                <p>Estamos orgullosos de tu esfuerzo y dedicación. Has demostrado una constancia increíble.</p>
+                <blockquote className="italic border-l-2 border-primary pl-4 text-left">
+                    "La disciplina es el puente entre las metas y los logros."
+                </blockquote>
+            </div>
+            <div className="flex justify-center">
+                <Button onClick={() => setIsCycleCompleteModalOpen(false)}>¡A por el siguiente reto!</Button>
+            </div>
         </DialogContent>
     </Dialog>
     </>
