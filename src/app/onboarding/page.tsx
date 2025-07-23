@@ -113,26 +113,20 @@ export default function OnboardingPage() {
     const emailFromParams = searchParams.get('email');
     const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
 
-    const emailToUse = loggedInUserEmail || emailFromParams;
-    setUserEmail(emailToUse);
-
-    if (!emailToUse) {
+    if (loggedInUserEmail) {
+      setUserEmail(loggedInUserEmail);
+      setPageMode('newPlan');
+    } else if (emailFromParams) {
+      setUserEmail(emailFromParams);
+      setPageMode('register');
+    } else {
       toast({
         variant: "destructive",
         title: "Error de Sesión",
         description: "No se encontró un usuario válido. Por favor, regístrate o inicia sesión.",
       });
       router.push("/login");
-      return;
     }
-    
-    // If a logged-in user is found in session, they are an existing user generating a new plan
-    if (loggedInUserEmail) {
-        setPageMode('newPlan');
-    } else {
-        setPageMode('register');
-    }
-
   }, [router, toast, searchParams]);
 
   const form = useForm<OnboardingFormValues>({
@@ -197,12 +191,9 @@ export default function OnboardingPage() {
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
-      // Save onboarding data regardless of flow
       localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
 
-      // --- FLOW SEPARATION ---
       if (pageMode === 'newPlan') {
-        // --- EXISTING USER FLOW: GENERATE PLAN ---
         const plan = await generatePersonalizedTrainingPlan(dataToSave);
         localStorage.setItem(`userPlan_${userEmail}`, JSON.stringify(plan));
         
@@ -213,7 +204,7 @@ export default function OnboardingPage() {
         endDate.setDate(today.getDate() + 28); // 4 weeks
         users = users.map((u: User) => u.email === userEmail ? {
             ...u, 
-            planStatus: 'aprobado', // Approve the plan automatically for existing users
+            planStatus: 'aprobado',
             planStartDate: today.toISOString(),
             planEndDate: endDate.toISOString(),
             currentWeek: 1
@@ -223,8 +214,7 @@ export default function OnboardingPage() {
         toast({ title: "¡Plan Generado!", description: "Tu nuevo plan está listo en tu panel." });
         router.push("/dashboard");
 
-      } else {
-        // --- NEW USER FLOW: SAVE DATA AND WAIT FOR APPROVAL ---
+      } else { // pageMode === 'register'
         setIsSuccess(true);
         toast({ title: "¡Información Guardada!", description: "Tus datos han sido enviados para revisión." });
         setTimeout(() => router.push("/login"), 3000); 
@@ -487,3 +477,5 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
+
+    
