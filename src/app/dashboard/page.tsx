@@ -132,7 +132,17 @@ const dayButtonColors = [
     "bg-orange-600/80 hover:bg-orange-600 text-orange-950",
 ]
 
-const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressChange, onSaveChanges, user }: { 
+const PlanAprobado = ({ 
+    plan, 
+    completedDays, 
+    onToggleDay, 
+    progress, 
+    onProgressChange, 
+    onSaveChanges, 
+    user,
+    activeDayIndex,
+    setActiveDayIndex
+}: { 
     plan: UserPlan; 
     completedDays: string[]; 
     onToggleDay: (day: string) => void;
@@ -140,8 +150,9 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
     onProgressChange: (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => void;
     onSaveChanges: () => void;
     user: User | null;
+    activeDayIndex: number;
+    setActiveDayIndex: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-    const [activeDayIndex, setActiveDayIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState<{ url: string; name: string } | null>(null);
     const [extraSets, setExtraSets] = useState<Record<string, number>>({});
@@ -445,6 +456,7 @@ export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [requestModalState, setRequestModalState] = useState<'closed' | 'confirming' | 'success'>('closed');
   const [isCycleCompleteModalOpen, setIsCycleCompleteModalOpen] = useState(false);
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
   const { toast } = useToast();
 
   const containerVariants = {
@@ -470,7 +482,6 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    // This simulates fetching the current user's plan status after they log in.
     if (typeof window !== 'undefined') {
       const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
       setUserEmail(loggedInUserEmail);
@@ -491,6 +502,11 @@ export default function DashboardPage() {
               if(storedCompletedDays) {
                   setCompletedDays(JSON.parse(storedCompletedDays));
               } else {
+                  // Proactive cleaning
+                  if (completedDays.length === 0) {
+                      localStorage.removeItem(`completedDays_week${currentWeek}_${currentUser.email}`);
+                      localStorage.removeItem(`progress_week${currentWeek}_${currentUser.email}`);
+                  }
                   setCompletedDays([]); 
               }
               const storedProgress = localStorage.getItem(`progress_week${currentWeek}_${currentUser.email}`);
@@ -502,7 +518,7 @@ export default function DashboardPage() {
           setPlanStatus('sin-plan');
         }
       } else {
-        setPlanStatus('sin-plan'); // Default for users not found
+        setPlanStatus('sin-plan');
       }
     }
   }, []);
@@ -638,7 +654,17 @@ export default function DashboardPage() {
     }
     switch(planStatus) {
       case 'aprobado':
-        return userPlan ? <PlanAprobado plan={userPlan} user={user} completedDays={completedDays} onToggleDay={handleToggleDay} progress={progress} onProgressChange={handleProgressChange} onSaveChanges={handleSaveChanges} /> : <p>Cargando plan...</p>;
+        return userPlan ? <PlanAprobado 
+            plan={userPlan} 
+            user={user} 
+            completedDays={completedDays} 
+            onToggleDay={handleToggleDay} 
+            progress={progress} 
+            onProgressChange={handleProgressChange} 
+            onSaveChanges={handleSaveChanges} 
+            activeDayIndex={activeDayIndex}
+            setActiveDayIndex={setActiveDayIndex}
+        /> : <p>Cargando plan...</p>;
       case 'pendiente':
         return <PlanPendiente />;
       case 'sin-plan':
@@ -812,6 +838,8 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
 
     
 
