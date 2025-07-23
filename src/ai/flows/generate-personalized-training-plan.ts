@@ -46,6 +46,11 @@ const prompt = ai.definePrompt({
   1. En el campo 'planJustification', explica en 2-3 frases por qué la estructura del plan (ejercicios, series, repeticiones) es ideal para el 'preferredWorkoutStyle' del usuario (ej., por qué es bueno para hipertrofia, fuerza, etc.).
   2. En el campo 'warmup', escribe una rutina de calentamiento y activación general (3-4 frases). Debe incluir movilidad articular y ejercicios de activación específicos para los principales grupos musculares.
   3. En el campo 'recommendations', proporciona una recomendación general (2-3 frases) sobre consejos de post-entrenamiento, como enfriamiento, hidratación, nutrición o mentalidad.
+  
+  {{#if injuriesOrConditions}}
+  MUY IMPORTANTE: El usuario ha reportado las siguientes lesiones o condiciones: {{{injuriesOrConditions}}}.
+  Debes tener esto en cuenta al seleccionar los ejercicios. Adapta el plan para evitar ejercicios que puedan agravar estas condiciones. En la sección 'recommendations', añade una advertencia específica para el usuario sobre cómo abordar su entrenamiento considerando estas limitaciones.
+  {{/if}}
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
 
@@ -74,7 +79,6 @@ const prompt = ai.definePrompt({
   Número de ejercicios por día: {{{exercisesPerDay}}}
   Estilo de Entrenamiento Preferido: {{{preferredWorkoutStyle}}}
   {{#if muscleFocus}}Enfoque Muscular Específico: {{#each muscleFocus}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}.{{/if}}
-  {{#if injuriesOrConditions}}Consideraciones Importantes (lesiones/condiciones): {{{injuriesOrConditions}}}. Adapta el plan para evitar ejercicios que puedan agravar estas condiciones.{{/if}}
   Edad: {{{age}}}
   Peso (kg): {{{weight}}}
   Estatura (cm): {{{height}}}
