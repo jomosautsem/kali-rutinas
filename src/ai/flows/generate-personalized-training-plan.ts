@@ -54,7 +54,7 @@ const prompt = ai.definePrompt({
   {{#if history}}
   MUY IMPORTANTE: El usuario ya ha recibido los siguientes planes. Para asegurar la variedad y evitar el aburrimiento, genera un plan que utilice ejercicios DIFERENTES a los que se enumeran a continuación. No repitas los siguientes ejercicios:
   {{#each history}}
-    Plan {{add @index 1}}:
+    Plan Historial {{@index}}:
     {{#each this.weeklyPlan}}
       {{#each this.exercises}}
       - {{this.name}}
@@ -112,5 +112,3 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
     return sanitizedPlan;
   }
 );
-
-    
