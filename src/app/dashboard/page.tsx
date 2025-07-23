@@ -896,7 +896,7 @@ export default function DashboardPage() {
                     <p>Tu rutina totalmente personalizada está siendo creada y analizada por un coach y Kali Gym.</p>
                     <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-300">
                         <p className="font-bold text-sm uppercase">Para agilizar tu plan</p>
-                        <p className="text-sm">Puedes confirmar por WhatsApp con tu nombre completo.</p>
+                        <p className="text-sm">Puedes confirmar por WhatsApp con tu nombre completo y la palabra PERSONALIZADA.</p>
                     </div>
                 </div>
                 <div className="flex justify-center">
