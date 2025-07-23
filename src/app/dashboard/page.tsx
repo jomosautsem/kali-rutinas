@@ -594,7 +594,7 @@ export default function DashboardPage() {
                localStorage.removeItem(`completedDays_week${nextWeek}_${userEmail}`);
                localStorage.removeItem(`progress_week${nextWeek}_${userEmail}`);
 
-
+               window.scrollTo(0, 0);
            } else {
                // Week 4 completed, end of cycle
                setIsCycleCompleteModalOpen(true);
