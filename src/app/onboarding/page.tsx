@@ -2,12 +2,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { motion, AnimatePresence } from "framer-motion"
-import { GeneratePersonalizedTrainingPlanInputSchema } from "@/lib/types"
+import { GeneratePersonalizedTrainingPlanInputSchema, type UserPlan } from "@/lib/types"
+import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -103,6 +104,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [pageMode, setPageMode] = useState<'register' | 'newPlan'>('register');
   
   useEffect(() => {
     const email = sessionStorage.getItem("onboardingUserEmail");
@@ -110,10 +112,23 @@ export default function OnboardingPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se encontró usuario para el onboarding. Por favor, regístrate primero.",
+        description: "No se encontró usuario. Por favor, inicia sesión de nuevo.",
       });
-      router.push("/register");
+      router.push("/login");
+      return;
     }
+
+    const storedUsers = localStorage.getItem("registeredUsers");
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const currentUser = users.find((u: any) => u.email === email);
+    
+    // If user has a planStatus, they are an existing user generating a new plan
+    if (currentUser && currentUser.planStatus) {
+        setPageMode('newPlan');
+    } else {
+        setPageMode('register');
+    }
+
   }, [router, toast]);
 
   const form = useForm<OnboardingFormValues>({
@@ -139,13 +154,11 @@ export default function OnboardingPage() {
   const watchedWorkoutStyle = form.watch("preferredWorkoutStyle");
 
   const processStep = async () => {
-    // If it's the last step, just submit. The resolver will handle full validation.
     if (currentStep === steps.length - 1) {
       await form.handleSubmit(onSubmit)();
       return;
     }
     
-    // For other steps, validate only the fields in the current step before proceeding
     const fieldsToValidate = steps[currentStep].fields as (keyof OnboardingFormValues)[];
     const isValid = await form.trigger(fieldsToValidate, { shouldFocus: true });
     
@@ -179,18 +192,41 @@ export default function OnboardingPage() {
         preferredWorkoutStyle: finalWorkoutStyle,
       };
       delete (dataToSave as any).otherWorkoutStyle;
-
+      
       localStorage.setItem(`onboardingData_${email}`, JSON.stringify(dataToSave));
-      toast({
-        title: "¡Información Guardada!",
-        description: "Tus datos han sido enviados al administrador para su revisión.",
-      });
-      setIsSuccess(true);
-      sessionStorage.removeItem("onboardingUserEmail");
-      setTimeout(() => router.push("/login"), 3000); 
+
+      if (pageMode === 'newPlan') {
+        // For existing users, generate plan immediately
+        const plan = await generatePersonalizedTrainingPlan(dataToSave);
+        localStorage.setItem(`userPlan_${email}`, JSON.stringify(plan));
+        
+        const storedUsers = localStorage.getItem("registeredUsers");
+        let users = storedUsers ? JSON.parse(storedUsers) : [];
+        const today = new Date();
+        const endDate = new Date();
+        endDate.setDate(today.getDate() + 28);
+        users = users.map((u: any) => u.email === email ? {
+            ...u, 
+            planStatus: 'aprobado',
+            planStartDate: today.toISOString(),
+            planEndDate: endDate.toISOString(),
+            currentWeek: 1
+        } : u);
+        localStorage.setItem("registeredUsers", JSON.stringify(users));
+        
+        toast({ title: "¡Plan Generado!", description: "Tu nuevo plan está listo en tu panel." });
+        router.push("/dashboard");
+
+      } else {
+        // For new users, go to success/pending page
+        toast({ title: "¡Información Guardada!", description: "Tus datos han sido enviados para revisión." });
+        setIsSuccess(true);
+        sessionStorage.removeItem("onboardingUserEmail");
+        setTimeout(() => router.push("/login"), 3000); 
+      }
     } catch (error) {
-      console.error("Failed to save onboarding data:", error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudieron guardar tus datos." });
+      console.error("Onboarding/Plan generation failed:", error);
+      toast({ variant: "destructive", title: "Error", description: "Ocurrió un error. Por favor, inténtalo de nuevo." });
       setIsLoading(false);
     }
   }
@@ -209,9 +245,9 @@ export default function OnboardingPage() {
 
   return (
     <AuthCard
-      title="Casi Hemos Terminado..."
-      description="Cuéntanos sobre ti para que podamos crear el plan perfecto."
-      footer={<p className="text-xs text-muted-foreground">Esta información será revisada por tu entrenador.</p>}
+      title={pageMode === 'newPlan' ? "Actualiza tus Datos" : "Casi Hemos Terminado..."}
+      description={pageMode === 'newPlan' ? "Confirma o actualiza tus datos para generar un nuevo plan." : "Cuéntanos sobre ti para que podamos crear el plan perfecto."}
+      footer={<p className="text-xs text-muted-foreground">Esta información será utilizada para generar tu plan de entrenamiento.</p>}
     >
        <FormProvider {...form}>
         <form onSubmit={(e) => { e.preventDefault(); processStep(); }} className="space-y-6 flex flex-col flex-grow">

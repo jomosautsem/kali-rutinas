@@ -781,7 +781,7 @@ export default function DashboardPage() {
             <Button onClick={() => setRequestModalState('confirming')} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
                 Rutina Personalizada
             </Button>
-            {planStatus !== 'pendiente' && (
+            {planStatus === 'sin-plan' && (
               <PlanGenerator onPlanGenerated={handlePlanGenerated} />
             )}
         </div>
