@@ -27,11 +27,19 @@ export default function ProgressPage() {
                 const currentUser = users.find(u => u.email === loggedInUserEmail);
                 setUser(currentUser || null);
 
-                // Try to load a plan, even if it's from a past cycle, to get exercise names
-                const storedPlan = localStorage.getItem(`userPlan_${loggedInUserEmail}`);
-                if (storedPlan) {
-                    setUserPlan(JSON.parse(storedPlan));
+                // Try to load an active plan first
+                let planToUse: UserPlan | null = null;
+                const activePlanString = localStorage.getItem(`userPlan_${loggedInUserEmail}`);
+                if (activePlanString) {
+                    planToUse = JSON.parse(activePlanString);
+                } else {
+                    // If no active plan, check for a recently completed plan
+                    const lastPlanString = localStorage.getItem(`lastCompletedPlan_${loggedInUserEmail}`);
+                    if (lastPlanString) {
+                        planToUse = JSON.parse(lastPlanString);
+                    }
                 }
+                setUserPlan(planToUse);
                 
                 const progressHistory: ProgressData[] = [];
                 for (let i = 1; i <= 4; i++) {
@@ -85,6 +93,8 @@ export default function ProgressPage() {
 
     // A mock plan for structure if no active plan exists but progress data does
     const planForAnalysis: UserPlan = userPlan || {
+        warmup: "",
+        recommendations: "",
         weeklyPlan: allProgressData.flatMap((weekProgress) =>
             Object.keys(weekProgress).map(day => ({
                 day: day,
@@ -145,3 +155,5 @@ export default function ProgressPage() {
         </div>
     )
 }
+
+    

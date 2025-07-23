@@ -500,6 +500,24 @@ export default function DashboardPage() {
     if (typeof window !== 'undefined') {
       const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
       setUserEmail(loggedInUserEmail);
+
+      // --- Progress History Cleanup ---
+      if (loggedInUserEmail) {
+        const expirationString = localStorage.getItem(`progressExpiration_${loggedInUserEmail}`);
+        if (expirationString) {
+            const expirationDate = new Date(expirationString);
+            if (new Date() > expirationDate) {
+                for (let i = 1; i <= 4; i++) {
+                    localStorage.removeItem(`progress_week${i}_${loggedInUserEmail}`);
+                }
+                localStorage.removeItem(`lastCompletedPlan_${loggedInUserEmail}`);
+                localStorage.removeItem(`progressExpiration_${loggedInUserEmail}`);
+                toast({ title: "Historial de Progreso Limpiado", description: "Tu historial del ciclo anterior ha sido eliminado." });
+            }
+        }
+      }
+      // --- End Cleanup ---
+
       const storedUsers = localStorage.getItem("registeredUsers");
       if (loggedInUserEmail && storedUsers) {
         const users: User[] = JSON.parse(storedUsers);
@@ -614,23 +632,28 @@ export default function DashboardPage() {
       setCompletedDays([]);
       setProgress({});
       setActiveDayIndex(0);
-      localStorage.removeItem(`completedDays_week${nextWeek}_${userEmail}`);
-      localStorage.removeItem(`progress_week${nextWeek}_${userEmail}`);
       
       setCycleModalState('closed');
       window.scrollTo(0, 0);
   }
 
   const handleFinishCycle = () => {
-    if (!user || !userEmail) return;
+    if (!user || !userEmail || !userPlan) return;
 
-    // 1. Update user data in localStorage (users list)
+    // 1. Store the finished plan and set an expiration date for the history
+    localStorage.setItem(`lastCompletedPlan_${userEmail}`, JSON.stringify(userPlan));
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 7); // Expire after 7 days
+    localStorage.setItem(`progressExpiration_${userEmail}`, expirationDate.toISOString());
+
+    // 2. Update user data in localStorage (users list)
     const storedUsers = localStorage.getItem("registeredUsers");
     let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
     
-    const updatedUser = {
+    const updatedUser: User = {
       ...user,
       planStatus: 'sin-plan',
+      customPlanRequest: 'none',
       currentWeek: undefined,
       planStartDate: undefined,
       planEndDate: undefined,
@@ -639,10 +662,10 @@ export default function DashboardPage() {
     users = users.map(u => u.email === user.email ? updatedUser : u);
     localStorage.setItem("registeredUsers", JSON.stringify(users));
 
-    // 2. Remove the user's active plan
+    // 3. Remove the user's active plan
     localStorage.removeItem(`userPlan_${userEmail}`);
 
-    // 3. Update local state to reflect the changes instantly
+    // 4. Update local state to reflect the changes instantly
     setUser(updatedUser);
     setUserPlan(null);
     setPlanStatus('sin-plan');
@@ -650,7 +673,7 @@ export default function DashboardPage() {
     setProgress({});
     setActiveDayIndex(0);
     
-    // 4. Close the modal
+    // 5. Close the modal
     setCycleModalState('closed');
   }
 
@@ -916,5 +939,7 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
 
     
