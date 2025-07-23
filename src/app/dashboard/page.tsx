@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Info, Calendar } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Info, Calendar, PartyPopper } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -181,13 +181,27 @@ const PlanAprobado = ({
         <>
             <div className="space-y-6">
                  {user?.planStartDate && user.planEndDate && (
-                     <Alert className="bg-card/50 border-border/50">
-                        <Calendar className="h-5 w-5 text-muted-foreground" />
-                        <AlertTitle className="font-headline text-foreground">Ciclo de Entrenamiento: Semana {user.currentWeek || 1} de 4</AlertTitle>
-                        <AlertDescription className="text-muted-foreground text-xs mt-1">
-                            {format(new Date(user.planStartDate), "PPP")} - {format(new Date(user.planEndDate), "PPP")}
-                        </AlertDescription>
-                    </Alert>
+                    <Card className="bg-card/70 border-primary/20 shadow-lg shadow-primary/10">
+                        <CardHeader className="text-center">
+                            <CardTitle className="font-headline text-2xl text-primary">Ciclo de Entrenamiento Activo</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex items-center justify-around text-center">
+                            <div>
+                               <p className="text-sm text-muted-foreground">Semana</p>
+                               <p className="text-3xl font-bold">{user.currentWeek || 1} <span className="text-lg text-muted-foreground">/ 4</span></p>
+                            </div>
+                             <div className="h-16 w-px bg-border"></div>
+                            <div>
+                               <p className="text-sm text-muted-foreground">Inicio</p>
+                               <p className="font-semibold">{format(new Date(user.planStartDate), "PPP")}</p>
+                            </div>
+                             <div className="h-16 w-px bg-border"></div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Fin</p>
+                                <p className="font-semibold">{format(new Date(user.planEndDate), "PPP")}</p>
+                            </div>
+                        </CardContent>
+                    </Card>
                  )}
                  {plan.warmup && (
                     <Alert className="bg-blue-500/5 border-blue-500/20">
@@ -455,7 +469,7 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [requestModalState, setRequestModalState] = useState<'closed' | 'confirming' | 'success'>('closed');
-  const [isCycleCompleteModalOpen, setIsCycleCompleteModalOpen] = useState(false);
+  const [cycleModalState, setCycleModalState] = useState<'closed' | 'week_complete' | 'cycle_complete'>('closed');
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const { toast } = useToast();
 
@@ -575,31 +589,35 @@ export default function DashboardPage() {
       if (isWeekComplete) {
            const currentWeek = user.currentWeek || 1;
            if (currentWeek < 4) {
-               toast({
-                   title: `¡Semana ${currentWeek} Completada!`,
-                   description: "¡Felicidades! Tu próxima semana está lista."
-               });
-               const nextWeek = currentWeek + 1;
-               const updatedUser = { ...user, currentWeek: nextWeek };
-               
-               const storedUsers = localStorage.getItem("registeredUsers");
-               let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-               users = users.map(u => u.email === user.email ? updatedUser : u);
-               localStorage.setItem("registeredUsers", JSON.stringify(users));
-               setUser(updatedUser);
-               
-               setCompletedDays([]);
-               setProgress({});
-               setActiveDayIndex(0); // Reset active day to the first day of the new week
-               localStorage.removeItem(`completedDays_week${nextWeek}_${userEmail}`);
-               localStorage.removeItem(`progress_week${nextWeek}_${userEmail}`);
-
-               window.scrollTo(0, 0);
+               setCycleModalState('week_complete');
            } else {
                // Week 4 completed, end of cycle
-               setIsCycleCompleteModalOpen(true);
+               setCycleModalState('cycle_complete');
            }
       }
+  }
+
+  const handleAdvanceToNextWeek = () => {
+      if (!user || !userEmail) return;
+
+      const currentWeek = user.currentWeek || 1;
+      const nextWeek = currentWeek + 1;
+      const updatedUser = { ...user, currentWeek: nextWeek };
+
+      const storedUsers = localStorage.getItem("registeredUsers");
+      let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+      users = users.map(u => u.email === user.email ? updatedUser : u);
+      localStorage.setItem("registeredUsers", JSON.stringify(users));
+      setUser(updatedUser);
+
+      setCompletedDays([]);
+      setProgress({});
+      setActiveDayIndex(0);
+      localStorage.removeItem(`completedDays_week${nextWeek}_${userEmail}`);
+      localStorage.removeItem(`progress_week${nextWeek}_${userEmail}`);
+      
+      setCycleModalState('closed');
+      window.scrollTo(0, 0);
   }
 
   const handleProgressChange = (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => {
@@ -680,9 +698,9 @@ export default function DashboardPage() {
       }
   }
 
-  const handleCycleCompleteModalChange = (isOpen: boolean) => {
+  const handleCycleModalChange = (isOpen: boolean) => {
       if (!isOpen) {
-          setIsCycleCompleteModalOpen(false);
+          setCycleModalState('closed');
       }
   }
 
@@ -724,7 +742,7 @@ export default function DashboardPage() {
                         <CardTitle className="font-headline">Tu Plan de Entrenamiento</CardTitle>
                         <CardDescription>
                             {planStatus === 'aprobado' 
-                                ? `Este es tu horario de entrenamiento para la semana ${user?.currentWeek || 1}.`
+                                ? `Este es tu horario de entrenamiento para la semana.`
                                 : "Tu plan de entrenamiento aparecerá aquí una vez que esté listo."
                             }
                         </CardDescription>
@@ -816,23 +834,43 @@ export default function DashboardPage() {
         </DialogContent>
     </Dialog>
 
-     <Dialog open={isCycleCompleteModalOpen} onOpenChange={handleCycleCompleteModalChange}>
+     <Dialog open={cycleModalState !== 'closed'} onOpenChange={handleCycleModalChange}>
         <DialogContent>
-             <DialogHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
+            {cycleModalState === 'week_complete' && user && (
+                <>
+                    <DialogHeader className="text-center">
+                        <div className="flex justify-center mb-4">
+                            <PartyPopper className="h-16 w-16 text-primary p-2 rounded-full bg-primary/20" />
+                        </div>
+                        <DialogTitle className="text-2xl font-headline">¡Semana {user.currentWeek} Completada!</DialogTitle>
+                    </DialogHeader>
+                    <div className="text-center text-muted-foreground py-4 space-y-4">
+                        <p>¡Excelente trabajo! Has demostrado una gran disciplina. Prepárate para el siguiente desafío.</p>
+                    </div>
+                    <div className="flex justify-center">
+                        <Button onClick={handleAdvanceToNextWeek}>Empezar Semana { (user.currentWeek || 0) + 1}</Button>
+                    </div>
+                </>
+            )}
+             {cycleModalState === 'cycle_complete' && (
+                <>
+                 <DialogHeader className="text-center">
+                    <div className="flex justify-center mb-4">
+                        <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
+                    </div>
+                    <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus 4 Semanas!</DialogTitle>
+                </DialogHeader>
+                <div className="text-center text-muted-foreground py-4 space-y-4">
+                    <p>Estamos orgullosos de tu esfuerzo y dedicación. Has demostrado una constancia increíble.</p>
+                    <blockquote className="italic border-l-2 border-primary pl-4 text-left">
+                        "La disciplina es el puente entre las metas y los logros."
+                    </blockquote>
                 </div>
-                <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus 4 Semanas!</DialogTitle>
-            </DialogHeader>
-            <div className="text-center text-muted-foreground py-4 space-y-4">
-                <p>Estamos orgullosos de tu esfuerzo y dedicación. Has demostrado una constancia increíble.</p>
-                <blockquote className="italic border-l-2 border-primary pl-4 text-left">
-                    "La disciplina es el puente entre las metas y los logros."
-                </blockquote>
-            </div>
-            <div className="flex justify-center">
-                <Button onClick={() => setIsCycleCompleteModalOpen(false)}>¡A por el siguiente reto!</Button>
-            </div>
+                <div className="flex justify-center">
+                    <Button onClick={() => setCycleModalState('closed')}>¡A por el siguiente reto!</Button>
+                </div>
+                </>
+             )}
         </DialogContent>
     </Dialog>
     </>
