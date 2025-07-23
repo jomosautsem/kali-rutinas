@@ -235,16 +235,6 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                         <h3 className="font-bold text-lg">{dayPlan.day}</h3>
                                         <p className="text-base text-muted-foreground">{dayPlan.focus}</p>
                                       </div>
-                                      <div className="flex items-center space-x-2 bg-card p-3 rounded-lg">
-                                        <Checkbox 
-                                          id={`complete-${dayPlan.day}`} 
-                                          checked={completedDays.includes(dayPlan.day)}
-                                          onCheckedChange={() => onToggleDay(dayPlan.day)}
-                                        />
-                                        <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
-                                          Marcar día como completado
-                                        </Label>
-                                      </div>
                                     </div>
                                     <div className="space-y-8 pt-4">
                                         {(dayPlan.exercises || []).map((exercise, exerciseIndex) => {
@@ -328,7 +318,17 @@ const PlanAprobado = ({ plan, completedDays, onToggleDay, progress, onProgressCh
                                             )
                                         })}
                                     </div>
-                                    <div className="flex justify-end pt-4">
+                                    <div className="flex justify-between items-center pt-6 mt-4 border-t">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox 
+                                            id={`complete-${dayPlan.day}`} 
+                                            checked={completedDays.includes(dayPlan.day)}
+                                            onCheckedChange={() => onToggleDay(dayPlan.day)}
+                                            />
+                                            <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
+                                            Marcar día como completado
+                                            </Label>
+                                        </div>
                                         <Button onClick={onSaveChanges}>
                                             <Save className="mr-2 h-4 w-4" />
                                             Guardar Avances del Día
@@ -729,3 +729,4 @@ export default function DashboardPage() {
 }
 
     
+
