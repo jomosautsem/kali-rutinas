@@ -570,6 +570,7 @@ export default function DashboardPage() {
                localStorage.setItem("registeredUsers", JSON.stringify(users));
                setUser(updatedUser);
                
+               // Immediate state reset for the new week
                setCompletedDays([]);
                setProgress({});
 
@@ -806,3 +807,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
