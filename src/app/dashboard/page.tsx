@@ -490,6 +490,8 @@ export default function DashboardPage() {
               const storedCompletedDays = localStorage.getItem(`completedDays_week${currentWeek}_${currentUser.email}`);
               if(storedCompletedDays) {
                   setCompletedDays(JSON.parse(storedCompletedDays));
+              } else {
+                  setCompletedDays([]); 
               }
               const storedProgress = localStorage.getItem(`progress_week${currentWeek}_${currentUser.email}`);
               if(storedProgress) {
@@ -551,15 +553,15 @@ export default function DashboardPage() {
       const currentWeek = user.currentWeek || 1;
       localStorage.setItem(`completedDays_week${currentWeek}_${userEmail}`, JSON.stringify(newCompletedDays));
 
-      // Check if the week is complete
       const allDaysInPlan = userPlan.weeklyPlan.map(d => d.day);
       const isWeekComplete = allDaysInPlan.length > 0 && allDaysInPlan.every(d => newCompletedDays.includes(d));
 
       if (isWeekComplete) {
+           const currentWeek = user.currentWeek || 1;
            if (currentWeek < 4) {
                toast({
                    title: `¡Semana ${currentWeek} Completada!`,
-                   description: "¡Felicidades! Refresca la página para empezar tu próxima semana."
+                   description: "¡Felicidades! Tu próxima semana está lista."
                });
                const nextWeek = currentWeek + 1;
                const updatedUser = { ...user, currentWeek: nextWeek };
@@ -570,9 +572,12 @@ export default function DashboardPage() {
                localStorage.setItem("registeredUsers", JSON.stringify(users));
                setUser(updatedUser);
                
-               // Immediate state reset for the new week
                setCompletedDays([]);
                setProgress({});
+               setActiveDayIndex(0); // Reset active day to the first day of the new week
+               localStorage.removeItem(`completedDays_week${nextWeek}_${userEmail}`);
+               localStorage.removeItem(`progress_week${nextWeek}_${userEmail}`);
+
 
            } else {
                // Week 4 completed, end of cycle
@@ -807,5 +812,7 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
 
     

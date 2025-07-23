@@ -12,19 +12,29 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 type WeeklyVolumeChartProps = {
   plan: UserPlan;
-  progress: ProgressData;
+  allProgress: ProgressData[];
 };
 
-export function WeeklyVolumeChart({ plan, progress }: WeeklyVolumeChartProps) {
-  const chartData = useMemo(() => calculateWeeklyVolume(plan, progress), [plan, progress]);
-  const hasData = useMemo(() => chartData.some(d => d.volume > 0), [chartData]);
+export function WeeklyVolumeChart({ plan, allProgress }: WeeklyVolumeChartProps) {
+  const chartData = useMemo(() => {
+    return allProgress.map((weeklyProgress, index) => ({
+        name: `Sem ${index + 1}`,
+        ...calculateWeeklyVolume(plan, weeklyProgress)
+    }));
+  }, [plan, allProgress]);
+
+  const hasData = useMemo(() => chartData.some(week => Object.values(week).some(val => typeof val === 'number' && val > 0)), [chartData]);
+  
+  const days = plan.weeklyPlan.map(d => d.day.substring(0,3));
+  const colors = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Volumen Semanal Total</CardTitle>
         <CardDescription>
-          Visualización del volumen de entrenamiento total (peso x reps) completado por día.
+          Visualización del volumen de entrenamiento total (peso x reps) completado por día a lo largo de las semanas.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -44,7 +54,7 @@ export function WeeklyVolumeChart({ plan, progress }: WeeklyVolumeChartProps) {
                 <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis
-                    dataKey="day"
+                    dataKey="name"
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                     tickLine={false}
@@ -66,7 +76,10 @@ export function WeeklyVolumeChart({ plan, progress }: WeeklyVolumeChartProps) {
                     }}
                     labelStyle={{ color: "hsl(var(--foreground))" }}
                 />
-                <Bar dataKey="volume" fill="hsl(var(--primary))" name="Volumen (kg)" radius={[4, 4, 0, 0]} />
+                <Legend />
+                 {days.map((day, i) => (
+                    <Bar key={day} dataKey={day} stackId="a" fill={colors[i % colors.length]} name={day} radius={[4, 4, 0, 0]} />
+                 ))}
                 </BarChart>
             </ResponsiveContainer>
             </div>
@@ -81,3 +94,6 @@ export function WeeklyVolumeChart({ plan, progress }: WeeklyVolumeChartProps) {
     </Card>
   );
 }
+
+
+    

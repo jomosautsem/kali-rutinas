@@ -34,7 +34,11 @@ export default function ProgressPage() {
                 for (let i = 1; i <= 4; i++) {
                     const storedProgress = localStorage.getItem(`progress_week${i}_${loggedInUserEmail}`);
                     if (storedProgress) {
-                        progressHistory.push(JSON.parse(storedProgress));
+                        try {
+                           progressHistory.push(JSON.parse(storedProgress));
+                        } catch (e) {
+                            console.error(`Failed to parse progress for week ${i}`, e);
+                        }
                     }
                 }
                 setAllProgressData(progressHistory);
@@ -76,20 +80,17 @@ export default function ProgressPage() {
         )
     }
 
-    // Combine all progress data for overall analysis
-    const combinedProgress = allProgressData.reduce((acc, current) => {
+    const combinedProgress = allProgressData.reduce((acc, current, weekIndex) => {
         for (const day in current) {
-            if (!acc[day]) acc[day] = {};
+            const dateKey = `W${weekIndex + 1} ${day.substring(0, 3)}`;
+            if (!acc[dateKey]) acc[dateKey] = {};
             for (const exercise in current[day]) {
-                if (!acc[day][exercise]) acc[day][exercise] = {};
-                // This simple merge might overwrite sets if day/exercise keys clash
-                // A more sophisticated merge might be needed depending on the analysis
-                Object.assign(acc[day][exercise], current[day][exercise]);
+                if (!acc[dateKey][exercise]) acc[dateKey][exercise] = {};
+                Object.assign(acc[dateKey][exercise], current[day][exercise]);
             }
         }
         return acc;
     }, {} as ProgressData);
-
     
     return (
         <div className="space-y-6">
@@ -117,10 +118,13 @@ export default function ProgressPage() {
 
             <PersonalRecords plan={userPlan} progress={combinedProgress} />
 
-            <WeeklyVolumeChart plan={userPlan} progress={combinedProgress} />
+            <WeeklyVolumeChart plan={userPlan} allProgress={allProgressData} />
 
             <ExerciseProgressChart plan={userPlan} progress={combinedProgress} />
             
         </div>
     )
 }
+
+
+    
