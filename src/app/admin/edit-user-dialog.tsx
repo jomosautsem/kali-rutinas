@@ -32,7 +32,6 @@ import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { ScrollArea } from "../ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 
 const formSchema = z.object({
@@ -57,7 +56,7 @@ type EditUserDialogProps = {
 const steps = [
     { id: 1, name: "Información Personal", fields: ["firstName", "paternalLastName", "maternalLastName", "email", "avatarUrl"] },
     { id: 2, name: "Ciclo de Entrenamiento", fields: ["planDurationInWeeks", "planStartDate", "planEndDate", "currentWeek"] },
-]
+];
 
 export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDialogProps) {
   const { toast } = useToast();
@@ -103,11 +102,11 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
     if (output) {
       setCurrentStep(step => step + 1);
     }
-  }
+  };
 
   const prevStep = () => {
     setCurrentStep(step => step - 1);
-  }
+  };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) return;
@@ -139,7 +138,7 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-md h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Editar Usuario</DialogTitle>
           <DialogDescription>
@@ -148,7 +147,7 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
         </DialogHeader>
         
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col overflow-hidden">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col flex-grow overflow-hidden">
                 <div className="flex-grow overflow-y-auto pr-6 -mr-6">
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -358,25 +357,26 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
                     </AnimatePresence>
                 </div>
               
-              <DialogFooter className="sticky bottom-0 bg-background pt-4 -mx-6 px-6 pb-0 mt-auto">
-                {currentStep > 0 && (
-                    <Button type="button" variant="ghost" onClick={prevStep}>
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Anterior
-                    </Button>
-                )}
-                <Button type="button" variant="outline" onClick={onClose} className="ml-auto">Cancelar</Button>
-                {currentStep < steps.length - 1 && (
-                    <Button type="button" onClick={nextStep}>
-                        Siguiente
-                    </Button>
-                )}
-                {currentStep === steps.length - 1 && (
-                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isSubmitting ? "Guardando..." : "Guardar Cambios"}
-                    </Button>
-                )}
-              </DialogFooter>
+                <DialogFooter className="flex-shrink-0 pt-4 border-t">
+                    {currentStep > 0 && (
+                        <Button type="button" variant="ghost" onClick={prevStep}>
+                            <ArrowLeft className="mr-2 h-4 w-4" /> Anterior
+                        </Button>
+                    )}
+                    <div className="flex-grow" />
+                    <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+                    {currentStep < steps.length - 1 && (
+                        <Button type="button" onClick={nextStep}>
+                            Siguiente
+                        </Button>
+                    )}
+                    {currentStep === steps.length - 1 && (
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+                        </Button>
+                    )}
+                </DialogFooter>
             </form>
           </Form>
       </DialogContent>
@@ -384,3 +384,4 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
   );
 }
 
+    
