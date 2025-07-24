@@ -1,77 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-1.1.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  engineType = "library"
-}
-
-// Modelos de la aplicación
-
-model User {
-  id                 String     @id @default(uuid())
-  firstName          String
-  paternalLastName   String
-  maternalLastName   String
-  name               String
-  email              String     @unique
-  role               String     @default("client") // "admin" o "client"
-  status             String     @default("pendiente") // "activo", "pendiente", "inactivo"
-  registeredAt       DateTime   @default(now())
-  planStatus         String     @default("sin-plan") // "aprobado", "pendiente", "sin-plan", "n/a"
-  inviteCode         String?
-  avatarUrl          String?
-  customPlanRequest  String?    @default("none") // 'requested' o 'none'
-  planStartDate      DateTime?
-  planEndDate        DateTime?
-  currentWeek        Int?
-  onboardingData     Json?
-  plans              UserPlan[]
-}
-
-model UserPlan {
-  id                String      @id @default(uuid())
-  planJustification String?
-  warmup            String?
-  recommendations   String?
-  createdAt         DateTime    @default(now())
-  weeklyPlan        DayPlan[]
-  userId            String
-  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model DayPlan {
-  id         String     @id @default(uuid())
-  day        String
-  focus      String
-  exercises  Exercise[]
-  userPlanId String
-  userPlan   UserPlan   @relation(fields: [userPlanId], references: [id], onDelete: Cascade)
-}
-
-model Exercise {
-  id          String   @id @default(uuid())
-  name        String
-  series      String
-  reps        String
-  rest        String
-  mediaUrl    String?
-  dayPlanId   String
-  dayPlan     DayPlan  @relation(fields: [dayPlanId], references: [id], onDelete: Cascade)
-}
-
-model Template {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  level       String
-  days        Int
-  plan        Json // Representa el objeto UserPlan como JSON
-  createdAt   DateTime @default(now())
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
