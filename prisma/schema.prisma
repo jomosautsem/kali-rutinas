@@ -1,83 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                String   @id @default(cuid())
-  firstName         String
-  paternalLastName  String
-  maternalLastName  String
-  name              String
-  email             String   @unique
-  role              String   @default("client")
-  status            String   @default("pendiente")
-  registeredAt      DateTime @default(now())
-  planStatus        String   @default("sin-plan")
-  inviteCode        String?
-  avatarUrl         String?
-  password          String?
+  id                 String    @id @default(uuid())
+  firstName          String
+  paternalLastName   String
+  maternalLastName   String
+  name               String
+  email              String    @unique
+  role               String    @default("client")
+  status             String    @default("pendiente")
+  registeredAt       DateTime  @default(now())
+  planStatus         String    @default("sin-plan")
+  inviteCode         String?
+  avatarUrl          String?
+  password           String?
+  customPlanRequest  String?   @default("none")
+  planStartDate      DateTime?
+  planEndDate        DateTime?
+  currentWeek        Int?
 
-  plan             UserPlan? @relation(fields: [planId], references: [id])
-  planId           String?   @unique
-  onboardingDataId String?   @unique
-  onboardingData   OnboardingData? @relation(fields: [onboardingDataId], references: [id])
-  progress         Progress[]
+  // Relaciones
+  plan               UserPlan? @relation(fields: [planId], references: [id])
+  planId             String?   @unique
+  onboardingData     Json?
+  progressData       Json?     @default("{}")
+  planHistory        Json?     @default("[]")
 }
 
 model UserPlan {
-  id              String   @id @default(cuid())
-  user            User?
-  warmup          String?  @db.Text
-  recommendations String?  @db.Text
-  weeklyPlan      Json
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-model OnboardingData {
-  id                    String   @id @default(cuid())
-  user                  User?
-  goals                 Json
-  currentFitnessLevel   String
-  trainingDays          Json
-  preferredWorkoutStyle String
-  muscleFocus           Json?
-  age                   Int
-  weight                Int
-  height                Int
-  goalTerm              String
-  injuriesOrConditions  String?  @db.Text
-  createdAt             DateTime @default(now())
-}
-
-model Progress {
-  id           String   @id @default(cuid())
-  user         User     @relation(fields: [userId], references: [id])
-  userId       String
-  day          String
-  exerciseName String
-  setIndex     Int
-  weight       Float
-  reps         Int
-  completed    Boolean
-  createdAt    DateTime @default(now())
-
-  @@index([userId])
-}
-
-model Template {
-  id          String   @id @default(cuid())
-  title       String
-  description String   @db.Text
-  level       String
-  days        Int
-  plan        Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String    @id @default(uuid())
+  planJustification String?
+  warmup            String?
+  recommendations   String?
+  weeklyPlan        Json
+  user              User?
+  isTemplate        Boolean   @default(false)
+  templateTitle     String?
+  templateDescription String?
+  templateLevel     String?
 }
