@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -11,41 +12,65 @@ datasource db {
 }
 
 model User {
-  id                 String    @id @default(uuid())
+  id                 String     @id @default(cuid())
   firstName          String
   paternalLastName   String
   maternalLastName   String
   name               String
-  email              String    @unique
-  role               String    @default("client")
-  status             String    @default("pendiente")
-  registeredAt       DateTime  @default(now())
-  planStatus         String    @default("sin-plan")
+  email              String     @unique
+  role               String     @default("client")
+  status             String     @default("pendiente")
+  registeredAt       DateTime   @default(now())
+  planStatus         String     @default("sin-plan")
   inviteCode         String?
   avatarUrl          String?
-  password           String?
-  customPlanRequest  String?   @default("none")
+  customPlanRequest  String?    @default("none")
   planStartDate      DateTime?
   planEndDate        DateTime?
   currentWeek        Int?
-
-  // Relaciones
-  plan               UserPlan? @relation(fields: [planId], references: [id])
-  planId             String?   @unique
+  password           String?
   onboardingData     Json?
-  progressData       Json?     @default("{}")
-  planHistory        Json?     @default("[]")
+  planHistory        Json?      @default("[]")
+  plan               UserPlan[]
+  progress           Progress[]
 }
 
 model UserPlan {
-  id                String    @id @default(uuid())
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
   planJustification String?
   warmup            String?
   recommendations   String?
-  weeklyPlan        Json
-  user              User?
-  isTemplate        Boolean   @default(false)
-  templateTitle     String?
-  templateDescription String?
-  templateLevel     String?
+  weeklyPlan        DayPlan[]
+}
+
+model DayPlan {
+  id         String     @id @default(cuid())
+  userPlanId String
+  userPlan   UserPlan   @relation(fields: [userPlanId], references: [id])
+  day        String
+  focus      String
+  exercises  Exercise[]
+}
+
+model Exercise {
+  id        String  @id @default(cuid())
+  dayPlanId String
+  dayPlan   DayPlan @relation(fields: [dayPlanId], references: [id])
+  name      String
+  series    String
+  reps      String
+  rest      String
+  mediaUrl  String?
+}
+
+model Progress {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  week           Int
+  progressData   Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
