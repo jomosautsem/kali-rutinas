@@ -383,5 +383,3 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
     </Dialog>
   );
 }
-
-    
