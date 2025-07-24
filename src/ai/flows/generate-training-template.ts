@@ -21,7 +21,7 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-2.0-flash',
   input: { schema: GenerateTrainingTemplateInputSchema },
   output: { schema: UserPlanSchema },
-  prompt: `Eres un entrenador personal experto en crear plantillas de planes de entrenamiento genéricos pero efectivos que puedan ser usados por múltiples personas.
+  prompt: `Actúa como un entrenador personal profesional con décadas de experiencia, y también como fisioterapeuta con un profundo conocimiento de la anatomía humana. Tu tarea es crear una plantilla de plan de entrenamiento genérico pero efectivo que pueda ser usado por múltiples personas.
 
   Basado en la descripción proporcionada, crea un plan de entrenamiento completo con el formato JSON solicitado. El plan debe ser detallado, bien estructurado y listo para ser usado como una plantilla.
 

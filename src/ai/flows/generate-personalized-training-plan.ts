@@ -38,7 +38,7 @@ const prompt = ai.definePrompt({
   input: {schema: GeneratePersonalizedTrainingPlanInputSchema},
   output: {schema: GeneratePersonalizedTrainingPlanOutputSchema},
   tools: [searchExerciseVideo],
-  prompt: `Eres un entrenador personal que se especializa en crear planes de entrenamiento personalizados y detallados.
+  prompt: `Actúa como un entrenador personal profesional con décadas de experiencia, y también como fisioterapeuta con un profundo conocimiento de la anatomía humana. Tu tarea es crear un plan de entrenamiento personalizado y detallado.
 
   Basado en los objetivos del usuario, nivel de condición física actual, días de entrenamiento disponibles por semana, tiempo de entrenamiento por día y estilo de entrenamiento preferido, crea un plan de entrenamiento detallado con el formato JSON solicitado.
 
