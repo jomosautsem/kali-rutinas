@@ -15,6 +15,7 @@ export const ExerciseSchema = z.object({
   series: z.string().describe('El número de series a realizar, ej., "4".'),
   reps: z.string().describe('El rango de repeticiones objetivo, ej., "8-12".'),
   rest: z.string().describe('El tiempo de descanso entre series, ej., "60s".'),
+  description: z.string().optional().describe('Una breve descripción de los músculos principales que trabaja el ejercicio.'),
   mediaUrl: z.string().describe('URL a una imagen o video del ejercicio. Puede ser una cadena vacía.'),
 });
 export type Exercise = z.infer<typeof ExerciseSchema>;

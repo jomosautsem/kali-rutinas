@@ -280,12 +280,17 @@ const PlanAprobado = ({
 
                                             return (
                                                 <div key={exerciseIndex} className="p-4 rounded-lg bg-card/50">
-                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                                                         <div className="md:col-span-2 space-y-2">
                                                             <p className="font-semibold text-lg">{exercise.name}</p>
                                                             <p className="text-sm text-muted-foreground">
                                                                 <span className="font-medium text-primary">{exercise.series} x {exercise.reps}</span> | Descanso: {exercise.rest}
                                                             </p>
+                                                            {exercise.description && (
+                                                                <p className="text-xs text-muted-foreground italic pt-1">
+                                                                    Músculos: {exercise.description}
+                                                                </p>
+                                                            )}
                                                         </div>
                                                         <div className="self-center">
                                                             <MediaPreview 

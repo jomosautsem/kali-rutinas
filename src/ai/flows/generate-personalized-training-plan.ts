@@ -49,7 +49,7 @@ const prompt = ai.definePrompt({
   
   {{#if injuriesOrConditions}}
   MUY IMPORTANTE: El usuario ha reportado las siguientes lesiones o condiciones: {{{injuriesOrConditions}}}.
-  Debes tener esto en cuenta al seleccionar los ejercicios. Adapta el plan para evitar ejercicios que puedan agravar estas condiciones. En la sección 'recommendations', añade una advertencia específica para el usuario sobre cómo abordar su entrenamiento considerando estas limitaciones.
+  Debes tener esto en cuenta al seleccionar los ejercicios. Adapta el plan para evitar ejercicios que puedan agravar estas condiciones. En el campo 'recommendations', añade una advertencia específica para el usuario sobre cómo abordar su entrenamiento considerando estas limitaciones.
   {{/if}}
 
   Crea un plan para los días de la semana especificados por el usuario en 'trainingDays'. El número total de días de entrenamiento debe coincidir con la cantidad de días en esa lista.
@@ -71,6 +71,8 @@ const prompt = ai.definePrompt({
   Para cada ejercicio, especifica las series y las repeticiones en los campos 'series' y 'reps' respectivamente. Por ejemplo, series: "4", reps: "8-12".
   
   MUY IMPORTANTE: Para cada ejercicio en el plan, debes usar la herramienta 'searchExerciseVideo' para encontrar un video del ejercicio y agregar la URL en el campo 'mediaUrl'. NO dejes el campo 'mediaUrl' vacío. La URL devuelta será una URL de búsqueda de youtube, está bien.
+
+  IMPORTANTE: Para cada ejercicio, rellena el campo 'description' con una breve descripción de 1-2 frases sobre los principales músculos que trabaja el ejercicio. Por ejemplo: "Este ejercicio se enfoca en el pectoral mayor, deltoides anterior y tríceps.".
   
   Objetivos: {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
@@ -108,6 +110,7 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
           ...exercise,
           series: exercise.series || "3", // Valor por defecto para series
           reps: exercise.reps || "10-12", // Valor por defecto para reps
+          description: exercise.description || "Descripción no disponible.",
           mediaUrl: exercise.mediaUrl || "",
         })),
       })),
