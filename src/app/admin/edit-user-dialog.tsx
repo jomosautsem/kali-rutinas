@@ -140,9 +140,9 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Editar Usuario</DialogTitle>
+          <DialogTitle>Editar Usuario - Paso {currentStep + 1} de {steps.length}</DialogTitle>
           <DialogDescription>
-            Actualiza la información y el ciclo de entrenamiento del usuario <span className="font-bold">{user.name}</span>.
+            Actualiza la información de <span className="font-bold">{user.name}</span>.
           </DialogDescription>
         </DialogHeader>
         
