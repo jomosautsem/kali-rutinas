@@ -86,13 +86,15 @@ export default function CreatePlanPage() {
         const storedUsers = localStorage.getItem("registeredUsers");
         let users = storedUsers ? JSON.parse(storedUsers) : [];
         const today = new Date();
-        const endDate = new Date(today.getTime() + 28 * 24 * 60 * 60 * 1000);
+        const durationWeeks = users.find((u: any) => u.email === email)?.planDurationInWeeks || 4;
+        const endDate = new Date(today.getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000);
         
         users = users.map((u: any) => u.email === email ? {
             ...u, 
             planStatus: 'aprobado',
             planStartDate: today.toISOString(),
             planEndDate: endDate.toISOString(),
+            planDurationInWeeks: durationWeeks,
             currentWeek: 1
         } : u);
         

@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock } from "lucide-react"
+import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock, Calendar } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { Textarea } from "@/components/ui/textarea"
@@ -92,10 +92,11 @@ const muscleFocusOptions = [
 const steps = [
     { id: "step-1", title: "Metas", fields: ["goals"], icon: Trophy },
     { id: "step-2", title: "Plazo", fields: ["goalTerm"], icon: Clock },
-    { id: "step-3", title: "Tu Nivel", fields: ["currentFitnessLevel", "trainingDays", "trainingTimePerDay"], icon: HeartPulse },
-    { id: "step-4", title: "Tu Estilo", fields: ["preferredWorkoutStyle", "otherWorkoutStyle", "muscleFocus"], icon: Dumbbell },
-    { id: "step-5", title: "Tus Datos", fields: ["age", "weight", "height"], icon: UserIcon },
-    { id: "step-6", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
+    { id: "step-3", title: "Duración", fields: ["planDuration"], icon: Calendar },
+    { id: "step-4", title: "Tu Nivel", fields: ["currentFitnessLevel", "trainingDays", "trainingTimePerDay"], icon: HeartPulse },
+    { id: "step-5", title: "Tu Estilo", fields: ["preferredWorkoutStyle", "otherWorkoutStyle", "muscleFocus"], icon: Dumbbell },
+    { id: "step-6", title: "Tus Datos", fields: ["age", "weight", "height"], icon: UserIcon },
+    { id: "step-7", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
 ];
 
 export default function OnboardingPage() {
@@ -143,6 +144,7 @@ export default function OnboardingPage() {
       weight: undefined,
       height: undefined,
       goalTerm: "mediano",
+      planDuration: 4,
       injuriesOrConditions: "",
       exercisesPerDay: 8, // Default value
       history: [],
@@ -206,12 +208,13 @@ export default function OnboardingPage() {
         let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
         const today = new Date();
         const endDate = new Date();
-        endDate.setDate(today.getDate() + 28); // 4 weeks
+        endDate.setDate(today.getDate() + (values.planDuration * 7)); // Use selected duration
         users = users.map((u: User) => u.email === userEmail ? {
             ...u, 
             planStatus: 'aprobado',
             planStartDate: today.toISOString(),
             planEndDate: endDate.toISOString(),
+            planDurationInWeeks: values.planDuration,
             currentWeek: 1
         } : u);
         localStorage.setItem("registeredUsers", JSON.stringify(users));
@@ -310,6 +313,35 @@ export default function OnboardingPage() {
                   )}
                   {currentStep === 2 && (
                     <Step title={steps[2].title} icon={steps[2].icon}>
+                        <FormField
+                            control={form.control}
+                            name="planDuration"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Duración del Ciclo de Entrenamiento</FormLabel>
+                                    <Select
+                                        onValueChange={(value) => field.onChange(parseInt(value, 10))}
+                                        defaultValue={String(field.value)}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecciona la duración" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="4">4 Semanas (Estándar)</SelectItem>
+                                            <SelectItem value="6">6 Semanas</SelectItem>
+                                            <SelectItem value="8">8 Semanas</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </Step>
+                   )}
+                  {currentStep === 3 && (
+                    <Step title={steps[3].title} icon={steps[3].icon}>
                       <FormField control={form.control} name="currentFitnessLevel" render={({ field }) => (
                         <FormItem>
                           <FormLabel>Nivel de Condición Física</FormLabel>
@@ -354,8 +386,8 @@ export default function OnboardingPage() {
                       )} />
                     </Step>
                   )}
-                  {currentStep === 3 && (
-                     <Step title={steps[3].title} icon={steps[3].icon}>
+                  {currentStep === 4 && (
+                     <Step title={steps[4].title} icon={steps[4].icon}>
                         <FormField control={form.control} name="preferredWorkoutStyle" render={({ field }) => (
                             <FormItem>
                             <FormLabel>Estilo de Entrenamiento Preferido</FormLabel>
@@ -392,8 +424,8 @@ export default function OnboardingPage() {
                         )} />
                     </Step>
                   )}
-                  {currentStep === 4 && (
-                    <Step title={steps[4].title} icon={steps[4].icon}>
+                  {currentStep === 5 && (
+                    <Step title={steps[5].title} icon={steps[5].icon}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField control={form.control} name="age" render={({ field }) => (
                                 <FormItem>
@@ -455,8 +487,8 @@ export default function OnboardingPage() {
                         )} />
                     </Step>
                   )}
-                   {currentStep === 5 && (
-                    <Step title={steps[5].title} icon={steps[5].icon}>
+                   {currentStep === 6 && (
+                    <Step title={steps[6].title} icon={steps[6].icon}>
                         <FormField control={form.control} name="injuriesOrConditions" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Lesiones o Condiciones Médicas (Opcional)</FormLabel>

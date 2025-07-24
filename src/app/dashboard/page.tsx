@@ -190,7 +190,7 @@ const PlanAprobado = ({
                         <CardContent className="flex items-center justify-around text-center">
                             <div>
                                <p className="text-sm text-muted-foreground">Semana</p>
-                               <p className="text-3xl font-bold">{user.currentWeek || 1} <span className="text-lg text-muted-foreground">/ 4</span></p>
+                               <p className="text-3xl font-bold">{user.currentWeek || 1} <span className="text-lg text-muted-foreground">/ {user.planDurationInWeeks || 4}</span></p>
                             </div>
                              <div className="h-16 w-px bg-border"></div>
                             <div>
@@ -510,7 +510,8 @@ export default function DashboardPage() {
         if (expirationString) {
             const expirationDate = new Date(expirationString);
             if (new Date() > expirationDate) {
-                for (let i = 1; i <= 4; i++) {
+                const totalWeeks = user?.planDurationInWeeks || 4;
+                for (let i = 1; i <= totalWeeks; i++) {
                     localStorage.removeItem(`progress_week${i}_${loggedInUserEmail}`);
                 }
                 localStorage.removeItem(`lastCompletedPlan_${loggedInUserEmail}`);
@@ -557,24 +558,28 @@ export default function DashboardPage() {
         setPlanStatus('sin-plan');
       }
     }
-  }, []);
+  }, [user?.planDurationInWeeks]);
 
   const handlePlanGenerated = (newPlan: UserPlan) => {
     if (typeof window !== 'undefined' && userEmail && user) {
+        const storedUsers = localStorage.getItem("registeredUsers");
+        let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+        const currentUser = users.find(u => u.email === userEmail);
+        const planDuration = currentUser?.planDurationInWeeks || 4;
+        
         const today = new Date();
         const endDate = new Date();
-        endDate.setDate(today.getDate() + 28); // 4 weeks
+        endDate.setDate(today.getDate() + (planDuration * 7));
 
         const updatedUser: User = {
             ...user,
             planStatus: 'aprobado',
             planStartDate: today.toISOString(),
             planEndDate: endDate.toISOString(),
+            planDurationInWeeks: planDuration,
             currentWeek: 1
         };
 
-        const storedUsers = localStorage.getItem("registeredUsers");
-        let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
         users = users.map(u => u.email === userEmail ? updatedUser : u);
         
         localStorage.setItem("registeredUsers", JSON.stringify(users));
@@ -584,18 +589,15 @@ export default function DashboardPage() {
         
         setPlanStatus('aprobado');
         
-        // Update plan history for AI variation
         const planHistoryString = localStorage.getItem(`planHistory_${userEmail}`);
         let planHistory: UserPlan[] = planHistoryString ? JSON.parse(planHistoryString) : [];
         planHistory.push(newPlan);
         if (planHistory.length > 3) {
-            planHistory.shift(); // Keep only the last 3
+            planHistory.shift(); 
         }
         localStorage.setItem(`planHistory_${userEmail}`, JSON.stringify(planHistory));
 
-
-        // Reset progress for the new plan
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= planDuration; i++) {
             localStorage.removeItem(`completedDays_week${i}_${userEmail}`);
             localStorage.removeItem(`progress_week${i}_${userEmail}`);
         }
@@ -620,10 +622,10 @@ export default function DashboardPage() {
 
       if (isWeekComplete) {
            const currentWeek = user.currentWeek || 1;
-           if (currentWeek < 4) {
+           const totalWeeks = user.planDurationInWeeks || 4;
+           if (currentWeek < totalWeeks) {
                setCycleModalState('week_complete');
            } else {
-               // Week 4 completed, end of cycle
                setConfetti(true);
                setCycleModalState('cycle_complete');
            }
@@ -654,13 +656,11 @@ export default function DashboardPage() {
   const handleFinishCycle = () => {
     if (!user || !userEmail || !userPlan) return;
 
-    // 1. Store the finished plan and set an expiration date for the history
     localStorage.setItem(`lastCompletedPlan_${userEmail}`, JSON.stringify(userPlan));
     const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 7); // Expire after 7 days
+    expirationDate.setDate(expirationDate.getDate() + 7);
     localStorage.setItem(`progressExpiration_${userEmail}`, expirationDate.toISOString());
 
-    // 2. Update user data in localStorage (users list)
     const storedUsers = localStorage.getItem("registeredUsers");
     let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
     
@@ -671,15 +671,14 @@ export default function DashboardPage() {
       currentWeek: undefined,
       planStartDate: undefined,
       planEndDate: undefined,
+      planDurationInWeeks: undefined,
     };
     
     users = users.map(u => u.email === user.email ? updatedUser : u);
     localStorage.setItem("registeredUsers", JSON.stringify(users));
 
-    // 3. Remove the user's active plan
     localStorage.removeItem(`userPlan_${userEmail}`);
 
-    // 4. Update local state to reflect the changes instantly
     setUser(updatedUser);
     setUserPlan(null);
     setPlanStatus('sin-plan');
@@ -687,7 +686,6 @@ export default function DashboardPage() {
     setProgress({});
     setActiveDayIndex(0);
     
-    // 5. Close the modal
     setCycleModalState('closed');
   }
 
@@ -950,7 +948,7 @@ export default function DashboardPage() {
                     >
                         <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
                     </motion.div>
-                    <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus 4 Semanas!</DialogTitle>
+                    <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus {user?.planDurationInWeeks || 4} Semanas!</DialogTitle>
                 </DialogHeader>
                 <div className="text-center text-muted-foreground py-4 space-y-4">
                     <p>Estamos orgullosos de tu esfuerzo y dedicación. Has demostrado una constancia increíble.</p>
@@ -968,5 +966,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
