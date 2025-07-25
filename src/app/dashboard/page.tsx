@@ -783,9 +783,9 @@ export default function DashboardPage() {
       
       <motion.div variants={itemVariants}>
         <Tabs defaultValue="plan">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="plan">Tu Plan Semanal</TabsTrigger>
-                <TabsTrigger value="progress">Resumen de Progreso</TabsTrigger>
+            <TabsList className="flex items-center justify-start gap-2 bg-transparent p-0">
+                <TabsTrigger value="plan" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black">Tu Plan Semanal</TabsTrigger>
+                <TabsTrigger value="progress" className="data-[state=active]:bg-green-500 data-[state=active]:text-black">Resumen de Progreso</TabsTrigger>
             </TabsList>
             <TabsContent value="plan">
                 <Card>
