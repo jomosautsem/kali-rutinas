@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus, XCircle, Power, Sparkles } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus, XCircle, Power, Sparkles, FileText } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,6 +43,9 @@ import { EditUserDialog } from "../admin/edit-user-dialog";
 import { AssignTemplateDialog } from "./assign-template-dialog";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
+import { ViewOnboardingDataDialog } from "./view-onboarding-data-dialog";
+import type { GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
+
 
 type UserTableClientProps = {
   users: User[];
@@ -75,8 +78,11 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
   const [isInviteCodeDialogOpen, setIsInviteCodeDialogOpen] = useState(false);
   const [isAssignTemplateDialogOpen, setIsAssignTemplateDialogOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isOnboardingDataOpen, setIsOnboardingDataOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [selectedUserProgress, setSelectedUserProgress] = useState<{ progress: ProgressData, plan: UserPlan } | null>(null);
+  const [selectedOnboardingData, setSelectedOnboardingData] = useState<GeneratePersonalizedTrainingPlanInput | null>(null);
+
 
   const handleDeleteClick = (user: User) => {
     setSelectedUser(user)
@@ -130,6 +136,14 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     setSelectedUser(user);
     setIsAnalyticsOpen(true);
   }
+
+  const handleViewOnboardingData = (user: User) => {
+    const data = localStorage.getItem(`onboardingData_${user.email}`);
+    setSelectedOnboardingData(data ? JSON.parse(data) : null);
+    setSelectedUser(user);
+    setIsOnboardingDataOpen(true);
+  };
+
 
   return (
     <>
@@ -234,6 +248,12 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                       )}
                       {user.role === 'client' && user.status !== 'pendiente' && (
                         <>
+                          {user.customPlanRequest === 'requested' && (
+                              <DropdownMenuItem onClick={() => handleViewOnboardingData(user)}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                Ver Solicitud de Plan
+                              </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)} disabled={user.status === 'inactivo'}>
                               <FileEdit className="mr-2 h-4 w-4" />
                               Editar/Generar Plan
@@ -306,6 +326,19 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
           onEditUser={onEditUser}
         />
       )}
+      
+       {selectedUser && (
+        <ViewOnboardingDataDialog
+            user={selectedUser}
+            data={selectedOnboardingData}
+            isOpen={isOnboardingDataOpen}
+            onClose={() => {
+                setIsOnboardingDataOpen(false);
+                setSelectedUser(null);
+                setSelectedOnboardingData(null);
+            }}
+        />
+       )}
 
       {selectedUser && (
         <AssignTemplateDialog

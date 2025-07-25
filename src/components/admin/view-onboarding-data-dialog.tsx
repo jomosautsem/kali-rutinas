@@ -36,10 +36,10 @@ export function ViewOnboardingDataDialog({ user, data, isOpen, onClose }: ViewOn
         <DialogHeader>
           <DialogTitle className="font-headline flex items-center gap-2">
             <FileText />
-            Datos de Onboarding de {user.name}
+            Datos de Solicitud de {user.name}
           </DialogTitle>
           <DialogDescription>
-            Información proporcionada por el usuario durante su registro inicial.
+            Información proporcionada por el usuario para su plan personalizado.
           </DialogDescription>
         </DialogHeader>
 
@@ -63,8 +63,8 @@ export function ViewOnboardingDataDialog({ user, data, isOpen, onClose }: ViewOn
           ) : (
             <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-8 border-2 border-dashed rounded-lg h-full">
               <AlertCircle className="h-10 w-10 mb-4" />
-              <p className="font-semibold">Sin Datos de Onboarding</p>
-              <p className="text-sm">Este usuario no ha completado el formulario de onboarding inicial.</p>
+              <p className="font-semibold">Sin Datos de Solicitud</p>
+              <p className="text-sm">No se encontraron datos de la solicitud para este usuario.</p>
             </div>
           )}
         </div>

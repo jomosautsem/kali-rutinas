@@ -7,8 +7,7 @@ import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { motion, AnimatePresence } from "framer-motion"
-import { GeneratePersonalizedTrainingPlanInputSchema, type UserPlan, type User } from "@/lib/types"
-import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
+import { GeneratePersonalizedTrainingPlanInputSchema, type User } from "@/lib/types"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -70,9 +69,11 @@ const trainingDaysOptions = [
 ];
 
 const workoutStyleOptions = [
+    { value: "definicion muscular", label: "Definición Muscular" },
+    { value: "heavy duty", label: "Heavy Duty" },
     { value: "fuerza", label: "Fuerza" },
-    { value: "resistencia", label: "Resistencia" },
     { value: "hipertrofia", label: "Hipertrofia" },
+    { value: "resistencia", label: "Resistencia" },
     { value: "cardio", label: "Cardio" },
     { value: "hiit", label: "HIIT" },
     { value: "nucleus overload", label: "Nucleus Overload" },
@@ -107,24 +108,17 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [pageMode, setPageMode] = useState<'register' | 'newPlan' | 'loading'>('loading');
   const [userEmail, setUserEmail] = useState<string | null>(null);
   
   useEffect(() => {
     const emailFromParams = searchParams.get('email');
-    const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
-
-    if (loggedInUserEmail) {
-      setUserEmail(loggedInUserEmail);
-      setPageMode('newPlan');
-    } else if (emailFromParams) {
+    if (emailFromParams) {
       setUserEmail(emailFromParams);
-      setPageMode('register');
     } else {
       toast({
         variant: "destructive",
         title: "Error de Sesión",
-        description: "No se encontró un usuario válido. Por favor, regístrate o inicia sesión.",
+        description: "No se encontró un usuario válido. Por favor, inicia sesión.",
       });
       router.push("/login");
     }
@@ -184,9 +178,6 @@ export default function OnboardingPage() {
     }
 
     try {
-      const planHistoryString = localStorage.getItem(`planHistory_${userEmail}`);
-      const history = planHistoryString ? JSON.parse(planHistoryString) : [];
-
       const finalWorkoutStyle = values.preferredWorkoutStyle === 'otro' 
         ? values.otherWorkoutStyle
         : values.preferredWorkoutStyle;
@@ -194,48 +185,31 @@ export default function OnboardingPage() {
       const dataToSave = {
         ...values,
         preferredWorkoutStyle: finalWorkoutStyle!,
-        history,
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
-      // THIS IS THE CRUCIAL FIX: ALWAYS SAVE ONBOARDING DATA
       localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
       
-      if (pageMode === 'newPlan') {
-        const plan = await generatePersonalizedTrainingPlan(dataToSave);
-        localStorage.setItem(`userPlan_${userEmail}`, JSON.stringify(plan));
+      const storedUsers = localStorage.getItem("registeredUsers");
+      let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+      users = users.map((u: User) => u.email === userEmail ? {
+          ...u, 
+          customPlanRequest: 'requested',
+      } : u);
+      localStorage.setItem("registeredUsers", JSON.stringify(users));
         
-        const storedUsers = localStorage.getItem("registeredUsers");
-        let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-        const today = new Date();
-        const endDate = new Date();
-        endDate.setDate(today.getDate() + (values.planDuration * 7));
-        users = users.map((u: User) => u.email === userEmail ? {
-            ...u, 
-            planStatus: 'aprobado',
-            planStartDate: today.toISOString(),
-            planEndDate: endDate.toISOString(),
-            planDurationInWeeks: values.planDuration,
-            currentWeek: 1
-        } : u);
-        localStorage.setItem("registeredUsers", JSON.stringify(users));
-        
-        toast({ title: "¡Plan Generado!", description: "Tu nuevo plan está listo en tu panel." });
-        router.push("/dashboard");
+      setIsSuccess(true);
+      toast({ title: "¡Solicitud Enviada!", description: "Tus datos han sido enviados al entrenador." });
+      setTimeout(() => router.push("/dashboard"), 3000); 
 
-      } else { // pageMode === 'register'
-        setIsSuccess(true);
-        toast({ title: "¡Información Guardada!", description: "Tus datos han sido enviados para revisión." });
-        setTimeout(() => router.push("/login"), 3000); 
-      }
     } catch (error) {
-      console.error("Onboarding/Plan generation failed:", error);
+      console.error("Custom plan request failed:", error);
       toast({ variant: "destructive", title: "Error", description: "Ocurrió un error. Por favor, inténtalo de nuevo." });
       setIsLoading(false);
     }
   }
   
-  if (pageMode === 'loading') {
+  if (!userEmail) {
       return (
         <AuthCard title="Cargando..." description="Verificando tu información..." footer={<></>}>
              <div className="text-center space-y-4 py-8">
@@ -247,10 +221,10 @@ export default function OnboardingPage() {
 
   if (isSuccess) {
     return (
-      <AuthCard title="¡Todo Listo!" description="Gracias por completar tu información." footer={<></>}>
+      <AuthCard title="¡Solicitud Recibida!" description="Gracias por completar tu información." footer={<></>}>
         <div className="text-center space-y-4 py-8">
             <CheckCircle className="h-16 w-16 mx-auto text-green-500" />
-            <p className="text-muted-foreground">Tu cuenta está ahora pendiente de aprobación por un administrador. Serás redirigido a la página de inicio de sesión en unos segundos.</p>
+            <p className="text-muted-foreground">Un entrenador revisará tu solicitud y creará un plan a tu medida. Se te notificará cuando esté listo. Serás redirigido a tu panel en unos segundos.</p>
         </div>
       </AuthCard>
     )
@@ -258,8 +232,8 @@ export default function OnboardingPage() {
 
   return (
     <AuthCard
-      title={pageMode === 'newPlan' ? "Actualiza tus Datos" : "Casi Hemos Terminado..."}
-      description={pageMode === 'newPlan' ? "Confirma o actualiza tus datos para generar un nuevo plan." : "Cuéntanos sobre ti para que podamos crear el plan perfecto."}
+      title="Solicitar Plan Personalizado"
+      description="Completa este formulario para que nuestros entrenadores puedan crear la rutina perfecta para ti."
       footer={<p className="text-xs text-muted-foreground">Esta información será utilizada para generar tu plan de entrenamiento.</p>}
     >
        <FormProvider {...form}>
@@ -515,5 +489,3 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
-
-    

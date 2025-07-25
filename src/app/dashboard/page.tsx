@@ -25,6 +25,7 @@ import { PlanDownloader } from "@/components/plan-downloader";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import ReactConfetti from "react-confetti";
+import { useRouter } from "next/navigation";
 
 
 const isVideo = (url: string) => {
@@ -476,11 +477,11 @@ export default function DashboardPage() {
   const [completedDays, setCompletedDays] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [requestModalState, setRequestModalState] = useState<'closed' | 'confirming' | 'success'>('closed');
   const [cycleModalState, setCycleModalState] = useState<'closed' | 'week_complete' | 'cycle_complete'>('closed');
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [confetti, setConfetti] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -710,19 +711,8 @@ export default function DashboardPage() {
   };
   
   const handleCustomPlanRequest = () => {
-    if (typeof window !== 'undefined' && userEmail) {
-      const storedUsers = localStorage.getItem("registeredUsers");
-      if (storedUsers) {
-        let users: User[] = JSON.parse(storedUsers);
-        users = users.map(u => 
-          u.email === userEmail ? { ...u, customPlanRequest: 'requested' } : u
-        );
-        localStorage.setItem("registeredUsers", JSON.stringify(users));
-        setRequestModalState('success');
-        if(user) {
-            setUser({...user, customPlanRequest: 'requested'});
-        }
-      }
+     if (user?.email) {
+      router.push(`/onboarding?email=${user.email}`);
     }
   };
 
@@ -753,12 +743,6 @@ export default function DashboardPage() {
     }
   }
 
-  const handleOpenModalChange = (isOpen: boolean) => {
-      if (!isOpen) {
-          setRequestModalState('closed');
-      }
-  }
-
   const handleCycleModalChange = (isOpen: boolean) => {
       if (!isOpen) {
           setCycleModalState('closed');
@@ -784,7 +768,7 @@ export default function DashboardPage() {
           <Skeleton className="h-9 w-64" />
         )}
         <div className="flex items-center gap-2">
-            <Button onClick={() => setRequestModalState('confirming')} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
+            <Button onClick={handleCustomPlanRequest} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
                 Rutina Personalizada
             </Button>
             <Button asChild className="bg-gradient-to-r from-blue-500 to-green-400 text-white font-bold shadow-lg hover:from-blue-600 hover:to-green-500">
@@ -866,45 +850,6 @@ export default function DashboardPage() {
         </Tabs>
       </motion.div>
     </motion.div>
-    
-    <Dialog open={requestModalState !== 'closed'} onOpenChange={handleOpenModalChange}>
-        <DialogContent>
-            {requestModalState === 'confirming' && (
-                <>
-                <DialogHeader>
-                    <DialogTitle className="font-headline text-2xl text-center">Confirmar Solicitud</DialogTitle>
-                    <DialogDescription className="text-center pt-2">
-                        ¿Estás seguro de que quieres solicitar una rutina totalmente personalizada a un entrenador? Se notificará al administrador.
-                    </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="gap-2 sm:justify-center pt-4">
-                    <Button variant="outline" onClick={() => setRequestModalState('closed')}>Cancelar</Button>
-                    <Button onClick={handleCustomPlanRequest}>Sí, confirmar solicitud</Button>
-                </DialogFooter>
-                </>
-            )}
-             {requestModalState === 'success' && (
-                <>
-                <DialogHeader className="text-center">
-                    <div className="flex justify-center mb-4">
-                    <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
-                    </div>
-                    <DialogTitle className="text-2xl font-headline">¡Felicidades!</DialogTitle>
-                </DialogHeader>
-                <div className="text-center text-muted-foreground py-4 space-y-4">
-                    <p>Tu rutina totalmente personalizada está siendo creada y analizada por un coach y Kali Gym.</p>
-                    <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-300">
-                        <p className="font-bold text-sm uppercase">Para agilizar tu plan</p>
-                        <p className="text-sm">Puedes confirmar por WhatsApp con tu nombre completo y la palabra PERSONALIZADA.</p>
-                    </div>
-                </div>
-                <div className="flex justify-center">
-                    <Button onClick={() => setRequestModalState('closed')}>Entendido</Button>
-                </div>
-                </>
-             )}
-        </DialogContent>
-    </Dialog>
 
      <Dialog open={cycleModalState !== 'closed'} onOpenChange={handleCycleModalChange}>
         <DialogContent>

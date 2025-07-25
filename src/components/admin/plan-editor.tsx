@@ -192,31 +192,30 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
 
   const handleGeneratePlan = async () => {
     if (!user) return;
+    
+    const onboardingDataString = localStorage.getItem(`onboardingData_${user.email}`);
+    if (!onboardingDataString) {
+        toast({
+            variant: "destructive",
+            title: "Datos de usuario no encontrados",
+            description: "Este usuario no ha completado el formulario de solicitud de plan personalizado. No se puede generar un plan."
+        });
+        return;
+    }
+
     setIsGenerating(true);
     try {
-        // Dummy data for generation since onboarding is removed
-        const generationInput: GeneratePersonalizedTrainingPlanInput = {
-            goals: ["ganar masa muscular"],
-            currentFitnessLevel: "intermedio",
-            trainingDays: ["lunes", "miercoles", "viernes"],
-            trainingTimePerDay: "60 minutos",
-            preferredWorkoutStyle: "hipertrofia",
-            age: 25,
-            weight: 75,
-            height: 180,
-            goalTerm: "mediano",
-            planDuration: 4,
-            exercisesPerDay: 8,
-            history: [],
-        };
+        const generationInput: GeneratePersonalizedTrainingPlanInput = JSON.parse(onboardingDataString);
+        const planHistoryString = localStorage.getItem(`planHistory_${user.email}`);
+        generationInput.history = planHistoryString ? JSON.parse(planHistoryString) : [];
 
         const newPlan = await generatePersonalizedTrainingPlan(generationInput);
         
         form.reset(newPlan);
         setActiveDayIndex(0);
         toast({
-            title: "Plan Generado",
-            description: "Se ha generado un nuevo plan. Revísalo y apruébalo."
+            title: "Plan Generado con IA",
+            description: "Se ha generado un nuevo plan basado en los datos del usuario. Revísalo y apruébalo."
         });
     } catch (error) {
         console.error("Error generating plan", error);
@@ -253,7 +252,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
         <DialogHeader>
           <DialogTitle className="font-headline">Plan de Entrenamiento para {user.name}</DialogTitle>
           <DialogDescription>
-            Revisa, modifica y aprueba el plan de entrenamiento. También puedes generar uno nuevo.
+            Revisa, modifica y aprueba el plan de entrenamiento. También puedes generar uno nuevo con IA basado en los datos del usuario.
           </DialogDescription>
         </DialogHeader>
         
@@ -272,7 +271,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                             <AlertDialogHeader>
                             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Esta acción generará un nuevo plan de entrenamiento con IA. 
+                                Esta acción generará un nuevo plan de entrenamiento con IA usando los datos de la solicitud del usuario. 
                                 <span className="font-bold text-destructive"> Todos los cambios no guardados en el editor actual se perderán.</span>
                             </AlertDialogDescription>
                             </AlertDialogHeader>
@@ -312,7 +311,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Confirmar Generación</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Se generará un plan de demostración con IA. ¿Deseas continuar?
+                                        Se generará un plan con IA basado en los datos proporcionados por el usuario. ¿Deseas continuar?
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -36,7 +37,7 @@ export function FormNavigation({
           ) : currentStep === totalSteps - 1 ? (
              <Send className="mr-2 h-4 w-4" />
           ) : null}
-          {isLoading ? "Procesando..." : currentStep === totalSteps - 1 ? "Enviar y Finalizar" : "Siguiente"}
+          {isLoading ? "Procesando..." : currentStep === totalSteps - 1 ? "Enviar Solicitud" : "Siguiente"}
         </Button>
       </div>
     </div>

@@ -69,18 +69,17 @@ export type ProgressData = {
 }
 
 // This schema defines the data required to generate a personalized training plan.
-// Even though the onboarding form is removed, this schema is still used by the AI flow.
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
-  goals: z.array(z.string()).describe('Los objetivos de fitness del usuario.'),
-  currentFitnessLevel: z.string().describe('El nivel de fitness actual del usuario, ej., principiante, intermedio, avanzado.'),
-  trainingDays: z.array(z.string()).describe('Los días específicos de la semana que el usuario puede dedicar al entrenamiento.'),
-  trainingTimePerDay: z.string().describe('El tiempo aproximado que el usuario tiene para entrenar por día.'),
-  preferredWorkoutStyle: z.string().describe('El estilo de entrenamiento preferido por el usuario, ej., levantamiento de pesas, cardio, HIIT, yoga.'),
+  goals: z.array(z.string()).min(1, "Debes seleccionar al menos una meta.").describe('Los objetivos de fitness del usuario.'),
+  currentFitnessLevel: z.string().min(1, "Debes seleccionar tu nivel.").describe('El nivel de fitness actual del usuario, ej., principiante, intermedio, avanzado.'),
+  trainingDays: z.array(z.string()).min(1, "Debes seleccionar al menos un día.").describe('Los días específicos de la semana que el usuario puede dedicar al entrenamiento.'),
+  trainingTimePerDay: z.string().min(1, "Debes seleccionar el tiempo disponible.").describe('El tiempo aproximado que el usuario tiene para entrenar por día.'),
+  preferredWorkoutStyle: z.string().min(1, "Debes seleccionar un estilo.").describe('El estilo de entrenamiento preferido por el usuario, ej., levantamiento de pesas, cardio, HIIT, yoga.'),
   muscleFocus: z.array(z.string()).optional().describe('Los grupos musculares específicos en los que el usuario quiere enfocarse.'),
-  age: z.number().describe('La edad del usuario.'),
-  weight: z.number().describe('El peso del usuario en kilogramos.'),
-  height: z.number().describe('La estatura del usuario en centímetros.'),
-  goalTerm: z.string().describe('El plazo en el que el usuario espera alcanzar sus metas, ej., corto, mediano, largo plazo.'),
+  age: z.number({ required_error: "La edad es requerida."}).min(12, "Debes ser mayor de 12 años.").describe('La edad del usuario.'),
+  weight: z.number({ required_error: "El peso es requerido."}).min(30, "El peso debe ser realista.").describe('El peso del usuario en kilogramos.'),
+  height: z.number({ required_error: "La estatura es requerida."}).min(100, "La estatura debe ser realista.").describe('La estatura del usuario en centímetros.'),
+  goalTerm: z.string().min(1, "Debes seleccionar un plazo.").describe('El plazo en el que el usuario espera alcanzar sus metas, ej., corto, mediano, largo plazo.'),
   planDuration: z.number().describe("La duración del ciclo de entrenamiento en semanas (4, 6 u 8)."),
   injuriesOrConditions: z.string().optional().describe('Cualquier lesión o condición médica que el entrenador deba conocer.'),
   exercisesPerDay: z.number().describe('El número de ejercicios que el usuario desea realizar por día de entrenamiento.'),
