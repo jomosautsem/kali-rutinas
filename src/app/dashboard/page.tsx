@@ -711,6 +711,7 @@ export default function DashboardPage() {
     }
   };
 
+  const isPlanActive = planStatus === 'aprobado' || planStatus === 'pendiente';
 
   const renderPlanContent = () => {
     if (planStatus === null) {
@@ -763,11 +764,11 @@ export default function DashboardPage() {
           <Skeleton className="h-9 w-64" />
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            <PlanGenerator onPlanGenerated={handlePlanGenerated} />
-            <Button asChild className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">
+            <PlanGenerator onPlanGenerated={handlePlanGenerated} disabled={isPlanActive} />
+            <Button asChild disabled={isPlanActive} className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
               <Link href={`/onboarding?email=${user?.email}`}>Solicitar Rutina Personalizada</Link>
             </Button>
-            <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
+            <Button asChild disabled={isPlanActive} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
                 <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
             </Button>
         </div>

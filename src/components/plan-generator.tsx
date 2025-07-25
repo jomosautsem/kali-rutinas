@@ -120,9 +120,10 @@ const steps = [
 
 type PlanGeneratorProps = {
   onPlanGenerated: (newPlan: UserPlan) => void;
+  disabled?: boolean;
 };
 
-export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
+export function PlanGenerator({ onPlanGenerated, disabled = false }: PlanGeneratorProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -226,7 +227,7 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
         }}>
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button>
+                    <Button disabled={disabled}>
                         <Sparkles className="mr-2 h-4 w-4" />
                         Generar Plan con IA
                     </Button>
