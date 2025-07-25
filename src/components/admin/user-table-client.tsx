@@ -39,7 +39,7 @@ import { PlanEditor } from "./plan-editor"
 import { GenerateInviteCodeDialog } from "./generate-invite-code-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ProgressAnalytics } from "./progress-analytics";
-import { EditUserDialog } from "../admin/edit-user-dialog";
+import { EditUserDialog } from "./edit-user-dialog";
 import { AssignTemplateDialog } from "./assign-template-dialog";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -373,3 +373,5 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     </>
   )
 }
+
+    

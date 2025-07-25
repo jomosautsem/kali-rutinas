@@ -25,12 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock, Calendar } from "lucide-react"
+import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock, Calendar, Sparkles, ArrowLeft } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { Textarea } from "@/components/ui/textarea"
 import { StepsIndicator } from "@/components/onboarding/steps-indicator"
-import { FormNavigation } from "@/components/onboarding/form-navigation"
 import { Step } from "@/components/onboarding/step"
 import { MultiToggleButtonGroup } from "@/components/ui/multi-toggle"
 
@@ -99,6 +98,47 @@ const steps = [
     { id: "step-6", title: "Tus Datos", fields: ["age", "weight", "height"], icon: UserIcon },
     { id: "step-7", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
 ];
+
+type FormNavigationProps = {
+  currentStep: number;
+  totalSteps: number;
+  isLoading: boolean;
+  onBack: () => void;
+};
+
+function FormNavigation({
+  currentStep,
+  totalSteps,
+  isLoading,
+  onBack,
+}: FormNavigationProps) {
+  return (
+    <div className="flex justify-between items-center pt-4 border-t border-border/20">
+      <div>
+        {currentStep > 0 && (
+          <Button type="button" variant="outline" onClick={onBack} disabled={isLoading}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Anterior
+          </Button>
+        )}
+      </div>
+      <div className="text-sm text-muted-foreground">
+        Paso {currentStep + 1} de {totalSteps}
+      </div>
+      <div>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : currentStep === totalSteps - 1 ? (
+             <Sparkles className="mr-2 h-4 w-4" />
+          ) : null}
+          {isLoading ? "Enviando..." : currentStep === totalSteps - 1 ? "Enviar Solicitud" : "Siguiente"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -489,3 +529,5 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
+
+    

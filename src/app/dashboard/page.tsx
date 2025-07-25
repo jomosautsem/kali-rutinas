@@ -764,7 +764,10 @@ export default function DashboardPage() {
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <PlanGenerator onPlanGenerated={handlePlanGenerated} />
-            <Button asChild className="bg-gradient-to-r from-blue-500 to-green-400 text-white font-bold shadow-lg hover:from-blue-600 hover:to-green-500">
+            <Button asChild>
+              <Link href={`/onboarding?email=${user?.email}`}>Solicitar Rutina Personalizada</Link>
+            </Button>
+            <Button asChild variant="outline">
                 <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
             </Button>
         </div>
@@ -893,3 +896,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    

@@ -107,3 +107,5 @@ export const GenerateTrainingTemplateInputSchema = z.object({
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres.").describe("Una descripción detallada de la plantilla de entrenamiento deseada."),
 });
 export type GenerateTrainingTemplateInput = z.infer<typeof GenerateTrainingTemplateInputSchema>;
+
+    

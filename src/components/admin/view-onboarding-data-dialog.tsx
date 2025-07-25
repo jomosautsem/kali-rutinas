@@ -76,3 +76,5 @@ export function ViewOnboardingDataDialog({ user, data, isOpen, onClose }: ViewOn
     </Dialog>
   );
 }
+
+    
