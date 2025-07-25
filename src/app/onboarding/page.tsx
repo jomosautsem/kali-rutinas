@@ -184,7 +184,6 @@ export default function OnboardingPage() {
     }
 
     try {
-      // Get plan history from local storage
       const planHistoryString = localStorage.getItem(`planHistory_${userEmail}`);
       const history = planHistoryString ? JSON.parse(planHistoryString) : [];
 
@@ -194,8 +193,8 @@ export default function OnboardingPage() {
 
       const dataToSave = {
         ...values,
-        preferredWorkoutStyle: finalWorkoutStyle,
-        history, // Add history to the input
+        preferredWorkoutStyle: finalWorkoutStyle!,
+        history,
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
@@ -209,7 +208,7 @@ export default function OnboardingPage() {
         let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
         const today = new Date();
         const endDate = new Date();
-        endDate.setDate(today.getDate() + (values.planDuration * 7)); // Use selected duration
+        endDate.setDate(today.getDate() + (values.planDuration * 7));
         users = users.map((u: User) => u.email === userEmail ? {
             ...u, 
             planStatus: 'aprobado',
@@ -515,3 +514,5 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
+
+    

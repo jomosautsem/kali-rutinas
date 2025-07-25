@@ -365,8 +365,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
         />
       )}
 
-      {selectedUser && (
-        <ViewOnboardingDataDialog
+      <ViewOnboardingDataDialog
             user={selectedUser}
             data={selectedOnboardingData}
             isOpen={isOnboardingDataOpen}
@@ -376,7 +375,6 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                 setSelectedOnboardingData(null);
             }}
         />
-      )}
 
       {selectedUser && (
         <GenerateInviteCodeDialog
@@ -392,3 +390,5 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     </>
   )
 }
+
+    
