@@ -199,6 +199,7 @@ export default function OnboardingPage() {
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
+      localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
       
       if (pageMode === 'newPlan') {
         const plan = await generatePersonalizedTrainingPlan(dataToSave);
@@ -223,8 +224,6 @@ export default function OnboardingPage() {
         router.push("/dashboard");
 
       } else { // pageMode === 'register'
-        // Just save onboarding data, do not generate plan or change status
-        localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
         setIsSuccess(true);
         toast({ title: "¡Información Guardada!", description: "Tus datos han sido enviados para revisión." });
         setTimeout(() => router.push("/login"), 3000); 
