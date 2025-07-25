@@ -96,7 +96,7 @@ export function TemplateGeneratorAI({ users, onSaveTemplate }: TemplateGenerator
 
   const handleSave = () => {
     if (generatedPlan && selectedUser) {
-      onSaveTemplate(generatedPlan, `Plantilla de ${selectedUser.name}`);
+      onSaveTemplate(generatedPlan, `${selectedUser.name}`);
       setGeneratedPlan(null); // Clear the generated plan after saving
       setSelectedUser(null);
     }
@@ -105,21 +105,18 @@ export function TemplateGeneratorAI({ users, onSaveTemplate }: TemplateGenerator
   return (
     <div className="grid md:grid-cols-2 gap-8 items-start">
       <div>
-        <CardHeader className="px-0 pt-0">
-          <CardTitle className="font-headline">Generar con IA desde Perfil</CardTitle>
-          <CardDescription>Crea plantillas basadas en los datos reales de tus clientes. Selecciona un usuario para generar un plan de entrenamiento adaptado a sus metas y características.</CardDescription>
-        </CardHeader>
         <CardContent className="px-0 pb-0">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                     <Button className="w-full">
                         <Sparkles className="mr-2 h-4 w-4" />
-                        Generar Plantilla desde Usuario
+                        Generar desde Perfil de Usuario
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Seleccionar Usuario</DialogTitle>
+                         <CardDescription>Crea plantillas basadas en los datos reales de tus clientes.</CardDescription>
                     </DialogHeader>
                     <div className="py-4 space-y-4">
                         <div className="space-y-2">
@@ -153,7 +150,7 @@ export function TemplateGeneratorAI({ users, onSaveTemplate }: TemplateGenerator
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Resultado Generado</CardTitle>
+          <CardTitle className="font-headline">Resultado</CardTitle>
            {selectedUser && <CardDescription>Basado en el perfil de: <span className="font-semibold text-primary">{selectedUser.name}</span></CardDescription>}
         </CardHeader>
         <CardContent>

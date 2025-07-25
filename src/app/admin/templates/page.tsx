@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { TemplateGenerator } from "@/components/template-generator";
 
 // The full template object type
 export type Template = {
@@ -134,6 +135,7 @@ export default function AdminTemplatesPage() {
             weeklyPlan: templateData.plan.weeklyPlan.map(day => ({
                 ...day,
                 exercises: day.exercises.map(exercise => {
+                    if (exercise.mediaUrl) return exercise; // Don't override if it already exists
                     const query = encodeURIComponent(`${exercise.name} ejercicio tutorial`);
                     const mediaUrl = `https://www.youtube.com/results?search_query=${query}`;
                     return { ...exercise, mediaUrl };
@@ -176,11 +178,11 @@ export default function AdminTemplatesPage() {
         });
     };
 
-    const handleSaveAITemplate = (plan: UserPlan, description: string) => {
+    const handleSaveAITemplate = (plan: UserPlan, title: string, description: string) => {
         const newTemplate: Template = {
             id: `template-ai-${Date.now()}`,
-            title: `${description}`,
-            description: `Generado por IA para el perfil de ${description}`,
+            title: title,
+            description: description,
             level: "Intermedio", // Default level for AI generated templates
             days: plan.weeklyPlan.length,
             plan: {
@@ -188,10 +190,11 @@ export default function AdminTemplatesPage() {
                 weeklyPlan: plan.weeklyPlan.map(day => ({
                     ...day,
                     exercises: day.exercises.map(exercise => {
+                        if (exercise.mediaUrl) return exercise;
                         const query = encodeURIComponent(`${exercise.name} ejercicio tutorial`);
                         return {
                             ...exercise,
-                            mediaUrl: exercise.mediaUrl || `https://www.youtube.com/results?search_query=${query}`
+                            mediaUrl: `https://www.youtube.com/results?search_query=${query}`
                         };
                     })
                 }))
@@ -211,7 +214,7 @@ export default function AdminTemplatesPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Gestión de Plantillas</h1>
-                    <p className="text-muted-foreground">Revisa las plantillas existentes, crea nuevas manualmente o genéralas con IA.</p>
+                    <p className="text-muted-foreground">Revisa las plantillas existentes, créalas manualmente o usa IA.</p>
                 </div>
                 <Button onClick={handleCreateClick} className="w-full sm:w-auto">
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -271,11 +274,20 @@ export default function AdminTemplatesPage() {
             </div>
 
             <Card>
-                 <CardHeader>
-                    <CardTitle className="font-headline">Generador de Plantillas con IA</CardTitle>
+                <CardHeader>
+                    <CardTitle className="font-headline">Generador de Plantillas con IA (Desde Texto)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <TemplateGeneratorAI users={users} onSaveTemplate={handleSaveAITemplate} />
+                    <TemplateGenerator onSaveTemplate={handleSaveAITemplate} />
+                </CardContent>
+            </Card>
+            
+            <Card>
+                 <CardHeader>
+                    <CardTitle className="font-headline">Generador de Plantillas con IA (Desde Perfil de Usuario)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <TemplateGeneratorAI users={users} onSaveTemplate={(plan, desc) => handleSaveAITemplate(plan, `Perfil: ${desc}`, `Generado por IA para el perfil de ${desc}`)} />
                 </CardContent>
             </Card>
 

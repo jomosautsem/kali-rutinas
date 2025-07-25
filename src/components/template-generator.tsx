@@ -15,13 +15,18 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
-import { Sparkles, Lightbulb, ClipboardCopy } from "lucide-react"
+import { Sparkles, Lightbulb, ClipboardCopy, Save } from "lucide-react"
 
 type FormData = z.infer<typeof GenerateTrainingTemplateInputSchema>;
 
-export function TemplateGeneratorAI() {
+type TemplateGeneratorProps = {
+    onSaveTemplate: (plan: UserPlan, title: string, description: string) => void;
+}
+
+export function TemplateGenerator({ onSaveTemplate }: TemplateGeneratorProps) {
   const [generatedPlan, setGeneratedPlan] = useState<UserPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastDescription, setLastDescription] = useState("");
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -34,6 +39,7 @@ export function TemplateGeneratorAI() {
   async function onSubmit(values: FormData) {
     setIsLoading(true);
     setGeneratedPlan(null);
+    setLastDescription(values.description);
     try {
       const result = await generateTrainingTemplate(values);
       setGeneratedPlan(result);
@@ -62,37 +68,37 @@ export function TemplateGeneratorAI() {
     })
   }
 
+  const handleSave = () => {
+    if (!generatedPlan) return;
+    // Use the first few words of the description as a title.
+    const title = lastDescription.split(' ').slice(0, 5).join(' ') + '...';
+    onSaveTemplate(generatedPlan, title, lastDescription);
+    setGeneratedPlan(null);
+  }
+
   return (
     <div className="grid md:grid-cols-2 gap-8 items-start">
-      <div>
-        <CardHeader className="px-0 pt-0">
-          <CardTitle className="font-headline">Generar con IA</CardTitle>
-          <CardDescription>Describe el tipo de plantilla que necesitas y la IA creará un plan de entrenamiento completo.</CardDescription>
-        </CardHeader>
-        <CardContent className="px-0">
-          <Form {...form}>
+        <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
+                <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
-                  <FormItem>
+                    <FormItem>
                     <FormLabel>Descripción de la Plantilla</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Ej: Plan de calistenia para principiantes de 3 días..." {...field} rows={4} />
+                        <Textarea placeholder="Ej: Plan de calistenia para principiantes de 3 días..." {...field} rows={4} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                    </FormItem>
                 )}
-              />
-              <Button type="submit" disabled={isLoading} className="w-full">
+                />
+                <Button type="submit" disabled={isLoading} className="w-full">
                 <Sparkles className="mr-2 h-4 w-4" />
                 {isLoading ? "Generando..." : "Generar Plantilla"}
-              </Button>
+                </Button>
             </form>
-          </Form>
-        </CardContent>
-      </div>
+        </Form>
 
       <Card>
         <CardHeader>
@@ -116,6 +122,15 @@ export function TemplateGeneratorAI() {
                         Copiar JSON
                     </Button>
                 </div>
+               {generatedPlan.warmup && (
+                <div className="p-3 rounded-md bg-secondary/50 border">
+                    <h4 className="font-semibold flex items-center gap-2 mb-2">
+                        <Sparkles className="text-primary"/>
+                        Calentamiento
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{generatedPlan.warmup}</p>
+                </div>
+              )}
               {generatedPlan.recommendations && (
                 <div className="p-3 rounded-md bg-secondary/50 border">
                   <h4 className="font-semibold flex items-center gap-2 mb-2">
@@ -132,7 +147,10 @@ export function TemplateGeneratorAI() {
                     </div>
                 ))}
               </div>
-              <Button className="w-full">Guardar Plantilla</Button>
+              <Button className="w-full" onClick={handleSave}>
+                <Save className="mr-2 h-4 w-4" />
+                Guardar como Plantilla
+              </Button>
             </div>
           ) : (
             <div className="text-center text-muted-foreground py-10">
