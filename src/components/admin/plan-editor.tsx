@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect } from "react";
@@ -11,14 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, AlertTriangle, ShieldAlert, Expand } from "lucide-react";
+import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, Expand } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
-import Link from "next/link";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 
 type PlanEditorProps = {
@@ -140,7 +139,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
-  const [onboardingData, setOnboardingData] = useState<GeneratePersonalizedTrainingPlanInput | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<{ url: string; name: string } | null>(null);
   const { toast } = useToast();
@@ -179,18 +177,6 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
         form.reset({ recommendations: "", weeklyPlan: [] });
       }
 
-      const storedOnboardingData = localStorage.getItem(`onboardingData_${user.email}`);
-      if (storedOnboardingData) {
-        try {
-          setOnboardingData(JSON.parse(storedOnboardingData));
-        } catch (error) {
-           console.error("Failed to parse onboarding data:", error);
-           setOnboardingData(null);
-        }
-      } else {
-        setOnboardingData(null);
-      }
-
       setIsLoading(false);
     }
   }, [user, isOpen, form]);
@@ -208,21 +194,23 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
     if (!user) return;
     setIsGenerating(true);
     try {
-        if (!onboardingData) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "No se encontraron datos de onboarding para este usuario."
-            });
-            return;
-        }
-
-        const correctedInput: GeneratePersonalizedTrainingPlanInput = {
-            ...onboardingData,
-            exercisesPerDay: Math.max(onboardingData.exercisesPerDay || 0, 8),
+        // Dummy data for generation since onboarding is removed
+        const generationInput: GeneratePersonalizedTrainingPlanInput = {
+            goals: ["ganar masa muscular"],
+            currentFitnessLevel: "intermedio",
+            trainingDays: ["lunes", "miercoles", "viernes"],
+            trainingTimePerDay: "60 minutos",
+            preferredWorkoutStyle: "hipertrofia",
+            age: 25,
+            weight: 75,
+            height: 180,
+            goalTerm: "mediano",
+            planDuration: 4,
+            exercisesPerDay: 8,
+            history: [],
         };
 
-        const newPlan = await generatePersonalizedTrainingPlan(correctedInput);
+        const newPlan = await generatePersonalizedTrainingPlan(generationInput);
         
         form.reset(newPlan);
         setActiveDayIndex(0);
@@ -277,7 +265,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                         <AlertDialogTrigger asChild>
                             <Button type="button" variant="default" disabled={isGenerating}>
                                 {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                {isGenerating ? "Generando..." : "Regenerar Plan con IA"}
+                                {isGenerating ? "Generando..." : "Generar Plan con IA"}
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -290,36 +278,10 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleGeneratePlan}>Sí, Regenerar</AlertDialogAction>
+                            <AlertDialogAction onClick={handleGeneratePlan}>Sí, Generar</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {onboardingData && (
-                    <Alert variant="default" className="bg-primary/10 border-primary/20">
-                      <Lightbulb className="h-5 w-5 text-primary" />
-                      <AlertTitle className="text-primary/90 font-semibold">Datos del Cliente</AlertTitle>
-                      <AlertDescription>
-                        <ul className="text-sm space-y-1 mt-2 text-foreground/80">
-                          <li><strong>Metas:</strong> {onboardingData.goals.join(', ')}</li>
-                          <li><strong>Nivel:</strong> {onboardingData.currentFitnessLevel}</li>
-                          <li><strong>Días:</strong> {onboardingData.trainingDays.join(', ')}</li>
-                          <li><strong>Estilo:</strong> {onboardingData.preferredWorkoutStyle}</li>
-                        </ul>
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  {onboardingData?.injuriesOrConditions && (
-                      <Alert variant="destructive" className="bg-orange-500/10 border-orange-500/20 text-orange-700">
-                          <ShieldAlert className="h-5 w-5 text-orange-500" />
-                          <AlertTitle className="text-orange-600 font-semibold">Lesiones/Condiciones Reportadas</AlertTitle>
-                          <AlertDescription className="text-sm mt-2 text-orange-700/80">
-                            {onboardingData.injuriesOrConditions}
-                          </AlertDescription>
-                      </Alert>
-                  )}
                 </div>
 
                 <div className="space-y-2 p-4 rounded-lg border bg-secondary/30">
@@ -350,7 +312,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Confirmar Generación</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Se generará un plan basado en los datos de onboarding del usuario. ¿Deseas continuar?
+                                        Se generará un plan de demostración con IA. ¿Deseas continuar?
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>

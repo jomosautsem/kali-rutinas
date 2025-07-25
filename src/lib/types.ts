@@ -68,65 +68,22 @@ export type ProgressData = {
     }
 }
 
+// This schema defines the data required to generate a personalized training plan.
+// Even though the onboarding form is removed, this schema is still used by the AI flow.
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
-  goals: z
-    .array(z.string())
-    .refine((value) => value.some((item) => item), {
-      message: "Debes seleccionar al menos una meta.",
-    })
-    .describe('Los objetivos de fitness del usuario.'),
-  currentFitnessLevel: z
-    .string()
-    .describe('El nivel de fitness actual del usuario, ej., principiante, intermedio, avanzado.'),
-  trainingDays: z
-    .array(z.string())
-    .refine((value) => value.length > 0, {
-        message: "Debes seleccionar al menos un día de entrenamiento.",
-    })
-    .describe('Los días específicos de la semana que el usuario puede dedicar al entrenamiento.'),
-  trainingTimePerDay: z
-    .string({ required_error: "Debes seleccionar el tiempo de entrenamiento."})
-    .describe('El tiempo aproximado que el usuario tiene para entrenar por día.'),
-  preferredWorkoutStyle: z
-    .string()
-    .describe('El estilo de entrenamiento preferido por el usuario, ej., levantamiento de pesas, cardio, HIIT, yoga.'),
-  muscleFocus: z
-    .array(z.string())
-    .optional()
-    .describe('Los grupos musculares específicos en los que el usuario quiere enfocarse.'),
-  age: z
-    .number({ required_error: "La edad es requerida." })
-    .int("La edad debe ser un número entero.")
-    .positive("La edad debe ser un número positivo.")
-    .describe('La edad del usuario.'),
-  weight: z
-    .number({ required_error: "El peso es requerido." })
-    .int("El peso debe ser un número entero.")
-    .positive("El peso debe ser un número positivo.")
-    .describe('El peso del usuario en kilogramos.'),
-  height: z
-    .number({ required_error: "La estatura es requerida." })
-    .int("La estatura debe ser un número entero.")
-    .positive("La estatura debe ser un número positivo.")
-    .describe('La estatura del usuario en centímetros.'),
-  goalTerm: z
-    .string()
-    .describe('El plazo en el que el usuario espera alcanzar sus metas, ej., corto, mediano, largo plazo.'),
-  planDuration: z
-    .number({ required_error: "La duración es requerida."})
-    .int()
-    .min(4)
-    .describe("La duración del ciclo de entrenamiento en semanas (4, 6 u 8)."),
-  injuriesOrConditions: z
-    .string()
-    .optional()
-    .describe('Cualquier lesión o condición médica que el entrenador deba conocer.'),
-   exercisesPerDay: z
-    .number({ required_error: "El número de ejercicios es requerido." })
-    .int("Debe ser un número entero.")
-    .min(8, "Como mínimo 8 ejercicios por día.")
-    .max(10, "Como máximo 10 ejercicios por día.")
-    .describe('El número de ejercicios que el usuario desea realizar por día de entrenamiento.'),
+  goals: z.array(z.string()).describe('Los objetivos de fitness del usuario.'),
+  currentFitnessLevel: z.string().describe('El nivel de fitness actual del usuario, ej., principiante, intermedio, avanzado.'),
+  trainingDays: z.array(z.string()).describe('Los días específicos de la semana que el usuario puede dedicar al entrenamiento.'),
+  trainingTimePerDay: z.string().describe('El tiempo aproximado que el usuario tiene para entrenar por día.'),
+  preferredWorkoutStyle: z.string().describe('El estilo de entrenamiento preferido por el usuario, ej., levantamiento de pesas, cardio, HIIT, yoga.'),
+  muscleFocus: z.array(z.string()).optional().describe('Los grupos musculares específicos en los que el usuario quiere enfocarse.'),
+  age: z.number().describe('La edad del usuario.'),
+  weight: z.number().describe('El peso del usuario en kilogramos.'),
+  height: z.number().describe('La estatura del usuario en centímetros.'),
+  goalTerm: z.string().describe('El plazo en el que el usuario espera alcanzar sus metas, ej., corto, mediano, largo plazo.'),
+  planDuration: z.number().describe("La duración del ciclo de entrenamiento en semanas (4, 6 u 8)."),
+  injuriesOrConditions: z.string().optional().describe('Cualquier lesión o condición médica que el entrenador deba conocer.'),
+  exercisesPerDay: z.number().describe('El número de ejercicios que el usuario desea realizar por día de entrenamiento.'),
   history: z.array(UserPlanSchema).optional().describe("Un historial de los últimos 3 planes generados para este usuario, para garantizar la variedad.")
 });
 export type GeneratePersonalizedTrainingPlanInput = z.infer<typeof GeneratePersonalizedTrainingPlanInputSchema>;

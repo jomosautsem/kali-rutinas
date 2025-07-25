@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Info, Calendar, PartyPopper } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Calendar, PartyPopper } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SetbackReporter } from "@/components/setback-reporter";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
@@ -563,7 +563,7 @@ export default function DashboardPage() {
         setPlanStatus('sin-plan');
       }
     }
-  }, [user?.planDurationInWeeks]);
+  }, [user?.planDurationInWeeks, completedDays.length, toast]);
 
   const handlePlanGenerated = (newPlan: UserPlan) => {
     if (typeof window !== 'undefined' && userEmail && user) {

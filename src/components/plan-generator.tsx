@@ -2,10 +2,9 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-
-import type { UserPlan } from "@/lib/types"
+import type { UserPlan, GeneratePersonalizedTrainingPlanInput } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
+import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
 
 import { Button } from "@/components/ui/button"
 import { 
@@ -18,7 +17,7 @@ import {
     DialogFooter
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Sparkles, AlertTriangle } from "lucide-react"
+import { Sparkles, AlertTriangle, Loader2 } from "lucide-react"
 
 type PlanGeneratorProps = {
   onPlanGenerated: (newPlan: UserPlan) => void;
@@ -26,24 +25,44 @@ type PlanGeneratorProps = {
 
 export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
     const [isOpen, setIsOpen] = useState(false)
+    const [isGenerating, setIsGenerating] = useState(false);
     const { toast } = useToast();
-    const router = useRouter();
     
-    const handleContinue = () => {
-        if (typeof window !== 'undefined') {
-            const email = sessionStorage.getItem("loggedInUser");
-            if (email) {
-                sessionStorage.setItem("onboardingUserEmail", email);
-                router.push('/onboarding');
-            } else {
-                toast({
-                    variant: "destructive",
-                    title: "Error de Sesión",
-                    description: "No se pudo encontrar tu sesión. Por favor, inicia sesión de nuevo.",
-                });
-            }
+    const handleGenerate = async () => {
+        setIsGenerating(true);
+        try {
+             // Since onboarding is removed, we use a default/demo profile for generation
+            const demoInput: GeneratePersonalizedTrainingPlanInput = {
+                goals: ["ganar masa muscular", "mejorar salud general"],
+                currentFitnessLevel: "principiante",
+                trainingDays: ["lunes", "martes", "jueves", "viernes"],
+                trainingTimePerDay: "60 minutos",
+                preferredWorkoutStyle: "hipertrofia",
+                age: 28,
+                weight: 70,
+                height: 175,
+                goalTerm: "mediano",
+                planDuration: 4,
+                exercisesPerDay: 8,
+                injuriesOrConditions: "",
+                history: [],
+            };
+            const newPlan = await generatePersonalizedTrainingPlan(demoInput);
+            onPlanGenerated(newPlan);
+            toast({
+                title: "¡Plan de IA Generado!",
+                description: "Tu nuevo plan está listo y ha sido aprobado automáticamente."
+            });
+        } catch (error) {
+             toast({
+                variant: "destructive",
+                title: "Error al generar el plan",
+                description: "No se pudo crear el plan con IA. Por favor, inténtalo de nuevo.",
+            });
+        } finally {
+            setIsGenerating(false);
+            setIsOpen(false);
         }
-        setIsOpen(false);
     }
     
     return (
@@ -75,8 +94,11 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                     Si prefieres un plan revisado y aprobado por un experto, por favor, solicita una "Rutina Personalizada" desde tu panel.
                 </p>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleContinue}>Entendido, continuar</Button>
+                    <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isGenerating}>Cancelar</Button>
+                    <Button onClick={handleGenerate} disabled={isGenerating}>
+                        {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isGenerating ? "Generando..." : "Entendido, continuar"}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

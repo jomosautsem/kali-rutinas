@@ -68,12 +68,10 @@ export default function RegisterPage() {
       
       toast({
         title: "Registro Exitoso",
-        description: "Ahora, cuéntanos un poco sobre tus metas.",
+        description: "Tu cuenta ha sido creada y está pendiente de aprobación.",
       })
       
-      // Redirect to onboarding with user's email as a query parameter
-      // DO NOT create a session here. This is a critical security step.
-      router.push(`/onboarding?email=${encodeURIComponent(email)}`)
+      router.push("/login")
 
     } catch (error) {
       console.error("Registration failed:", error)
@@ -168,7 +166,7 @@ export default function RegisterPage() {
           />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Creando cuenta..." : "Crear Cuenta y Continuar"}
+          {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
         </Button>
       </form>
     </AuthCard>
