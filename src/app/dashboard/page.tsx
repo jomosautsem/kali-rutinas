@@ -767,7 +767,7 @@ export default function DashboardPage() {
             <Button asChild>
               <Link href={`/onboarding?email=${user?.email}`}>Solicitar Rutina Personalizada</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
                 <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
             </Button>
         </div>
@@ -896,5 +896,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
