@@ -198,6 +198,7 @@ export default function OnboardingPage() {
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
+      // THIS IS THE CRUCIAL FIX: ALWAYS SAVE ONBOARDING DATA
       localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
       
       if (pageMode === 'newPlan') {
