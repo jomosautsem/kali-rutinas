@@ -509,24 +509,6 @@ export default function DashboardPage() {
       const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
       setUserEmail(loggedInUserEmail);
 
-      // --- Progress History Cleanup ---
-      if (loggedInUserEmail) {
-        const expirationString = localStorage.getItem(`progressExpiration_${loggedInUserEmail}`);
-        if (expirationString) {
-            const expirationDate = new Date(expirationString);
-            if (new Date() > expirationDate) {
-                const totalWeeks = user?.planDurationInWeeks || 4;
-                for (let i = 1; i <= totalWeeks; i++) {
-                    localStorage.removeItem(`progress_week${i}_${loggedInUserEmail}`);
-                }
-                localStorage.removeItem(`lastCompletedPlan_${loggedInUserEmail}`);
-                localStorage.removeItem(`progressExpiration_${loggedInUserEmail}`);
-                toast({ title: "Historial de Progreso Limpiado", description: "Tu historial del ciclo anterior ha sido eliminado." });
-            }
-        }
-      }
-      // --- End Cleanup ---
-
       const storedUsers = localStorage.getItem("registeredUsers");
       if (loggedInUserEmail && storedUsers) {
         const users: User[] = JSON.parse(storedUsers);
@@ -534,23 +516,27 @@ export default function DashboardPage() {
         if (currentUser) {
           setUser(currentUser);
           setPlanStatus(currentUser.planStatus as any);
+          
           if (currentUser.planStatus === 'aprobado') {
               const storedPlan = localStorage.getItem(`userPlan_${currentUser.email}`);
               if (storedPlan) {
                   setUserPlan(JSON.parse(storedPlan));
               }
+              
               const currentWeek = currentUser.currentWeek || 1;
               const storedCompletedDays = localStorage.getItem(`completedDays_week${currentWeek}_${currentUser.email}`);
-              if(storedCompletedDays) {
+              
+              if (storedCompletedDays) {
                   setCompletedDays(JSON.parse(storedCompletedDays));
               } else {
-                  // Proactive cleaning
+                  // Proactive cleaning if starting a new week
                   if (completedDays.length === 0) {
                       localStorage.removeItem(`completedDays_week${currentWeek}_${currentUser.email}`);
                       localStorage.removeItem(`progress_week${currentWeek}_${currentUser.email}`);
                   }
                   setCompletedDays([]); 
               }
+
               const storedProgress = localStorage.getItem(`progress_week${currentWeek}_${currentUser.email}`);
               if(storedProgress) {
                   setProgress(JSON.parse(storedProgress));
@@ -563,7 +549,8 @@ export default function DashboardPage() {
         setPlanStatus('sin-plan');
       }
     }
-  }, [user?.planDurationInWeeks, completedDays.length, toast]);
+  }, [user?.currentWeek, toast]);
+
 
   const handlePlanGenerated = (newPlan: UserPlan) => {
     if (typeof window !== 'undefined' && userEmail && user) {
