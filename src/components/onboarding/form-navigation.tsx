@@ -2,7 +2,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Loader2, ArrowLeft, Send } from "lucide-react"
+import { Loader2, ArrowLeft, Sparkles } from "lucide-react"
 
 type FormNavigationProps = {
   currentStep: number;
