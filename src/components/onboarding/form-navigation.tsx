@@ -35,9 +35,9 @@ export function FormNavigation({
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : currentStep === totalSteps - 1 ? (
-             <Send className="mr-2 h-4 w-4" />
+             <Sparkles className="mr-2 h-4 w-4" />
           ) : null}
-          {isLoading ? "Procesando..." : currentStep === totalSteps - 1 ? "Enviar Solicitud" : "Siguiente"}
+          {isLoading ? "Generando..." : currentStep === totalSteps - 1 ? "Generar Plan" : "Siguiente"}
         </Button>
       </div>
     </div>

@@ -710,12 +710,6 @@ export default function DashboardPage() {
         });
     }
   };
-  
-  const handleCustomPlanRequest = () => {
-     if (user?.email) {
-      router.push(`/onboarding?email=${user.email}`);
-    }
-  };
 
 
   const renderPlanContent = () => {
@@ -769,21 +763,16 @@ export default function DashboardPage() {
           <Skeleton className="h-9 w-64" />
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            <Button onClick={handleCustomPlanRequest} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
-                Rutina Personalizada
-            </Button>
+            <PlanGenerator onPlanGenerated={handlePlanGenerated} />
             <Button asChild className="bg-gradient-to-r from-blue-500 to-green-400 text-white font-bold shadow-lg hover:from-blue-600 hover:to-green-500">
                 <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
             </Button>
-            {planStatus === 'sin-plan' && (
-              <PlanGenerator onPlanGenerated={handlePlanGenerated} />
-            )}
         </div>
       </motion.div>
       
       <motion.div variants={itemVariants}>
         <Tabs defaultValue="plan">
-            <TabsList className="flex items-center justify-start gap-2 bg-transparent p-0">
+            <TabsList className="flex-nowrap justify-start gap-2 bg-transparent p-0 w-full overflow-x-auto">
                 <TabsTrigger value="plan" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black">Tu Plan Semanal</TabsTrigger>
                 <TabsTrigger value="progress" className="data-[state=active]:bg-green-500 data-[state=active]:text-black">Resumen de Progreso</TabsTrigger>
             </TabsList>
