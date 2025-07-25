@@ -70,9 +70,10 @@ export function TemplateGenerator({ onSaveTemplate }: TemplateGeneratorProps) {
 
   const handleSave = () => {
     if (!generatedPlan) return;
-    // Use the first few words of the description as a title.
-    const title = lastDescription.split(' ').slice(0, 5).join(' ') + '...';
-    onSaveTemplate(generatedPlan, title, lastDescription);
+    const words = lastDescription.split(' ');
+    const title = words.slice(0, 5).join(' ') + (words.length > 5 ? '...' : '');
+    const description = words.slice(0, 15).join(' ') + (words.length > 15 ? '...' : '');
+    onSaveTemplate(generatedPlan, title, description);
     setGeneratedPlan(null);
   }
 
