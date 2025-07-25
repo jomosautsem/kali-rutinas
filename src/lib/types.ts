@@ -1,4 +1,5 @@
 
+
 import { z } from "zod";
 
 // This type is now deprecated for plan generation, but kept for client-side progress tracking.

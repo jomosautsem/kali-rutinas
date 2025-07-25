@@ -4,15 +4,15 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useForm, useFieldArray, useWatch, Control, UseFormRegister } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, Control, UseFormRegister, useFormContext } from "react-hook-form";
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan";
-import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan, Exercise } from "@/lib/types";
+import type { GeneratePersonalizedTrainingPlanInput, User, UserPlan, Exercise, LibraryExercise } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, Expand } from "lucide-react";
+import { Trash2, PlusCircle, Sparkles, Loader2, Save, Youtube, Image as ImageIcon, Lightbulb, XCircle, Expand, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
@@ -430,76 +430,179 @@ function ExercisesFieldArray({ dayIndex, control, register, onPreviewClick }: { 
         name: `weeklyPlan.${dayIndex}.exercises`
     });
 
+    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+    const [activeExerciseIndex, setActiveExerciseIndex] = useState<number | null>(null);
+    const { setValue } = useFormContext<UserPlan>();
+
     const watchedExercises = useWatch({ control, name: `weeklyPlan.${dayIndex}.exercises` });
 
-    return (
-        <div className="space-y-4 pt-4">
-            {fields.map((field, exerciseIndex) => {
-              const exercise = watchedExercises?.[exerciseIndex] || {};
-              return (
-                <div key={field.id} className="p-4 rounded-lg bg-card/50">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                    <div className="md:col-span-2 space-y-4">
-                       <Input
-                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
-                          placeholder="Nombre del Ejercicio"
-                          className="font-semibold text-base"
-                      />
-                      <div className="flex items-center gap-2">
-                        <Input
-                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
-                          placeholder="Series"
-                          className="w-24"
-                        />
-                        <Input
-                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
-                          placeholder="Reps"
-                          className="w-24"
-                        />
-                        <Input
-                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
-                          placeholder="Descanso"
-                          className="w-24"
-                        />
-                      </div>
-                      <Input
-                          {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
-                          placeholder="URL de Video/Imagen (YouTube, .mp4, etc.)"
-                      />
-                    </div>
+    const openLibraryForExercise = (index: number) => {
+        setActiveExerciseIndex(index);
+        setIsLibraryOpen(true);
+    };
+    
+    const handleSelectExercise = (exercise: LibraryExercise) => {
+        if (activeExerciseIndex !== null) {
+            setValue(`weeklyPlan.${dayIndex}.exercises.${activeExerciseIndex}.name`, exercise.name);
+            setValue(`weeklyPlan.${dayIndex}.exercises.${activeExerciseIndex}.mediaUrl`, exercise.mediaUrl);
+            setValue(`weeklyPlan.${dayIndex}.exercises.${activeExerciseIndex}.description`, exercise.description || "");
+            setIsLibraryOpen(false);
+            setActiveExerciseIndex(null);
+        }
+    };
 
-                    <div className="self-center">
-                       <MediaPreview 
-                          url={exercise.mediaUrl || ''} 
-                          alt={`Visual de ${exercise.name}`}
-                          onPreviewClick={() => onPreviewClick(exercise)}
-                      />
+
+    return (
+        <>
+            <div className="space-y-4 pt-4">
+                {fields.map((field, exerciseIndex) => {
+                const exercise = watchedExercises?.[exerciseIndex] || {};
+                return (
+                    <div key={field.id} className="p-4 rounded-lg bg-card/50">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                        <div className="md:col-span-2 space-y-4">
+                           <div className="space-y-2">
+                                <Label>Ejercicio</Label>
+                                <div className="flex gap-2">
+                                     <Input
+                                        {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
+                                        placeholder="Nombre del Ejercicio"
+                                        className="font-semibold text-base flex-grow"
+                                        readOnly
+                                    />
+                                    <Button type="button" variant="outline" onClick={() => openLibraryForExercise(exerciseIndex)}>
+                                        <Search className="mr-2 h-4 w-4" /> Buscar
+                                    </Button>
+                                </div>
+                           </div>
+                        <div className="flex items-center gap-2">
+                            <Input
+                            {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
+                            placeholder="Series"
+                            className="w-24"
+                            />
+                            <Input
+                            {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
+                            placeholder="Reps"
+                            className="w-24"
+                            />
+                            <Input
+                            {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
+                            placeholder="Descanso"
+                            className="w-24"
+                            />
+                        </div>
+                        <Input
+                            {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
+                            placeholder="URL de Video/Imagen (YouTube, .mp4, etc.)"
+                        />
+                        </div>
+
+                        <div className="self-center">
+                        <MediaPreview 
+                            url={exercise.mediaUrl || ''} 
+                            alt={`Visual de ${exercise.name}`}
+                            onPreviewClick={() => onPreviewClick(exercise)}
+                        />
+                        </div>
                     </div>
-                  </div>
-                  <div className="flex justify-end mt-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => remove(exerciseIndex)}
-                      className="text-muted-foreground hover:text-destructive flex-shrink-0"
-                    >
-                      <XCircle className="h-5 w-5" />
-                    </Button>
-                  </div>
+                    <div className="flex justify-end mt-2">
+                        <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => remove(exerciseIndex)}
+                        className="text-muted-foreground hover:text-destructive flex-shrink-0"
+                        >
+                        <XCircle className="h-5 w-5" />
+                        </Button>
+                    </div>
+                    </div>
+                );
+                })}
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => append({ name: "", series: "4", reps: "8-12", rest: "60s", mediaUrl: "", description: "" })}
+                    className="mt-2"
+                >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Añadir Ejercicio
+                </Button>
+            </div>
+            
+            <ExerciseLibrarySelector
+                isOpen={isLibraryOpen}
+                onClose={() => setIsLibraryOpen(false)}
+                onSelect={handleSelectExercise}
+            />
+        </>
+    )
+}
+
+
+function ExerciseLibrarySelector({ isOpen, onClose, onSelect }: { isOpen: boolean; onClose: () => void; onSelect: (exercise: LibraryExercise) => void; }) {
+    const [library, setLibrary] = useState<LibraryExercise[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (isOpen) {
+            try {
+                const storedLibrary = localStorage.getItem("exerciseLibrary");
+                if (storedLibrary) {
+                    setLibrary(JSON.parse(storedLibrary));
+                }
+            } catch (error) {
+                toast({ variant: "destructive", title: "Error", description: "No se pudo cargar la biblioteca de ejercicios." });
+            }
+        }
+    }, [isOpen, toast]);
+
+    const filteredLibrary = library.filter(ex => 
+        ex.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ex.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-2xl h-[70vh] flex flex-col">
+                <DialogHeader>
+                    <DialogTitle>Seleccionar Ejercicio de la Biblioteca</DialogTitle>
+                </DialogHeader>
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input 
+                        placeholder="Buscar por nombre o grupo muscular..."
+                        className="pl-10"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
-              );
-            })}
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => append({ name: "", series: "4", reps: "8-12", rest: "60s", mediaUrl: "" })}
-                className="mt-2"
-            >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Añadir Ejercicio
-            </Button>
-        </div>
+                <div className="flex-1 overflow-y-auto -mx-6 px-6">
+                    <div className="space-y-2">
+                        {filteredLibrary.length > 0 ? (
+                            filteredLibrary.map(exercise => (
+                                <button
+                                    key={exercise.id}
+                                    type="button"
+                                    onClick={() => onSelect(exercise)}
+                                    className="w-full text-left p-3 rounded-md hover:bg-accent flex justify-between items-center transition-colors"
+                                >
+                                    <div>
+                                        <p className="font-semibold">{exercise.name}</p>
+                                        <p className="text-sm text-muted-foreground">{exercise.muscleGroup}</p>
+                                    </div>
+                                    <PlusCircle className="h-5 w-5 text-primary" />
+                                </button>
+                            ))
+                        ) : (
+                            <p className="text-center text-muted-foreground py-8">No se encontraron ejercicios.</p>
+                        )}
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }
