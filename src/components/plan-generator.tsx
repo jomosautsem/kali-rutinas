@@ -218,7 +218,11 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
     
     return (
         <Dialog open={isOpen} onOpenChange={(open) => {
-            if (!open) handleClose();
+            if (!open) {
+                handleClose();
+            } else {
+                setIsOpen(true);
+            }
         }}>
             <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -229,15 +233,15 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>¿Estás a punto de crear un nuevo plan?</AlertDialogTitle>
+                        <AlertDialogTitle>Advertencia de Responsabilidad</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Generar un nuevo plan de entrenamiento con IA reemplazará tu plan actual. Todo tu progreso se guardará, pero el plan semanal que sigues cambiará. ¿Estás seguro de que quieres continuar?
+                            El plan que estás a punto de generar será creado exclusivamente por Inteligencia Artificial (IA) y no será revisado por ningún entrenador de Kali Gym. Al continuar, aceptas que es tu responsabilidad ejecutar los ejercicios con la técnica adecuada y entrenar de forma segura.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <DialogTrigger asChild>
-                             <AlertDialogAction onClick={() => setIsOpen(true)}>Sí, generar nuevo plan</AlertDialogAction>
+                             <AlertDialogAction onClick={() => setIsOpen(true)}>Entendido, generar plan</AlertDialogAction>
                         </DialogTrigger>
                     </AlertDialogFooter>
                 </AlertDialogContent>
