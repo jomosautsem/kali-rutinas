@@ -68,6 +68,18 @@ export type ProgressData = {
     }
 }
 
+export const muscleGroups = ["Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Cuádriceps", "Isquiotibiales", "Glúteos", "Abdomen", "Cardio", "Otro"] as const;
+
+export const LibraryExerciseSchema = z.object({
+    id: z.string(),
+    name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
+    description: z.string().optional(),
+    muscleGroup: z.enum(muscleGroups),
+    mediaUrl: z.string().url("Debe ser una URL válida.").or(z.literal("")),
+});
+export type LibraryExercise = z.infer<typeof LibraryExerciseSchema>;
+
+
 // This schema defines the data required to generate a personalized training plan.
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
   goals: z.array(z.string()).min(1, "Debes seleccionar al menos una meta.").describe('Los objetivos de fitness del usuario.'),

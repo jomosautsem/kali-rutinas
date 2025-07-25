@@ -7,6 +7,7 @@ import {
   Activity,
   FileText,
   LayoutDashboard,
+  Library,
   Users,
 } from "lucide-react";
 import {
@@ -28,6 +29,7 @@ const navItems = [
     { href: "/admin/dashboard", icon: LayoutDashboard, label: "Panel" },
     { href: "/admin/users", icon: Users, label: "Usuarios" },
     { href: "/admin/templates", icon: FileText, label: "Plantillas" },
+    { href: "/admin/library", icon: Library, label: "Biblioteca" },
     { href: "/admin/status", icon: Activity, label: "Estado del Sistema" },
 ]
 
