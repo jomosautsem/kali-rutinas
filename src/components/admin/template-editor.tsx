@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useForm, useFieldArray, useWatch, Control, UseFormRegister, FormProvider, useFormContext } from "react-hook-form";
-import type { UserPlan } from "@/lib/types";
+import type { UserPlan, LibraryExercise } from "@/lib/types";
 import type { Template } from "@/app/admin/templates/page"; // Import Template type
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,10 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, Save, XCircle } from "lucide-react";
+import { Trash2, PlusCircle, Save, XCircle, Search, ChevronsUpDown } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
 
 
 const templateSchema = z.object({
@@ -36,6 +38,7 @@ const templateSchema = z.object({
                 reps: z.string(),
                 rest: z.string(),
                 mediaUrl: z.string().url().or(z.literal("")).optional(),
+                description: z.string().optional(),
             }))
         }))
     })
@@ -280,80 +283,110 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
 }
 
 function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number; control: any; register: UseFormRegister<Template> }) {
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: `plan.weeklyPlan.${dayIndex}.exercises`
-  });
-
-  const { setValue } = useFormContext();
-
-  const watchedExercises = useWatch({
-      control,
-      name: `plan.weeklyPlan.${dayIndex}.exercises`
-  });
-
-  return (
-    <div className="space-y-2 pt-4">
-      {fields.map((field, exerciseIndex) => {
-        const exerciseName = watchedExercises?.[exerciseIndex]?.name;
-        
-        return (
-            <div key={field.id} className="flex items-center gap-2 p-2 rounded-md bg-card/50">
-            <Input
-                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`)}
-                placeholder="Ejercicio"
-                className="flex-grow"
-                onBlur={(e) => {
-                    const name = e.target.value;
-                    if (name) {
-                        const newUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${name} ejercicio tutorial`)}`;
-                        setValue(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`, newUrl, { shouldValidate: true });
-                    }
-                }}
-            />
-            <Input
-                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
-                placeholder="Series"
-                className="w-20"
-            />
-            <Input
-                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
-                placeholder="Reps"
-                className="w-24"
-            />
-             <Input
-                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
-                placeholder="Descanso"
-                className="w-24"
-            />
-             <Input
-                {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`)}
-                placeholder="URL (se genera auto.)"
-                className="flex-grow bg-muted/50"
-                readOnly
-            />
-            <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => remove(exerciseIndex)}
-                className="text-muted-foreground hover:text-destructive flex-shrink-0"
-            >
-                <XCircle className="h-4 w-4" />
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: `plan.weeklyPlan.${dayIndex}.exercises`
+    });
+    
+    return (
+        <div className="space-y-2 pt-4">
+            {fields.map((field, exerciseIndex) => (
+                <div key={field.id} className="flex items-center gap-2 p-2 rounded-md bg-card/50">
+                    <ExerciseCombobox dayIndex={dayIndex} exerciseIndex={exerciseIndex} />
+                    <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)} placeholder="Series" className="w-20" />
+                    <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)} placeholder="Reps" className="w-24" />
+                    <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)} placeholder="Descanso" className="w-24" />
+                    <Button type="button" variant="ghost" size="icon" onClick={() => remove(exerciseIndex)} className="text-muted-foreground hover:text-destructive flex-shrink-0">
+                        <XCircle className="h-4 w-4" />
+                    </Button>
+                </div>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={() => append({ name: "", series: "4", reps: "8-12", rest: "60s", mediaUrl: "" })} className="mt-2">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Añadir Ejercicio
             </Button>
-            </div>
-        );
-      })}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => append({ name: "", series: "4", reps: "8-12", rest: "60s", mediaUrl: "" })}
-        className="mt-2"
-      >
-        <PlusCircle className="mr-2 h-4 w-4" />
-        Añadir Ejercicio
-      </Button>
-    </div>
-  );
+        </div>
+    );
+}
+
+function ExerciseCombobox({ dayIndex, exerciseIndex }: { dayIndex: number; exerciseIndex: number; }) {
+    const [library, setLibrary] = useState<LibraryExercise[]>([]);
+    const [open, setOpen] = useState(false);
+    const { control, setValue, getValues } = useFormContext<Template>();
+    const fieldName = `plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`;
+
+    useEffect(() => {
+        try {
+            const storedLibrary = localStorage.getItem("exerciseLibrary");
+            if (storedLibrary) setLibrary(JSON.parse(storedLibrary));
+        } catch (e) {
+            console.error("Failed to load exercise library from localStorage", e);
+        }
+    }, []);
+
+    const handleSelect = (exercise: LibraryExercise) => {
+        setValue(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.name`, exercise.name);
+        setValue(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`, exercise.mediaUrl);
+        setValue(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.description`, exercise.description || "");
+        setOpen(false);
+    };
+
+    const handleManualChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const name = e.target.value;
+        setValue(fieldName as any, name);
+        if (!library.some(ex => ex.name.toLowerCase() === name.toLowerCase())) {
+            const newUrl = name ? `https://www.youtube.com/results?search_query=${encodeURIComponent(`${name} ejercicio tutorial`)}` : "";
+            setValue(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.mediaUrl`, newUrl);
+            setValue(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.description`, "");
+        }
+    };
+    
+    return (
+        <FormField
+            control={control}
+            name={fieldName as any}
+            render={({ field }) => (
+                <FormItem className="flex-grow">
+                    <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className={cn("w-full justify-between font-normal", !field.value && "text-muted-foreground")}
+                                >
+                                    {field.value || "Selecciona o escribe un ejercicio..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                                <CommandInput 
+                                    placeholder="Buscar ejercicio o escribir nuevo..."
+                                    onInput={handleManualChange}
+                                    value={field.value}
+                                />
+                                <CommandList>
+                                    <CommandEmpty>No se encontró el ejercicio. Puedes escribir uno nuevo.</CommandEmpty>
+                                    <CommandGroup>
+                                        {library.map((exercise) => (
+                                            <CommandItem
+                                                value={exercise.name}
+                                                key={exercise.id}
+                                                onSelect={() => handleSelect(exercise)}
+                                            >
+                                                {exercise.name}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    );
 }
