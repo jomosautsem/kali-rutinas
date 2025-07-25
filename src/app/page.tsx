@@ -105,7 +105,7 @@ export default function Home() {
           <Logo className="h-12 w-12 text-primary" width={48} height={48} />
           <span className="font-bold text-lg font-headline">Dojo Dynamics</span>
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
+        <nav className="ml-auto flex gap-2 sm:gap-6 items-center">
           <Button variant="ghost" asChild>
             <Link href="/login" prefetch={false}>
                 Iniciar Sesión
@@ -155,7 +155,7 @@ export default function Home() {
 
             <motion.div
               variants={itemVariants}
-              className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center gap-2"
+              className="absolute bottom-10 left-1/2 -translate-x-1/2 flex-col items-center justify-center gap-2 hidden sm:flex"
             >
               <Link href="#features" className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-yellow-400 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>

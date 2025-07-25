@@ -188,17 +188,17 @@ const PlanAprobado = ({
                         <CardHeader className="text-center">
                             <CardTitle className="font-headline text-2xl text-primary">Ciclo de Entrenamiento Activo</CardTitle>
                         </CardHeader>
-                        <CardContent className="flex items-center justify-around text-center">
+                        <CardContent className="flex flex-col sm:flex-row items-center justify-around text-center gap-4 sm:gap-0">
                             <div>
                                <p className="text-sm text-muted-foreground">Semana</p>
                                <p className="text-3xl font-bold">{user.currentWeek || 1} <span className="text-lg text-muted-foreground">/ {user.planDurationInWeeks || 4}</span></p>
                             </div>
-                             <div className="h-16 w-px bg-border"></div>
+                             <div className="h-px w-16 sm:h-16 sm:w-px bg-border"></div>
                             <div>
                                <p className="text-sm text-muted-foreground">Inicio</p>
                                <p className="font-semibold">{format(new Date(user.planStartDate), "PPP")}</p>
                             </div>
-                             <div className="h-16 w-px bg-border"></div>
+                             <div className="h-px w-16 sm:h-16 sm:w-px bg-border"></div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Fin</p>
                                 <p className="font-semibold">{format(new Date(user.planEndDate), "PPP")}</p>
@@ -301,7 +301,7 @@ const PlanAprobado = ({
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className="mt-4">
+                                                    <div className="mt-4 overflow-x-auto">
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow>
@@ -322,7 +322,7 @@ const PlanAprobado = ({
                                                                                 <Input 
                                                                                     type="number"
                                                                                     placeholder="0"
-                                                                                    className="h-8"
+                                                                                    className="h-8 min-w-[70px]"
                                                                                     value={setProgress.weight}
                                                                                     onChange={(e) => onProgressChange(dayPlan.day, exercise.name, setIndex, 'weight', e.target.value)}
                                                                                 />
@@ -331,7 +331,7 @@ const PlanAprobado = ({
                                                                                 <Input 
                                                                                     type="number"
                                                                                     placeholder="0"
-                                                                                    className="h-8"
+                                                                                    className="h-8 min-w-[70px]"
                                                                                     value={setProgress.reps}
                                                                                     onChange={(e) => onProgressChange(dayPlan.day, exercise.name, setIndex, 'reps', e.target.value)}
                                                                                 />
@@ -347,6 +347,7 @@ const PlanAprobado = ({
                                                                 })}
                                                             </TableBody>
                                                         </Table>
+                                                        </div>
                                                         <div className="mt-2">
                                                             <Button 
                                                                 variant="outline" 
@@ -356,12 +357,11 @@ const PlanAprobado = ({
                                                                 Añadir Serie
                                                             </Button>
                                                         </div>
-                                                    </div>
                                                 </div>
                                             )
                                         })}
                                     </div>
-                                    <div className="flex justify-end items-center gap-4 pt-6 mt-4 border-t">
+                                    <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-6 mt-4 border-t">
                                         <div className="flex items-center space-x-2">
                                             <Checkbox 
                                             id={`complete-${dayPlan.day}`} 
@@ -760,7 +760,7 @@ export default function DashboardPage() {
       animate="visible"
       className="space-y-6"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between flex-wrap gap-4">
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between flex-wrap gap-4">
         {user ? (
           <h1 className="text-2xl md:text-3xl font-bold font-headline">
             Bienvenido, <span className="text-primary">{user.firstName}</span>
@@ -768,7 +768,7 @@ export default function DashboardPage() {
         ) : (
           <Skeleton className="h-9 w-64" />
         )}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Button onClick={handleCustomPlanRequest} className="bg-gradient-to-r from-red-500 to-yellow-400 text-white font-bold shadow-lg hover:from-red-600 hover:to-yellow-500">
                 Rutina Personalizada
             </Button>

@@ -147,11 +147,11 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
 
   return (
     <>
-      <div className="rounded-lg border bg-card">
+      <div className="rounded-lg border bg-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Usuario</TableHead>
+              <TableHead className="min-w-[250px]">Usuario</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>KaliCodigo</TableHead>
               <TableHead>Plan</TableHead>

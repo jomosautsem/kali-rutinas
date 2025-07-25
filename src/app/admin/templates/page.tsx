@@ -208,12 +208,12 @@ export default function AdminTemplatesPage() {
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Gestión de Plantillas</h1>
                     <p className="text-muted-foreground">Revisa las plantillas existentes, crea nuevas manualmente o genéralas con IA.</p>
                 </div>
-                <Button onClick={handleCreateClick}>
+                <Button onClick={handleCreateClick} className="w-full sm:w-auto">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Crear Plantilla Manualmente
                 </Button>

@@ -199,9 +199,9 @@ const AdminDashboardPage = () => {
 
       <motion.div 
         variants={containerVariants}
-        className="grid gap-8 md:grid-cols-3"
+        className="grid gap-8 grid-cols-1 xl:grid-cols-3"
       >
-        <motion.div variants={itemVariants} className="md:col-span-2">
+        <motion.div variants={itemVariants} className="xl:col-span-2">
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline">Resumen de Usuarios</CardTitle>
