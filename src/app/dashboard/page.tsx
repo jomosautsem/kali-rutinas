@@ -743,6 +743,38 @@ export default function DashboardPage() {
           setConfetti(false);
       }
   }
+  
+  const renderRequestPlanButton = () => {
+    const commonProps = {
+        className:"bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100",
+        children: "Solicitar Rutina Personalizada"
+    };
+
+    if (isPlanActive) {
+        return <Button {...commonProps} disabled />;
+    }
+    return (
+        <Button asChild {...commonProps}>
+            <Link href={`/onboarding?email=${user?.email}`}>{commonProps.children}</Link>
+        </Button>
+    );
+  };
+
+  const renderCreateOwnPlanButton = () => {
+    const commonProps = {
+        className:"bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500",
+        children: "Crea tu propia rutina"
+    };
+
+    if (isPlanActive) {
+        return <Button {...commonProps} disabled />;
+    }
+    return (
+        <Button asChild {...commonProps}>
+            <Link href="/dashboard/create-plan">{commonProps.children}</Link>
+        </Button>
+    );
+  };
 
   return (
     <>
@@ -763,12 +795,8 @@ export default function DashboardPage() {
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <PlanGenerator onPlanGenerated={handlePlanGenerated} disabled={isPlanActive} />
-            <Button asChild className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100 aria-disabled:opacity-50 aria-disabled:cursor-not-allowed">
-              <Link href={`/onboarding?email=${user?.email}`} aria-disabled={isPlanActive} tabIndex={isPlanActive ? -1 : undefined}>Solicitar Rutina Personalizada</Link>
-            </Button>
-            <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 aria-disabled:opacity-50 aria-disabled:cursor-not-allowed">
-                <Link href="/dashboard/create-plan" aria-disabled={isPlanActive} tabIndex={isPlanActive ? -1 : undefined}>Crea tu propia rutina</Link>
-            </Button>
+            {renderRequestPlanButton()}
+            {renderCreateOwnPlanButton()}
         </div>
       </motion.div>
       
