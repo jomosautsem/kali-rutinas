@@ -70,9 +70,11 @@ export function TemplateGenerator({ onSaveTemplate }: TemplateGeneratorProps) {
 
   const handleSave = () => {
     if (!generatedPlan) return;
-    const words = lastDescription.split(' ');
-    const title = words.slice(0, 5).join(' ') + (words.length > 5 ? '...' : '');
-    const description = words.slice(0, 15).join(' ') + (words.length > 15 ? '...' : '');
+    // Generate a concise title and description from the user's long description
+    const words = lastDescription.split(/\s+/);
+    const title = words.slice(0, 5).join(" ") + (words.length > 5 ? "..." : "");
+    const description = words.slice(0, 20).join(" ") + (words.length > 20 ? "..." : "");
+
     onSaveTemplate(generatedPlan, title, description);
     setGeneratedPlan(null);
   }

@@ -237,7 +237,7 @@ export default function AdminTemplatesPage() {
                                 )}>{template.level}</Badge>
                             </div>
                             <CardTitle className="pt-4">{template.title}</CardTitle>
-                            <CardDescription>{template.description}</CardDescription>
+                            <CardDescription className="line-clamp-3">{template.description}</CardDescription>
                         </CardHeader>
                         <CardContent className="flex-grow space-y-2">
                              <div className="flex items-center text-sm text-muted-foreground">
