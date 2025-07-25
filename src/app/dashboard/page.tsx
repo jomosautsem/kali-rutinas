@@ -622,6 +622,7 @@ export default function DashboardPage() {
                setConfetti(true);
                setCycleModalState('cycle_complete');
            }
+           window.scrollTo(0, 0);
       }
   }
 
