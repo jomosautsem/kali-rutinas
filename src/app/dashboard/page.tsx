@@ -1,5 +1,3 @@
-
-
 "use client"
 
 import { useState, useEffect } from "react";
@@ -765,11 +763,11 @@ export default function DashboardPage() {
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <PlanGenerator onPlanGenerated={handlePlanGenerated} disabled={isPlanActive} />
-            <Button asChild disabled={isPlanActive} className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-              <Link href={`/onboarding?email=${user?.email}`}>Solicitar Rutina Personalizada</Link>
+            <Button asChild className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              <Link href={`/onboarding?email=${user?.email}`} aria-disabled={isPlanActive} tabIndex={isPlanActive ? -1 : undefined}>Solicitar Rutina Personalizada</Link>
             </Button>
-            <Button asChild disabled={isPlanActive} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
+            <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                <Link href="/dashboard/create-plan" aria-disabled={isPlanActive} tabIndex={isPlanActive ? -1 : undefined}>Crea tu propia rutina</Link>
             </Button>
         </div>
       </motion.div>
@@ -897,3 +895,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
