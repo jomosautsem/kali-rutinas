@@ -19,6 +19,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
   FormControl,
   FormField,
   FormItem,
@@ -207,15 +218,30 @@ export function PlanGenerator({ onPlanGenerated }: PlanGeneratorProps) {
     
     return (
         <Dialog open={isOpen} onOpenChange={(open) => {
-            if (open) setIsOpen(true);
-            else handleClose();
+            if (!open) handleClose();
         }}>
-            <DialogTrigger asChild>
-                <Button>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generar Plan con IA
-                </Button>
-            </DialogTrigger>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Generar Plan con IA
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás a punto de crear un nuevo plan?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Generar un nuevo plan de entrenamiento con IA reemplazará tu plan actual. Todo tu progreso se guardará, pero el plan semanal que sigues cambiará. ¿Estás seguro de que quieres continuar?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <DialogTrigger asChild>
+                             <AlertDialogAction onClick={() => setIsOpen(true)}>Sí, generar nuevo plan</AlertDialogAction>
+                        </DialogTrigger>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <DialogContent className="sm:max-w-2xl h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="font-headline">Generador de Plan Personalizado con IA</DialogTitle>
