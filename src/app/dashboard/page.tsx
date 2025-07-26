@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useState, useEffect } from "react";
@@ -375,7 +374,7 @@ const PlanAprobado = ({
                                     <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-6 mt-4 border-t">
                                         <Button onClick={onSaveChanges} disabled={isDayCompleted || !hasUnsavedChanges}>
                                             <Save className="mr-2 h-4 w-4" />
-                                            Guardar Avances del Día
+                                            Guardar Avances
                                         </Button>
                                         <TooltipProvider>
                                         <Tooltip>
@@ -947,3 +946,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
