@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -25,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock, Calendar, Sparkles, ArrowLeft } from "lucide-react"
+import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock, Calendar, Sparkles, ArrowLeft, ListChecks } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { Textarea } from "@/components/ui/textarea"
@@ -93,7 +94,7 @@ const steps = [
     { id: "step-1", title: "Metas", fields: ["goals"], icon: Trophy },
     { id: "step-2", title: "Plazo", fields: ["goalTerm"], icon: Clock },
     { id: "step-3", title: "Duración", fields: ["planDuration"], icon: Calendar },
-    { id: "step-4", title: "Tu Nivel", fields: ["currentFitnessLevel", "trainingDays", "trainingTimePerDay"], icon: HeartPulse },
+    { id: "step-4", title: "Tu Nivel", fields: ["currentFitnessLevel", "trainingDays", "trainingTimePerDay", "exercisesPerDay"], icon: HeartPulse },
     { id: "step-5", title: "Tu Estilo", fields: ["preferredWorkoutStyle", "otherWorkoutStyle", "muscleFocus"], icon: Dumbbell },
     { id: "step-6", title: "Tus Datos", fields: ["age", "weight", "height"], icon: UserIcon },
     { id: "step-7", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
@@ -396,6 +397,20 @@ export default function OnboardingPage() {
                           </Select>
                           <FormMessage />
                         </FormItem>
+                      )} />
+                      <FormField control={form.control} name="exercisesPerDay" render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Ejercicios por Día</FormLabel>
+                          <Select onValueChange={(v) => field.onChange(parseInt(v))} defaultValue={String(field.value)}>
+                              <FormControl><SelectTrigger><SelectValue placeholder="Selecciona cantidad" /></SelectTrigger></FormControl>
+                              <SelectContent>
+                                  <SelectItem value="4">Pocos (4)</SelectItem>
+                                  <SelectItem value="6">Moderados (6)</SelectItem>
+                                  <SelectItem value="8">Muchos (8)</SelectItem>
+                              </SelectContent>
+                          </Select>
+                          <FormMessage />
+                          </FormItem>
                       )} />
                     </Step>
                   )}
