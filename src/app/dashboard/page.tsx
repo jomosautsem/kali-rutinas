@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlanGenerator } from "@/components/plan-generator"
 import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Calendar, PartyPopper, Info } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
+import type { User, UserPlan, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -926,9 +926,9 @@ export default function DashboardPage() {
             )}
              {cycleModalState === 'cycle_complete' && (
                  <AlertDialog>
-                    <DialogHeader className="text-center">
+                    <DialogHeader className="text-center px-2 py-4 sm:p-6">
                         <motion.div 
-                            className="flex justify-center mb-4"
+                            className="flex justify-center mb-2"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{
@@ -938,17 +938,17 @@ export default function DashboardPage() {
                                 delay: 0.2
                             }}
                         >
-                            <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
+                            <Check className="h-12 w-12 sm:h-16 sm:w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
                         </motion.div>
-                        <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus {user?.planDurationInWeeks || 4} Semanas!</DialogTitle>
+                        <DialogTitle className="text-xl sm:text-2xl font-headline">¡Has Logrado Completar tus {user?.planDurationInWeeks || 4} Semanas!</DialogTitle>
                     </DialogHeader>
-                    <div className="text-center text-muted-foreground py-4 space-y-4">
-                        <p>Estamos orgullosos de tu esfuerzo y dedicación. Has demostrado una constancia increíble.</p>
-                        <blockquote className="italic border-l-2 border-primary pl-4 text-left">
+                    <div className="text-center text-muted-foreground px-2 pb-4 sm:px-6 sm:pb-6 space-y-3">
+                        <p className="text-sm sm:text-base">Estamos orgullosos de tu esfuerzo y dedicación. Has demostrado una constancia increíble.</p>
+                        <blockquote className="text-sm italic border-l-2 border-primary pl-3 text-left">
                             "La disciplina es el puente entre las metas y los logros."
                         </blockquote>
                     </div>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center px-2 pb-2 sm:px-6 sm:pb-4">
                         <AlertDialogTrigger asChild>
                             <Button>¡A por el siguiente reto!</Button>
                         </AlertDialogTrigger>
