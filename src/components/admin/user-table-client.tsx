@@ -39,7 +39,7 @@ import { PlanEditor } from "./plan-editor"
 import { GenerateInviteCodeDialog } from "./generate-invite-code-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ProgressAnalytics } from "./progress-analytics";
-import { EditUserDialog } from "./edit-user-dialog";
+import { EditUserDialog } from "../edit-user-dialog";
 import { AssignTemplateDialog } from "./assign-template-dialog";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -235,10 +235,16 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                       {user.role === 'client' && (
-                        <DropdownMenuItem onClick={() => handleEditUserClick(user)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar Usuario
-                        </DropdownMenuItem>
+                        <>
+                            <DropdownMenuItem onClick={() => handleEditUserClick(user)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Editar Usuario
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewOnboardingData(user)}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                Ver Solicitud de Plan
+                            </DropdownMenuItem>
+                        </>
                       )}
                       {user.role === 'client' && user.status === 'pendiente' && (
                         <DropdownMenuItem onClick={() => handleApproveClick(user)}>
@@ -248,12 +254,6 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                       )}
                       {user.role === 'client' && user.status !== 'pendiente' && (
                         <>
-                          {user.customPlanRequest === 'requested' && (
-                              <DropdownMenuItem onClick={() => handleViewOnboardingData(user)}>
-                                <FileText className="mr-2 h-4 w-4" />
-                                Ver Solicitud de Plan
-                              </DropdownMenuItem>
-                          )}
                           <DropdownMenuItem onClick={() => handlePlanEditorOpen(user)} disabled={user.status === 'inactivo'}>
                               <FileEdit className="mr-2 h-4 w-4" />
                               Editar/Generar Plan
@@ -373,5 +373,3 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     </>
   )
 }
-
-    
