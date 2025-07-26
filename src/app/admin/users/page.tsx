@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -68,21 +69,31 @@ export default function AdminUsersPage() {
     }
   };
   
-  const handleSaveAndApprovePlan = (userId: string, plan: UserPlan) => {
-    const updatedUsers = users.map(user => 
-      user.id === userId ? { ...user, planStatus: 'aprobado' } : user
+  const handleSaveAndApprovePlan = (userId: string, plan: UserPlan, duration: number) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    const today = new Date();
+    const endDate = new Date(today.getTime() + duration * 7 * 24 * 60 * 60 * 1000);
+
+    const updatedUsers = users.map(u => 
+      u.id === userId ? { 
+          ...u, 
+          planStatus: 'aprobado',
+          planStartDate: today.toISOString(),
+          planEndDate: endDate.toISOString(),
+          planDurationInWeeks: duration,
+          currentWeek: 1
+      } : u
     );
     setUsers(updatedUsers);
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
 
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      localStorage.setItem(`userPlan_${user.email}`, JSON.stringify(plan));
-       toast({
+    localStorage.setItem(`userPlan_${user.email}`, JSON.stringify(plan));
+    toast({
         title: "Plan Asignado y Aprobado",
         description: `El plan ha sido asignado correctamente a ${user.name}.`,
-      });
-    }
+    });
   };
 
   const handleApproveUser = (userId: string, inviteCode: string) => {
@@ -124,7 +135,7 @@ export default function AdminUsersPage() {
         onEditUser={handleEditUser}
         onDeleteUser={handleDeleteUser} 
         onSaveAndApprovePlan={handleSaveAndApprovePlan}
-        onApproveUser={handleApproveUser}
+        onApproveUser={onApproveUser}
         onToggleUserStatus={handleToggleUserStatus}
       />
     </div>

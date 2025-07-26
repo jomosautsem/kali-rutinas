@@ -45,6 +45,7 @@ import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { ViewOnboardingDataDialog } from "./view-onboarding-data-dialog";
 import type { GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 
 type UserTableClientProps = {
@@ -52,7 +53,7 @@ type UserTableClientProps = {
   templates: Template[];
   onEditUser: (user: User) => void;
   onDeleteUser: (userId: string) => void;
-  onSaveAndApprovePlan: (userId: string, plan: UserPlan) => void;
+  onSaveAndApprovePlan: (userId: string, plan: UserPlan, duration: number) => void;
   onApproveUser: (userId: string, inviteCode: string) => void;
   onToggleUserStatus: (userId: string, currentStatus: "activo" | "inactivo") => void;
 }
@@ -82,6 +83,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [selectedUserProgress, setSelectedUserProgress] = useState<{ progress: ProgressData, plan: UserPlan } | null>(null);
   const [selectedOnboardingData, setSelectedOnboardingData] = useState<GeneratePersonalizedTrainingPlanInput | null>(null);
+  const { toast } = useToast();
 
 
   const handleDeleteClick = (user: User) => {
@@ -143,7 +145,14 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     setSelectedUser(user);
     setIsOnboardingDataOpen(true);
   };
-
+  
+  const handleSaveAndApproveWithToast = (userId: string, plan: UserPlan) => {
+    onSaveAndApprovePlan(userId, plan, 4); // Default to 4 weeks duration
+    toast({
+        title: "Plan Aprobado",
+        description: `El plan ha sido guardado y aprobado para el usuario.`,
+    });
+  };
 
   return (
     <>
@@ -311,7 +320,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
             user={selectedUser} 
             isOpen={isPlanEditorOpen}
             onClose={handlePlanEditorClose}
-            onSaveAndApprove={onSaveAndApprovePlan}
+            onSaveAndApprove={handleSaveAndApproveWithToast}
           />
       )}
       
@@ -346,7 +355,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
           templates={templates}
           isOpen={isAssignTemplateDialogOpen}
           onClose={() => setIsAssignTemplateDialogOpen(false)}
-          onAssign={(plan) => onSaveAndApprovePlan(selectedUser.id, plan)}
+          onAssign={(plan, duration) => onSaveAndApprovePlan(selectedUser.id, plan, duration)}
         />
       )}
       

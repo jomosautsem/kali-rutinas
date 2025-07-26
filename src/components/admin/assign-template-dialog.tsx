@@ -30,16 +30,17 @@ type AssignTemplateDialogProps = {
   templates: Template[];
   isOpen: boolean;
   onClose: () => void;
-  onAssign: (plan: UserPlan) => void;
+  onAssign: (plan: UserPlan, duration: number) => void;
 };
 
 export function AssignTemplateDialog({ user, templates, isOpen, onClose, onAssign }: AssignTemplateDialogProps) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [duration, setDuration] = useState<number>(4);
 
   const handleAssign = () => {
     const template = templates.find(t => t.id === selectedTemplateId);
     if (template) {
-      onAssign(template.plan);
+      onAssign(template.plan, duration);
       onClose();
     }
   };
@@ -57,7 +58,7 @@ export function AssignTemplateDialog({ user, templates, isOpen, onClose, onAssig
             Asignar Plantilla a {user.name}
           </DialogTitle>
           <DialogDescription>
-            Selecciona una plantilla de la lista para asignarla directamente al usuario.
+            Selecciona una plantilla y la duración del ciclo para asignarla al usuario.
           </DialogDescription>
         </DialogHeader>
 
@@ -79,36 +80,54 @@ export function AssignTemplateDialog({ user, templates, isOpen, onClose, onAssig
               </SelectContent>
             </Select>
           </div>
-
+            
           {selectedTemplate && (
-            <Card className="bg-secondary/50">
-                <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <CardTitle>{selectedTemplate.title}</CardTitle>
-                            <CardDescription>{selectedTemplate.description}</CardDescription>
+            <div className="space-y-4">
+                <Card className="bg-secondary/50">
+                    <CardHeader>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <CardTitle>{selectedTemplate.title}</CardTitle>
+                                <CardDescription>{selectedTemplate.description}</CardDescription>
+                            </div>
+                            <Badge variant="outline" className={cn(
+                                "ml-4 shrink-0",
+                                selectedTemplate.level === "Principiante" && "border-blue-500 text-blue-500",
+                                selectedTemplate.level === "Intermedio" && "border-yellow-500 text-yellow-500",
+                                selectedTemplate.level === "Avanzado" && "border-red-500 text-red-500",
+                            )}>{selectedTemplate.level}</Badge>
                         </div>
-                        <Badge variant="outline" className={cn(
-                            "ml-4 shrink-0",
-                            selectedTemplate.level === "Principiante" && "border-blue-500 text-blue-500",
-                            selectedTemplate.level === "Intermedio" && "border-yellow-500 text-yellow-500",
-                            selectedTemplate.level === "Avanzado" && "border-red-500 text-red-500",
-                        )}>{selectedTemplate.level}</Badge>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center text-sm text-muted-foreground gap-4">
-                        <div className="flex items-center gap-1.5">
-                            <Dumbbell className="h-4 w-4" />
-                            <span>{selectedTemplate.plan.weeklyPlan.flatMap(d => d.exercises).length} ejercicios</span>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center text-sm text-muted-foreground gap-4">
+                            <div className="flex items-center gap-1.5">
+                                <Dumbbell className="h-4 w-4" />
+                                <span>{selectedTemplate.plan.weeklyPlan.flatMap(d => d.exercises).length} ejercicios</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <Calendar className="h-4 w-4" />
+                                <span>{selectedTemplate.plan.weeklyPlan.length} días</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                            <Calendar className="h-4 w-4" />
-                            <span>{selectedTemplate.plan.weeklyPlan.length} días</span>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+                
+                <div>
+                    <label htmlFor="duration-select" className="text-sm font-medium">
+                        Duración del Ciclo
+                    </label>
+                    <Select onValueChange={(value) => setDuration(parseInt(value))} value={String(duration)}>
+                        <SelectTrigger id="duration-select" className="mt-1">
+                            <SelectValue placeholder="Selecciona la duración del ciclo..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="4">4 Semanas</SelectItem>
+                            <SelectItem value="6">6 Semanas</SelectItem>
+                            <SelectItem value="8">8 Semanas</SelectItem>
+                        </SelectContent>
+                    </Select>
+                 </div>
+            </div>
           )}
 
            {user.planStatus === 'aprobado' && (
