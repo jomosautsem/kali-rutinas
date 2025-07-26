@@ -518,6 +518,7 @@ export function PlanGenerator({ onPlanGenerated, disabled = false }: PlanGenerat
                                 totalSteps={steps.length}
                                 isLoading={isGenerating}
                                 onBack={prevStep}
+                                onCancel={handleClose}
                             />
                         </div>
                     </form>

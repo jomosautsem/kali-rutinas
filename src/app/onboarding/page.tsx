@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { StepsIndicator } from "@/components/onboarding/steps-indicator"
 import { Step } from "@/components/onboarding/step"
 import { MultiToggleButtonGroup } from "@/components/ui/multi-toggle"
+import { FormNavigation } from "@/components/onboarding/form-navigation"
 
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
@@ -100,47 +101,6 @@ const steps = [
     { id: "step-7", title: "Salud", fields: ["injuriesOrConditions"], icon: Shield }
 ];
 
-type FormNavigationProps = {
-  currentStep: number;
-  totalSteps: number;
-  isLoading: boolean;
-  onBack: () => void;
-};
-
-function FormNavigation({
-  currentStep,
-  totalSteps,
-  isLoading,
-  onBack,
-}: FormNavigationProps) {
-  return (
-    <div className="flex justify-between items-center pt-4 border-t border-border/20">
-      <div>
-        {currentStep > 0 && (
-          <Button type="button" variant="outline" onClick={onBack} disabled={isLoading}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Anterior
-          </Button>
-        )}
-      </div>
-      <div className="text-sm text-muted-foreground">
-        Paso {currentStep + 1} de {totalSteps}
-      </div>
-      <div>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : currentStep === totalSteps - 1 ? (
-             <Sparkles className="mr-2 h-4 w-4" />
-          ) : null}
-          {isLoading ? "Enviando..." : currentStep === totalSteps - 1 ? "Enviar Solicitud" : "Siguiente"}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-
 export default function OnboardingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -207,6 +167,10 @@ export default function OnboardingPage() {
     if(currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
+  }
+
+  const handleCancel = () => {
+      router.push('/dashboard');
   }
 
   async function onSubmit(values: OnboardingFormValues) {
@@ -537,6 +501,7 @@ export default function OnboardingPage() {
                   totalSteps={steps.length}
                   isLoading={isLoading}
                   onBack={prevStep}
+                  onCancel={handleCancel}
               />
             </div>
         </form>
@@ -544,5 +509,3 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
-
-    
