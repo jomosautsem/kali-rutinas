@@ -140,7 +140,8 @@ const PlanAprobado = ({
     plan, 
     completedDays, 
     onToggleDay, 
-    progress, 
+    progress,
+    savedProgress,
     onProgressChange, 
     onSaveChanges, 
     user,
@@ -151,6 +152,7 @@ const PlanAprobado = ({
     completedDays: string[]; 
     onToggleDay: (day: string) => void;
     progress: ProgressData;
+    savedProgress: ProgressData;
     onProgressChange: (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => void;
     onSaveChanges: () => void;
     user: User | null;
@@ -180,6 +182,8 @@ const PlanAprobado = ({
 
     const activeDay = plan.weeklyPlan[activeDayIndex]?.day;
     const activeDayProgress = progress[activeDay] || {};
+
+    const hasUnsavedChanges = JSON.stringify(progress) !== JSON.stringify(savedProgress);
 
     return (
         <>
@@ -369,7 +373,7 @@ const PlanAprobado = ({
                                         })}
                                     </div>
                                     <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-6 mt-4 border-t">
-                                        <Button onClick={onSaveChanges} disabled={isDayCompleted}>
+                                        <Button onClick={onSaveChanges} disabled={isDayCompleted || !hasUnsavedChanges}>
                                             <Save className="mr-2 h-4 w-4" />
                                             Guardar Avances del Día
                                         </Button>
@@ -381,15 +385,21 @@ const PlanAprobado = ({
                                                         id={`complete-${dayPlan.day}`} 
                                                         checked={completedDays.includes(dayPlan.day)}
                                                         onCheckedChange={() => onToggleDay(dayPlan.day)}
+                                                        disabled={hasUnsavedChanges}
                                                     />
-                                                    <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
+                                                    <Label 
+                                                      htmlFor={`complete-${dayPlan.day}`} 
+                                                      className={cn("text-sm font-medium leading-none", hasUnsavedChanges ? "cursor-not-allowed text-muted-foreground" : "cursor-pointer")}
+                                                    >
                                                         Marcar día como completado
                                                     </Label>
                                                 </div>
                                             </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Asegúrate de guardar tu progreso antes de marcar el día como completado.</p>
-                                            </TooltipContent>
+                                            {hasUnsavedChanges && (
+                                                <TooltipContent>
+                                                    <p>Guarda tu progreso para poder marcar el día como completado.</p>
+                                                </TooltipContent>
+                                            )}
                                         </Tooltip>
                                         </TooltipProvider>
                                     </div>
@@ -492,6 +502,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [completedDays, setCompletedDays] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressData>({});
+  const [savedProgress, setSavedProgress] = useState<ProgressData>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [cycleModalState, setCycleModalState] = useState<'closed' | 'week_complete' | 'cycle_complete'>('closed');
   const [activeDayIndex, setActiveDayIndex] = useState(0);
@@ -546,7 +557,6 @@ export default function DashboardPage() {
               if (storedCompletedDays) {
                   setCompletedDays(JSON.parse(storedCompletedDays));
               } else {
-                  // Proactive cleaning if starting a new week
                   if (completedDays.length === 0) {
                       localStorage.removeItem(`completedDays_week${currentWeek}_${currentUser.email}`);
                       localStorage.removeItem(`progress_week${currentWeek}_${currentUser.email}`);
@@ -555,9 +565,9 @@ export default function DashboardPage() {
               }
 
               const storedProgress = localStorage.getItem(`progress_week${currentWeek}_${currentUser.email}`);
-              if(storedProgress) {
-                  setProgress(JSON.parse(storedProgress));
-              }
+              const initialProgress = storedProgress ? JSON.parse(storedProgress) : {};
+              setProgress(initialProgress);
+              setSavedProgress(initialProgress);
           }
         } else {
           setPlanStatus('sin-plan');
@@ -612,6 +622,7 @@ export default function DashboardPage() {
         }
         setCompletedDays([]);
         setProgress({});
+        setSavedProgress({});
     }
   };
 
@@ -657,6 +668,7 @@ export default function DashboardPage() {
 
       setCompletedDays([]);
       setProgress({});
+      setSavedProgress({});
       setActiveDayIndex(0);
       
       setCycleModalState('closed');
@@ -694,6 +706,7 @@ export default function DashboardPage() {
     setPlanStatus('sin-plan');
     setCompletedDays([]);
     setProgress({});
+    setSavedProgress({});
     setActiveDayIndex(0);
     
     setCycleModalState('closed');
@@ -701,7 +714,7 @@ export default function DashboardPage() {
 
   const handleProgressChange = (day: string, exerciseName: string, setIndex: number, field: 'weight' | 'reps' | 'completed', value: string | boolean) => {
     setProgress(prev => {
-        const newProgress = { ...prev };
+        const newProgress = JSON.parse(JSON.stringify(prev)); // Deep copy
         if (!newProgress[day]) {
             newProgress[day] = {};
         }
@@ -720,6 +733,7 @@ export default function DashboardPage() {
     if (userEmail && user) {
         const currentWeek = user.currentWeek || 1;
         localStorage.setItem(`progress_week${currentWeek}_${userEmail}`, JSON.stringify(progress));
+        setSavedProgress(progress);
         toast({
             title: "¡Progreso Guardado!",
             description: "Tus avances han sido registrados correctamente.",
@@ -740,7 +754,8 @@ export default function DashboardPage() {
             user={user} 
             completedDays={completedDays} 
             onToggleDay={handleToggleDay} 
-            progress={progress} 
+            progress={progress}
+            savedProgress={savedProgress}
             onProgressChange={handleProgressChange} 
             onSaveChanges={handleSaveChanges} 
             activeDayIndex={activeDayIndex}
@@ -763,23 +778,23 @@ export default function DashboardPage() {
   }
   
   const renderRequestPlanButton = () => {
-    if (isPlanActive) {
-      return <Button disabled>Solicitar Rutina Personalizada</Button>;
-    }
     return (
-      <Button asChild className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">
-        <Link href={`/onboarding?email=${user?.email}`}>Solicitar Rutina Personalizada</Link>
+      <Button asChild={!isPlanActive} disabled={isPlanActive} className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">
+          {isPlanActive 
+              ? <span>Solicitar Rutina Personalizada</span> 
+              : <Link href={`/onboarding?email=${user?.email}`}>Solicitar Rutina Personalizada</Link>
+          }
       </Button>
     );
   };
 
   const renderCreateOwnPlanButton = () => {
-    if (isPlanActive) {
-      return <Button disabled>Crea tu propia rutina</Button>;
-    }
     return (
-      <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
-        <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
+      <Button asChild={!isPlanActive} disabled={isPlanActive} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
+          {isPlanActive
+              ? <span>Crea tu propia rutina</span>
+              : <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
+          }
       </Button>
     );
   };
