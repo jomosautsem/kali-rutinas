@@ -138,7 +138,7 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Editar Usuario - Paso {currentStep + 1} de {steps.length}</DialogTitle>
           <DialogDescription>

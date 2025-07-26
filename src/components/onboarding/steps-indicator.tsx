@@ -19,7 +19,7 @@ type StepsIndicatorProps = {
 export function StepsIndicator({ steps, currentStep }: StepsIndicatorProps) {
   return (
     <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4 p-2">
+        <div className="hidden sm:flex items-center justify-between gap-4 p-2">
             {steps.map((step, index) => {
                 const isActive = index === currentStep;
                 const isCompleted = index < currentStep;

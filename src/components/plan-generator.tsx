@@ -77,13 +77,13 @@ const fitnessGoalsOptions = [
 ];
 
 const trainingDaysOptions = [
-    { value: "lunes", label: "Lunes" },
-    { value: "martes", label: "Martes" },
-    { value: "miercoles", label: "Miércoles" },
-    { value: "jueves", label: "Jueves" },
-    { value: "viernes", label: "Viernes" },
-    { value: "sabado", label: "Sábado" },
-    { value: "domingo", label: "Domingo" },
+    { value: "lunes", label: "L" },
+    { value: "martes", label: "M" },
+    { value: "miercoles", label: "X" },
+    { value: "jueves", label: "J" },
+    { value: "viernes", label: "V" },
+    { value: "sabado", label: "S" },
+    { value: "domingo", label: "D" },
 ];
 
 const workoutStyleOptions = [
@@ -101,10 +101,10 @@ const workoutStyleOptions = [
 const muscleFocusOptions = [
     { value: "pecho", label: "Pecho" },
     { value: "espalda", label: "Espalda" },
-    { value: "pierna", label: "Pierna (Completa)" },
-    { value: "gluteos y esquiotibiales", label: "Glúteos e Isquios" },
+    { value: "pierna", label: "Pierna" },
+    { value: "gluteos y esquiotibiales", label: "Glúteos/Isquios" },
     { value: "hombros", label: "Hombros" },
-    { value: "brazos", label: "Brazos (Completo)" },
+    { value: "brazos", label: "Brazos" },
     { value: "abdomen", label: "Abdomen" },
 ]
 
@@ -248,7 +248,7 @@ export function PlanGenerator({ onPlanGenerated, disabled = false }: PlanGenerat
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            <DialogContent className="sm:max-w-2xl h-[90vh] flex flex-col">
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="font-headline">Generador de Plan Personalizado con IA</DialogTitle>
                     <DialogDescription>

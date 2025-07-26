@@ -24,7 +24,7 @@ type PlanEditorProps = {
   user: User | null;
   isOpen: boolean;
   onClose: () => void;
-  onSaveAndApprove: (userId: string, plan: UserPlan) => void;
+  onSaveAndApprove: (userId: string, plan: UserPlan, duration: number) => void;
 };
 
 const getYoutubeVideoId = (url: string): string | null => {
@@ -231,7 +231,13 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
 
   const onSubmit = (data: UserPlan) => {
     if (user) {
-        onSaveAndApprove(user.id, data);
+        // Find user's plan duration from their profile or default to 4
+        const storedUsers = localStorage.getItem("registeredUsers");
+        const users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+        const currentUser = users.find(u => u.id === user.id);
+        const duration = currentUser?.planDurationInWeeks || 4;
+        
+        onSaveAndApprove(user.id, data, duration);
         onClose();
     }
   };
@@ -248,7 +254,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="font-headline">Plan de Entrenamiento para {user.name}</DialogTitle>
           <DialogDescription>
@@ -362,7 +368,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                         {fields.map((field, index) => (
                            <div key={field.id} className={cn(activeDayIndex === index ? "block" : "hidden")}>
                                <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex flex-col sm:flex-row items-center gap-4">
                                         <Input
                                             {...form.register(`weeklyPlan.${index}.day`)}
                                             className="font-bold text-lg"
@@ -370,7 +376,7 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                                         />
                                         <Input
                                             {...form.register(`weeklyPlan.${index}.focus`)}
-                                            className="text-base flex-1"
+                                            className="text-base flex-1 w-full"
                                             placeholder="Enfoque del día"
                                         />
                                         <Button
@@ -475,21 +481,21 @@ function ExercisesFieldArray({ dayIndex, control, register, onPreviewClick }: { 
                                     </Button>
                                 </div>
                            </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <Input
                             {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)}
                             placeholder="Series"
-                            className="w-24"
+                            className="w-24 flex-grow sm:flex-grow-0"
                             />
                             <Input
                             {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)}
                             placeholder="Reps"
-                            className="w-24"
+                            className="w-24 flex-grow sm:flex-grow-0"
                             />
                             <Input
                             {...register(`weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)}
                             placeholder="Descanso"
-                            className="w-24"
+                            className="w-24 flex-grow sm:flex-grow-0"
                             />
                         </div>
                         <Input

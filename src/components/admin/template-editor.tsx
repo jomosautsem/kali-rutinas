@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect } from "react";
@@ -123,7 +124,7 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="font-headline">
             {initialData ? "Editar Plantilla" : "Crear Nueva Plantilla Manual"}
@@ -227,7 +228,7 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
                   {fields.map((field, index) => (
                     <div key={field.id} className={cn(activeDayIndex === index ? "block" : "hidden")}>
                       <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
                           <Input
                             {...register(`plan.weeklyPlan.${index}.day`)}
                             className="font-bold text-lg"
@@ -235,7 +236,7 @@ export function TemplateEditor({ isOpen, onClose, onSave, initialData }: Templat
                           />
                           <Input
                             {...register(`plan.weeklyPlan.${index}.focus`)}
-                            className="text-base flex-1"
+                            className="text-base flex-1 w-full"
                             placeholder="Enfoque del día"
                           />
                           <Button
@@ -291,14 +292,16 @@ function ExercisesFieldArray({ dayIndex, control, register }: { dayIndex: number
     return (
         <div className="space-y-2 pt-4">
             {fields.map((field, exerciseIndex) => (
-                <div key={field.id} className="flex items-center gap-2 p-2 rounded-md bg-card/50">
+                <div key={field.id} className="flex flex-col sm:flex-row items-center gap-2 p-2 rounded-md bg-card/50">
                     <ExerciseCombobox dayIndex={dayIndex} exerciseIndex={exerciseIndex} />
-                    <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)} placeholder="Series" className="w-20" />
-                    <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)} placeholder="Reps" className="w-24" />
-                    <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)} placeholder="Descanso" className="w-24" />
-                    <Button type="button" variant="ghost" size="icon" onClick={() => remove(exerciseIndex)} className="text-muted-foreground hover:text-destructive flex-shrink-0">
-                        <XCircle className="h-4 w-4" />
-                    </Button>
+                    <div className="flex w-full sm:w-auto items-center gap-2">
+                        <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.series`)} placeholder="Series" className="w-20 flex-grow" />
+                        <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.reps`)} placeholder="Reps" className="w-24 flex-grow" />
+                        <Input {...register(`plan.weeklyPlan.${dayIndex}.exercises.${exerciseIndex}.rest`)} placeholder="Descanso" className="w-24 flex-grow" />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => remove(exerciseIndex)} className="text-muted-foreground hover:text-destructive shrink-0">
+                            <XCircle className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={() => append({ name: "", series: "4", reps: "8-12", rest: "60s", mediaUrl: "" })} className="mt-2">
@@ -346,7 +349,7 @@ function ExerciseCombobox({ dayIndex, exerciseIndex }: { dayIndex: number; exerc
             control={control}
             name={fieldName as any}
             render={({ field }) => (
-                <FormItem className="flex-grow">
+                <FormItem className="flex-grow w-full sm:w-auto">
                     <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
                             <FormControl>
@@ -390,3 +393,4 @@ function ExerciseCombobox({ dayIndex, exerciseIndex }: { dayIndex: number; exerc
         />
     );
 }
+

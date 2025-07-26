@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlanGenerator } from "@/components/plan-generator"
 import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Calendar, PartyPopper, Info } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import type { User, UserPlan, ProgressData } from "@/lib/types";
+import type { User, UserPlan, ProgressData, Exercise } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -285,7 +285,7 @@ const PlanAprobado = ({
                               transition={{ duration: 0.3 }}
                               className={cn(activeDayIndex === index ? "block" : "hidden")}
                             >
-                               <div className={cn("space-y-4 p-4 rounded-lg bg-secondary/30", isDayCompleted && "opacity-60 pointer-events-none")}>
+                               <div className={cn("space-y-4 p-2 sm:p-4 rounded-lg bg-secondary/30", isDayCompleted && "opacity-60 pointer-events-none")}>
                                     <div className="flex items-center justify-between gap-4">
                                       <div className="flex-1">
                                         <h3 className="font-bold text-lg">{dayPlan.day}</h3>
@@ -298,7 +298,7 @@ const PlanAprobado = ({
                                             const numberOfSets = (parseInt(exercise.series) || 0) + (extraSets[`${dayPlan.day}-${exercise.name}`] || 0);
 
                                             return (
-                                                <div key={exerciseIndex} className="p-4 rounded-lg bg-card/50">
+                                                <div key={exerciseIndex} className="p-2 sm:p-4 rounded-lg bg-card/50">
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                                                         <div className="md:col-span-2 space-y-2">
                                                             <p className="font-semibold text-lg">{exercise.name}</p>
@@ -836,10 +836,10 @@ export default function DashboardPage() {
       </motion.div>
       
       <motion.div variants={itemVariants}>
-        <Tabs defaultValue="plan">
-            <TabsList className="flex-nowrap justify-start gap-2 bg-transparent p-0 w-full overflow-x-auto">
-                <TabsTrigger value="plan" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black">Tu Plan Semanal</TabsTrigger>
-                <TabsTrigger value="progress" className="data-[state=active]:bg-green-500 data-[state=active]:text-black">Resumen de Progreso</TabsTrigger>
+        <Tabs defaultValue="plan" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="plan">Tu Plan Semanal</TabsTrigger>
+                <TabsTrigger value="progress">Resumen de Progreso</TabsTrigger>
             </TabsList>
             <TabsContent value="plan">
                 <Card>
