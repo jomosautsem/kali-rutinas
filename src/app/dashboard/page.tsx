@@ -181,7 +181,7 @@ const PlanAprobado = ({
 
     const activeDay = plan.weeklyPlan[activeDayIndex]?.day;
     const activeDayProgress = progress[activeDay] || {};
-
+    
     const hasUnsavedChanges = JSON.stringify(progress) !== JSON.stringify(savedProgress);
 
     return (
@@ -372,7 +372,7 @@ const PlanAprobado = ({
                                         })}
                                     </div>
                                     <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-6 mt-4 border-t">
-                                        <Button onClick={onSaveChanges} disabled={isDayCompleted || !hasUnsavedChanges}>
+                                        <Button onClick={onSaveChanges} disabled={!hasUnsavedChanges || isDayCompleted}>
                                             <Save className="mr-2 h-4 w-4" />
                                             Guardar Avances
                                         </Button>
@@ -384,11 +384,11 @@ const PlanAprobado = ({
                                                         id={`complete-${dayPlan.day}`} 
                                                         checked={completedDays.includes(dayPlan.day)}
                                                         onCheckedChange={() => onToggleDay(dayPlan.day)}
-                                                        disabled={hasUnsavedChanges}
+                                                        disabled={hasUnsavedChanges || isDayCompleted}
                                                     />
                                                     <Label 
                                                       htmlFor={`complete-${dayPlan.day}`} 
-                                                      className={cn("text-sm font-medium leading-none", hasUnsavedChanges ? "cursor-not-allowed text-muted-foreground" : "cursor-pointer")}
+                                                      className={cn("text-sm font-medium leading-none", (hasUnsavedChanges || isDayCompleted) ? "cursor-not-allowed text-muted-foreground" : "cursor-pointer")}
                                                     >
                                                         Marcar día como completado
                                                     </Label>
@@ -946,5 +946,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
