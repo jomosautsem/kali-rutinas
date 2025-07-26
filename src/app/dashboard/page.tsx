@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react";
@@ -257,7 +258,9 @@ const PlanAprobado = ({
                              {user && <PlanDownloader user={user} plan={plan} />}
                         </div>
 
-                        {plan.weeklyPlan.map((dayPlan, index) => (
+                        {plan.weeklyPlan.map((dayPlan, index) => {
+                           const isDayCompleted = completedDays.includes(dayPlan.day);
+                           return (
                            <motion.div 
                               key={index} 
                               initial={{ opacity: 0 }}
@@ -265,7 +268,7 @@ const PlanAprobado = ({
                               transition={{ duration: 0.3 }}
                               className={cn(activeDayIndex === index ? "block" : "hidden")}
                             >
-                               <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
+                               <div className={cn("space-y-4 p-4 rounded-lg bg-secondary/30", isDayCompleted && "opacity-60 pointer-events-none")}>
                                     <div className="flex items-center justify-between gap-4">
                                       <div className="flex-1">
                                         <h3 className="font-bold text-lg">{dayPlan.day}</h3>
@@ -323,6 +326,7 @@ const PlanAprobado = ({
                                                                                     className="h-8 min-w-[70px]"
                                                                                     value={setProgress.weight}
                                                                                     onChange={(e) => onProgressChange(dayPlan.day, exercise.name, setIndex, 'weight', e.target.value)}
+                                                                                    disabled={isDayCompleted}
                                                                                 />
                                                                             </TableCell>
                                                                              <TableCell>
@@ -332,12 +336,14 @@ const PlanAprobado = ({
                                                                                     className="h-8 min-w-[70px]"
                                                                                     value={setProgress.reps}
                                                                                     onChange={(e) => onProgressChange(dayPlan.day, exercise.name, setIndex, 'reps', e.target.value)}
+                                                                                    disabled={isDayCompleted}
                                                                                 />
                                                                             </TableCell>
                                                                              <TableCell className="text-center">
                                                                                 <Checkbox 
                                                                                     checked={setProgress.completed}
                                                                                     onCheckedChange={(checked) => onProgressChange(dayPlan.day, exercise.name, setIndex, 'completed', !!checked)}
+                                                                                    disabled={isDayCompleted}
                                                                                 />
                                                                             </TableCell>
                                                                         </TableRow>
@@ -350,7 +356,8 @@ const PlanAprobado = ({
                                                             <Button 
                                                                 variant="outline" 
                                                                 size="sm" 
-                                                                onClick={() => handleAddSet(dayPlan.day, exercise.name)}>
+                                                                onClick={() => handleAddSet(dayPlan.day, exercise.name)}
+                                                                disabled={isDayCompleted}>
                                                                 <PlusCircle className="mr-2 h-4 w-4" />
                                                                 Añadir Serie
                                                             </Button>
@@ -370,14 +377,14 @@ const PlanAprobado = ({
                                             Marcar día como completado
                                             </Label>
                                         </div>
-                                        <Button onClick={onSaveChanges}>
+                                        <Button onClick={onSaveChanges} disabled={isDayCompleted}>
                                             <Save className="mr-2 h-4 w-4" />
                                             Guardar Avances del Día
                                         </Button>
                                     </div>
                                 </div>
                             </motion.div>
-                        ))}
+                        )})}
                     </div>
                 )}
             </div>
@@ -746,15 +753,14 @@ export default function DashboardPage() {
   
   const renderRequestPlanButton = () => {
     const commonProps = {
-        className:"bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100",
-        children: "Solicitar Rutina Personalizada"
+      children: "Solicitar Rutina Personalizada"
     };
 
     if (isPlanActive) {
-        return <Button {...commonProps} disabled />;
+        return <Button disabled className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">{commonProps.children}</Button>;
     }
     return (
-        <Button asChild {...commonProps}>
+        <Button asChild className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">
             <Link href={`/onboarding?email=${user?.email}`}>{commonProps.children}</Link>
         </Button>
     );
@@ -762,15 +768,14 @@ export default function DashboardPage() {
 
   const renderCreateOwnPlanButton = () => {
     const commonProps = {
-        className:"bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500",
         children: "Crea tu propia rutina"
     };
 
     if (isPlanActive) {
-        return <Button {...commonProps} disabled />;
+        return <Button disabled className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">{commonProps.children}</Button>;
     }
     return (
-        <Button asChild {...commonProps}>
+        <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
             <Link href="/dashboard/create-plan">{commonProps.children}</Link>
         </Button>
     );
