@@ -27,6 +27,17 @@ import { format } from "date-fns";
 import ReactConfetti from "react-confetti";
 import { useRouter } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 
 const isVideo = (url: string) => {
@@ -914,33 +925,49 @@ export default function DashboardPage() {
                 </>
             )}
              {cycleModalState === 'cycle_complete' && (
-                <>
-                 <DialogHeader className="text-center">
-                    <motion.div 
-                        className="flex justify-center mb-4"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 260,
-                            damping: 20,
-                            delay: 0.2
-                        }}
-                    >
-                        <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
-                    </motion.div>
-                    <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus {user?.planDurationInWeeks || 4} Semanas!</DialogTitle>
-                </DialogHeader>
-                <div className="text-center text-muted-foreground py-4 space-y-4">
-                    <p>Estamos orgullosos de tu esfuerzo y dedicación. Has demostrado una constancia increíble.</p>
-                    <blockquote className="italic border-l-2 border-primary pl-4 text-left">
-                        "La disciplina es el puente entre las metas y los logros."
-                    </blockquote>
-                </div>
-                <div className="flex justify-center">
-                    <Button onClick={handleFinishCycle}>¡A por el siguiente reto!</Button>
-                </div>
-                </>
+                 <AlertDialog>
+                    <DialogHeader className="text-center">
+                        <motion.div 
+                            className="flex justify-center mb-4"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 260,
+                                damping: 20,
+                                delay: 0.2
+                            }}
+                        >
+                            <Check className="h-16 w-16 bg-green-500/20 text-green-500 p-2 rounded-full" />
+                        </motion.div>
+                        <DialogTitle className="text-2xl font-headline">¡Has Logrado Completar tus {user?.planDurationInWeeks || 4} Semanas!</DialogTitle>
+                    </DialogHeader>
+                    <div className="text-center text-muted-foreground py-4 space-y-4">
+                        <p>Estamos orgullosos de tu esfuerzo y dedicación. Has demostrado una constancia increíble.</p>
+                        <blockquote className="italic border-l-2 border-primary pl-4 text-left">
+                            "La disciplina es el puente entre las metas y los logros."
+                        </blockquote>
+                    </div>
+                    <div className="flex justify-center">
+                        <AlertDialogTrigger asChild>
+                            <Button>¡A por el siguiente reto!</Button>
+                        </AlertDialogTrigger>
+                    </div>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>¿Estás listo para finalizar?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Esta acción archivará tu plan actual y te permitirá generar uno nuevo. Tu progreso será guardado en tu historial.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleFinishCycle}>
+                                Sí, finalizar ciclo
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
              )}
         </DialogContent>
     </Dialog>
