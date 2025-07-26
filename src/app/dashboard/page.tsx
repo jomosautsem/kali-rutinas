@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useState, useEffect } from "react";
@@ -6,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Calendar, PartyPopper } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Calendar, PartyPopper, Info } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, Exercise, ProgressData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import ReactConfetti from "react-confetti";
 import { useRouter } from "next/navigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 const isVideo = (url: string) => {
@@ -367,20 +369,29 @@ const PlanAprobado = ({
                                         })}
                                     </div>
                                     <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-6 mt-4 border-t">
-                                        <div className="flex items-center space-x-2">
-                                            <Checkbox 
-                                            id={`complete-${dayPlan.day}`} 
-                                            checked={completedDays.includes(dayPlan.day)}
-                                            onCheckedChange={() => onToggleDay(dayPlan.day)}
-                                            />
-                                            <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
-                                            Marcar día como completado
-                                            </Label>
-                                        </div>
                                         <Button onClick={onSaveChanges} disabled={isDayCompleted}>
                                             <Save className="mr-2 h-4 w-4" />
                                             Guardar Avances del Día
                                         </Button>
+                                        <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className="flex items-center space-x-2">
+                                                    <Checkbox 
+                                                        id={`complete-${dayPlan.day}`} 
+                                                        checked={completedDays.includes(dayPlan.day)}
+                                                        onCheckedChange={() => onToggleDay(dayPlan.day)}
+                                                    />
+                                                    <Label htmlFor={`complete-${dayPlan.day}`} className="text-sm font-medium leading-none cursor-pointer">
+                                                        Marcar día como completado
+                                                    </Label>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Asegúrate de guardar tu progreso antes de marcar el día como completado.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                        </TooltipProvider>
                                     </div>
                                 </div>
                             </motion.div>
@@ -752,34 +763,27 @@ export default function DashboardPage() {
   }
   
   const renderRequestPlanButton = () => {
-    const commonProps = {
-      children: "Solicitar Rutina Personalizada"
-    };
-
     if (isPlanActive) {
-        return <Button disabled className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">{commonProps.children}</Button>;
+      return <Button disabled>Solicitar Rutina Personalizada</Button>;
     }
     return (
-        <Button asChild className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">
-            <Link href={`/onboarding?email=${user?.email}`}>{commonProps.children}</Link>
-        </Button>
+      <Button asChild className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">
+        <Link href={`/onboarding?email=${user?.email}`}>Solicitar Rutina Personalizada</Link>
+      </Button>
     );
   };
 
   const renderCreateOwnPlanButton = () => {
-    const commonProps = {
-        children: "Crea tu propia rutina"
-    };
-
     if (isPlanActive) {
-        return <Button disabled className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">{commonProps.children}</Button>;
+      return <Button disabled>Crea tu propia rutina</Button>;
     }
     return (
-        <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
-            <Link href="/dashboard/create-plan">{commonProps.children}</Link>
-        </Button>
+      <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
+        <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
+      </Button>
     );
   };
+
 
   return (
     <>
