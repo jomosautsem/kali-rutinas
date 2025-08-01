@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -5,4 +8,90 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String  @id @default(cuid())
+  firstName          String
+  paternalLastName   String
+  maternalLastName   String
+  name               String
+  email              String  @unique
+  password           String?
+  role               String  @default("client")
+  status             String  @default("pendiente")
+  registeredAt       DateTime @default(now())
+  planStatus         String  @default("sin-plan")
+  inviteCode         String?
+  avatarUrl          String?
+  customPlanRequest  String? @default("none")
+  planStartDate      DateTime?
+  planEndDate        DateTime?
+  currentWeek        Int?
+  planDurationInWeeks Int?
+
+  plan           UserPlan?
+  progress       Progress[]
+  planHistory    PlanHistory[]
+  onboardingData OnboardingData?
+}
+
+model UserPlan {
+  id                 Int      @id @default(autoincrement())
+  userId             String   @unique
+  planJustification  String?
+  warmup             String?
+  recommendations    String?
+  weeklyPlan         Json
+  createdAt          DateTime @default(now())
+  isActive           Boolean  @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LibraryExercise {
+  id           String @id @default(cuid())
+  name         String @unique
+  description  String?
+  muscleGroup  String
+  mediaUrl     String?
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  level       String
+  days        Int
+  plan        Json
+  createdAt   DateTime @default(now())
+}
+
+model Progress {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  week      Int
+  data      Json
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, week])
+}
+
+model PlanHistory {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  plan      Json
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OnboardingData {
+    id        Int      @id @default(autoincrement())
+    userId    String   @unique
+    data      Json
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -1,6 +1,5 @@
-
-
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 
 // This type is now deprecated for plan generation, but kept for client-side progress tracking.
 export const SetSchema = z.object({
@@ -36,6 +35,7 @@ export const UserPlanSchema = z.object({
 });
 export type UserPlan = z.infer<typeof UserPlanSchema>;
 
+// We can't infer this from Prisma anymore because of JSON fields.
 export type User = {
   id: string;
   firstName: string;
@@ -80,6 +80,16 @@ export const LibraryExerciseSchema = z.object({
 });
 export type LibraryExercise = z.infer<typeof LibraryExerciseSchema>;
 
+export type Template = {
+    id: string;
+    title: string;
+    description: string;
+    level: "Principiante" | "Intermedio" | "Avanzado";
+    days: number;
+    plan: UserPlan; // UserPlan is compatible with the JSON structure
+    createdAt: Date;
+};
+
 
 // This schema defines the data required to generate a personalized training plan.
 export const GeneratePersonalizedTrainingPlanInputSchema = z.object({
@@ -121,4 +131,7 @@ export const GenerateTrainingTemplateInputSchema = z.object({
 });
 export type GenerateTrainingTemplateInput = z.infer<typeof GenerateTrainingTemplateInputSchema>;
 
-    
+// Helper type for JSON fields
+export type UserPlanFromPrisma = Omit<Prisma.UserPlanGetPayload<{}>, 'weeklyPlan'> & {
+  weeklyPlan: DayPlan[];
+}

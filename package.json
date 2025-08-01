@@ -5,12 +5,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "genkit:dev": "genkit start -- tsx src/ai/genkit.ts",
-    "genkit:watch": "genkit start -- tsx --watch src/ai/genkit.ts"
+    "genkit:watch": "genkit start -- tsx --watch src/ai/genkit.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.13.0",
