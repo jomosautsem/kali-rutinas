@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -34,6 +33,7 @@ import { StepsIndicator } from "@/components/onboarding/steps-indicator"
 import { Step } from "@/components/onboarding/step"
 import { MultiToggleButtonGroup } from "@/components/ui/multi-toggle"
 import { FormNavigation } from "@/components/onboarding/form-navigation"
+import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
 
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
@@ -509,3 +509,5 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
+
+    

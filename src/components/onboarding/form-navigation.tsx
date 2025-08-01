@@ -3,7 +3,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Loader2, ArrowLeft, Sparkles, X } from "lucide-react"
+import { Loader2, ArrowLeft, Sparkles, X, ArrowRight } from "lucide-react"
 
 type FormNavigationProps = {
   currentStep: number;
@@ -44,9 +44,12 @@ export function FormNavigation({
           ) : currentStep === totalSteps - 1 ? (
              <Sparkles className="mr-2 h-4 w-4" />
           ) : null}
-          {isLoading ? "Generando..." : currentStep === totalSteps - 1 ? "Generar Plan" : "Siguiente"}
+          {isLoading ? "Enviando..." : currentStep === totalSteps - 1 ? "Enviar Solicitud" : "Siguiente"}
+           {currentStep < totalSteps - 1 && !isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
       </div>
     </div>
   );
 }
+
+    
