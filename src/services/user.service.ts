@@ -1,7 +1,8 @@
+
 'use server';
 
 import { PrismaClient } from '@prisma/client';
-import type { User } from "@/lib/types";
+import type { User, GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
 
 const prisma = new PrismaClient();
 
@@ -17,8 +18,8 @@ export async function getAllUsers(): Promise<User[]> {
     return users.map(user => ({
         ...user,
         registeredAt: user.registeredAt.toISOString(),
-        planStartDate: user.planStartDate?.toISOString(),
-        planEndDate: user.planEndDate?.toISOString(),
+        planStartDate: user.planStartDate?.toISOString() || undefined,
+        planEndDate: user.planEndDate?.toISOString() || undefined,
     }));
 }
 
@@ -30,8 +31,8 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     return {
         ...user,
         registeredAt: user.registeredAt.toISOString(),
-        planStartDate: user.planStartDate?.toISOString(),
-        planEndDate: user.planEndDate?.toISOString(),
+        planStartDate: user.planStartDate?.toISOString() || undefined,
+        planEndDate: user.planEndDate?.toISOString() || undefined,
     };
 }
 
@@ -43,8 +44,8 @@ export async function getUserById(id: string): Promise<User | null> {
     return {
         ...user,
         registeredAt: user.registeredAt.toISOString(),
-        planStartDate: user.planStartDate?.toISOString(),
-        planEndDate: user.planEndDate?.toISOString(),
+        planStartDate: user.planStartDate?.toISOString() || undefined,
+        planEndDate: user.planEndDate?.toISOString() || undefined,
     };
 }
 
@@ -61,6 +62,7 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
 
     const newUser = await prisma.user.create({
         data: {
+            id: `user-${Date.now()}`,
             firstName: userData.firstName,
             paternalLastName: userData.paternalLastName,
             maternalLastName: userData.maternalLastName,
@@ -71,11 +73,15 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
         }
     });
     
+    const createdUser = await prisma.user.findUnique({ where: { id: newUser.id }});
+
+    if(!createdUser) throw new Error("Failed to create user");
+    
     return {
-        ...newUser,
-        registeredAt: newUser.registeredAt.toISOString(),
-        planStartDate: newUser.planStartDate?.toISOString(),
-        planEndDate: newUser.planEndDate?.toISOString(),
+        ...createdUser,
+        registeredAt: createdUser.registeredAt.toISOString(),
+        planStartDate: createdUser.planStartDate?.toISOString() || undefined,
+        planEndDate: createdUser.planEndDate?.toISOString() || undefined,
     };
 }
 
@@ -110,8 +116,8 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
     return {
         ...updatedUser,
         registeredAt: updatedUser.registeredAt.toISOString(),
-        planStartDate: updatedUser.planStartDate?.toISOString(),
-        planEndDate: updatedUser.planEndDate?.toISOString(),
+        planStartDate: updatedUser.planStartDate?.toISOString() || undefined,
+        planEndDate: updatedUser.planEndDate?.toISOString() || undefined,
     };
 }
 
@@ -125,4 +131,13 @@ export async function deleteUser(userId: string): Promise<boolean> {
         console.error("Failed to delete user:", error);
         return false;
     }
+}
+
+
+export async function saveOnboardingData(userId: string, data: Omit<GeneratePersonalizedTrainingPlanInput, 'history'>): Promise<void> {
+     await prisma.onboardingData.upsert({
+        where: { userId },
+        update: { data: data as any },
+        create: { userId, data: data as any },
+    });
 }

@@ -34,6 +34,7 @@ import { Step } from "@/components/onboarding/step"
 import { MultiToggleButtonGroup } from "@/components/ui/multi-toggle"
 import { FormNavigation } from "@/components/onboarding/form-navigation"
 import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
+import { createUser, getUserByEmail, saveOnboardingData, updateUser } from "@/services/user.service"
 
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
@@ -109,20 +110,33 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   
   useEffect(() => {
-    const emailFromParams = searchParams.get('email');
-    if (emailFromParams) {
-      setUserEmail(emailFromParams);
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Error de Sesión",
-        description: "No se encontró un usuario válido. Por favor, inicia sesión.",
-      });
-      router.push("/login");
+    const fetchUser = async () => {
+        const emailFromParams = searchParams.get('email');
+        if (emailFromParams) {
+            const fetchedUser = await getUserByEmail(emailFromParams);
+            if (fetchedUser) {
+                setUser(fetchedUser);
+            } else {
+                 toast({
+                    variant: "destructive",
+                    title: "Usuario no encontrado",
+                    description: "El correo proporcionado no está registrado.",
+                });
+                router.push("/login");
+            }
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Error de Sesión",
+            description: "No se encontró un usuario válido. Por favor, inicia sesión.",
+          });
+          router.push("/login");
+        }
     }
+    fetchUser();
   }, [router, toast, searchParams]);
 
   const form = useForm<OnboardingFormValues>({
@@ -176,7 +190,7 @@ export default function OnboardingPage() {
   async function onSubmit(values: OnboardingFormValues) {
     setIsLoading(true);
     
-    if (!userEmail) {
+    if (!user) {
       toast({ variant: "destructive", title: "Error fatal", description: "Se perdió la sesión de usuario." });
       setIsLoading(false);
       return;
@@ -193,15 +207,9 @@ export default function OnboardingPage() {
       };
       delete (dataToSave as any).otherWorkoutStyle;
       
-      localStorage.setItem(`onboardingData_${userEmail}`, JSON.stringify(dataToSave));
+      await saveOnboardingData(user.id, dataToSave);
       
-      const storedUsers = localStorage.getItem("registeredUsers");
-      let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-      users = users.map((u: User) => u.email === userEmail ? {
-          ...u, 
-          customPlanRequest: 'requested',
-      } : u);
-      localStorage.setItem("registeredUsers", JSON.stringify(users));
+      await updateUser(user.id, { customPlanRequest: 'requested' });
         
       setIsSuccess(true);
       toast({ title: "¡Solicitud Enviada!", description: "Tus datos han sido enviados al entrenador." });
@@ -214,7 +222,7 @@ export default function OnboardingPage() {
     }
   }
   
-  if (!userEmail) {
+  if (!user) {
       return (
         <AuthCard title="Cargando..." description="Verificando tu información..." footer={<></>}>
              <div className="text-center space-y-4 py-8">
@@ -509,5 +517,3 @@ export default function OnboardingPage() {
     </AuthCard>
   )
 }
-
-    
