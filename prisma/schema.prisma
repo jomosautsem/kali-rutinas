@@ -3,6 +3,7 @@
 
 generator client {
   provider      = "prisma-client-js"
+  // Esta línea es la solución clave para el error de OpenSSL.
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -10,6 +11,8 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ========= MODELOS DE BASE DE DATOS =========
 
 model User {
   id                  String       @id
@@ -30,10 +33,12 @@ model User {
   planEndDate         DateTime?
   currentWeek         Int?
   planDurationInWeeks Int?
-  plans               UserPlan[]
-  progress            Progress[]
-  planHistory         PlanHistory[]
-  onboardingData      OnboardingData?
+
+  // Relaciones
+  plans         UserPlan[]
+  progress      Progress[]
+  planHistory   PlanHistory[]
+  onboardingData OnboardingData?
 }
 
 model UserPlan {
@@ -47,7 +52,7 @@ model UserPlan {
   isActive          Boolean   @default(true)
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, isActive], name: "active_plan_per_user")
+  @@unique([userId, isActive], name: "active_user_plan")
 }
 
 model LibraryExercise {
