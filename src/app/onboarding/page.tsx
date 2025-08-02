@@ -33,8 +33,7 @@ import { StepsIndicator } from "@/components/onboarding/steps-indicator"
 import { Step } from "@/components/onboarding/step"
 import { MultiToggleButtonGroup } from "@/components/ui/multi-toggle"
 import { FormNavigation } from "@/components/onboarding/form-navigation"
-import { generatePersonalizedTrainingPlan } from "@/ai/flows/generate-personalized-training-plan"
-import { createUser, getUserByEmail, saveOnboardingData, updateUser } from "@/services/user.service"
+import { getUserByEmail, saveOnboardingData, updateUser } from "@/services/user.service"
 
 
 const formSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({

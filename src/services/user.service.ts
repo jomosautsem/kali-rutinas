@@ -1,143 +1,110 @@
 
-'use server';
+'use client'; // Important: services using localStorage must be client-side
 
-import { PrismaClient } from '@prisma/client';
 import type { User, GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
 
-const prisma = new PrismaClient();
+const USERS_STORAGE_KEY = "registeredUsers";
 
 // --- USER SERVICE FUNCTIONS ---
 
+const initialMockUsers: User[] = [
+  { id: "user-alice-1", firstName: "Alice", paternalLastName: "Johnson", maternalLastName: "Smith", name: "Alice Johnson Smith", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado", inviteCode: "JOALSM23", avatarUrl: "/images/avatars/avatar-01.png" },
+  { id: "user-bob-2", firstName: "Bob", paternalLastName: "Williams", maternalLastName: "Jones", name: "Bob Williams Jones", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan", inviteCode: "WIBOJO45", avatarUrl: "/images/avatars/avatar-02.png" },
+  { id: "user-charlie-3", firstName: "Charlie", paternalLastName: "Brown", maternalLastName: "Davis", name: "Charlie Brown Davis", email: "charlie@example.com", role: "client", status: "pendiente", registeredAt: "2023-10-05", planStatus: "sin-plan", avatarUrl: "/images/avatars/avatar-03.png" },
+  { id: "user-jorge-4", firstName: "Jorge", paternalLastName: "Morales", maternalLastName: "", name: "Jorge Morales", email: "kalicentrodeportivotemixco@gmail.com", role: "admin", status: "activo", registeredAt: "2023-01-15", planStatus: "n/a", avatarUrl: "/images/avatars/avatar-04.png" },
+  { id: "user-ethan-5", firstName: "Ethan", paternalLastName: "Hunt", maternalLastName: "Carter", name: "Ethan Hunt Carter", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan", avatarUrl: "/images/avatars/avatar-05.png" },
+];
+
+
+function getUsersFromStorage(): User[] {
+    if (typeof window === 'undefined') return [];
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    if (storedUsers) {
+        return JSON.parse(storedUsers);
+    } else {
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialMockUsers));
+        return initialMockUsers;
+    }
+}
+
+function saveUsersToStorage(users: User[]) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+}
+
 export async function getAllUsers(): Promise<User[]> {
-    const users = await prisma.user.findMany({
-        orderBy: {
-            registeredAt: 'desc'
-        }
-    });
-    // Convert Date objects to ISO strings for serialization
-    return users.map(user => ({
-        ...user,
-        registeredAt: user.registeredAt.toISOString(),
-        planStartDate: user.planStartDate?.toISOString() || undefined,
-        planEndDate: user.planEndDate?.toISOString() || undefined,
-    }));
+    return getUsersFromStorage();
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
-    const user = await prisma.user.findUnique({
-        where: { email },
-    });
-    if (!user) return null;
-    return {
-        ...user,
-        registeredAt: user.registeredAt.toISOString(),
-        planStartDate: user.planStartDate?.toISOString() || undefined,
-        planEndDate: user.planEndDate?.toISOString() || undefined,
-    };
+    const users = getUsersFromStorage();
+    return users.find(u => u.email === email) || null;
 }
 
 export async function getUserById(id: string): Promise<User | null> {
-    const user = await prisma.user.findUnique({
-        where: { id },
-    });
-     if (!user) return null;
-    return {
-        ...user,
-        registeredAt: user.registeredAt.toISOString(),
-        planStartDate: user.planStartDate?.toISOString() || undefined,
-        planEndDate: user.planEndDate?.toISOString() || undefined,
-    };
+    const users = getUsersFromStorage();
+    return users.find(u => u.id === id) || null;
 }
 
-export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus'>): Promise<User> {
-    const existingUser = await prisma.user.findUnique({
-        where: { email: userData.email },
-    });
-
-    if (existingUser) {
+export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus' | 'name'>): Promise<User> {
+    const users = getUsersFromStorage();
+    if (users.some(user => user.email === userData.email)) {
         throw new Error("Este correo electrónico ya ha sido registrado.");
     }
-    
-    const fullName = `${userData.firstName} ${userData.paternalLastName} ${userData.maternalLastName}`.trim();
 
-    const newUser = await prisma.user.create({
-        data: {
-            id: `user-${Date.now()}`,
-            firstName: userData.firstName,
-            paternalLastName: userData.paternalLastName,
-            maternalLastName: userData.maternalLastName,
-            name: fullName,
-            email: userData.email,
-            password: userData.password, // In a real app, this should be hashed
-            avatarUrl: userData.avatarUrl,
-        }
-    });
-    
-    const createdUser = await prisma.user.findUnique({ where: { id: newUser.id }});
-
-    if(!createdUser) throw new Error("Failed to create user");
-    
-    return {
-        ...createdUser,
-        registeredAt: createdUser.registeredAt.toISOString(),
-        planStartDate: createdUser.planStartDate?.toISOString() || undefined,
-        planEndDate: createdUser.planEndDate?.toISOString() || undefined,
+    const newUser: User = {
+        ...userData,
+        id: `user-${Date.now()}`,
+        name: `${userData.firstName} ${userData.paternalLastName} ${userData.maternalLastName}`.trim(),
+        role: "client",
+        status: "pendiente",
+        registeredAt: new Date().toISOString(),
+        planStatus: "sin-plan",
     };
+
+    const updatedUsers = [...users, newUser];
+    saveUsersToStorage(updatedUsers);
+    return newUser;
 }
 
 export async function updateUser(userId: string, updatedData: Partial<User>): Promise<User | null> {
+    const users = getUsersFromStorage();
+    let userToUpdate: User | undefined;
     
-    const dataToUpdate: any = { ...updatedData };
-    
-    if (updatedData.firstName || updatedData.paternalLastName || updatedData.maternalLastName) {
-        const currentUser = await prisma.user.findUnique({ where: { id: userId } });
-        if(currentUser){
-            dataToUpdate.name = `${updatedData.firstName || currentUser.firstName} ${updatedData.paternalLastName || currentUser.paternalLastName} ${updatedData.maternalLastName || currentUser.maternalLastName}`.trim();
+    const updatedUsers = users.map(user => {
+        if (user.id === userId) {
+            userToUpdate = { ...user, ...updatedData };
+            // Ensure name is updated if partial names are provided
+            if (updatedData.firstName || updatedData.paternalLastName || updatedData.maternalLastName) {
+                userToUpdate.name = `${userToUpdate.firstName} ${userToUpdate.paternalLastName} ${userToUpdate.maternalLastName}`.trim();
+            }
+            return userToUpdate;
         }
+        return user;
+    });
+
+    if (userToUpdate) {
+        saveUsersToStorage(updatedUsers);
+        return userToUpdate;
     }
     
-    // Remove fields that shouldn't be directly updated this way
-    delete dataToUpdate.id;
-    delete dataToUpdate.registeredAt;
-    delete dataToUpdate.password; 
-
-    // Convert date strings back to Date objects for Prisma
-    if (dataToUpdate.planStartDate) dataToUpdate.planStartDate = new Date(dataToUpdate.planStartDate);
-    if (dataToUpdate.planEndDate) dataToUpdate.planEndDate = new Date(dataToUpdate.planEndDate);
-
-
-    const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: dataToUpdate,
-    });
-    
-    if (!updatedUser) return null;
-
-    return {
-        ...updatedUser,
-        registeredAt: updatedUser.registeredAt.toISOString(),
-        planStartDate: updatedUser.planStartDate?.toISOString() || undefined,
-        planEndDate: updatedUser.planEndDate?.toISOString() || undefined,
-    };
+    return null;
 }
 
 export async function deleteUser(userId: string): Promise<boolean> {
-    try {
-        await prisma.user.delete({
-            where: { id: userId },
-        });
+    let users = getUsersFromStorage();
+    const initialLength = users.length;
+    users = users.filter(user => user.id !== userId);
+
+    if (users.length < initialLength) {
+        saveUsersToStorage(users);
         return true;
-    } catch (error) {
-        console.error("Failed to delete user:", error);
-        return false;
     }
+    return false;
 }
 
-
 export async function saveOnboardingData(userId: string, data: Omit<GeneratePersonalizedTrainingPlanInput, 'history'>): Promise<void> {
-     await prisma.onboardingData.upsert({
-        where: { userId },
-        update: { data: data as any },
-        create: { userId, data: data as any },
-    });
+    const user = await getUserById(userId);
+    if (!user) throw new Error("User not found");
+    localStorage.setItem(`onboardingData_${user.email}`, JSON.stringify(data));
 }
