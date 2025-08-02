@@ -108,3 +108,5 @@ export async function saveOnboardingData(userId: string, data: Omit<GeneratePers
     if (!user) throw new Error("User not found");
     localStorage.setItem(`onboardingData_${user.email}`, JSON.stringify(data));
 }
+
+    

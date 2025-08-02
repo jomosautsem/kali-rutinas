@@ -787,29 +787,6 @@ export default function DashboardPage() {
           setConfetti(false);
       }
   }
-  
-  const renderRequestPlanButton = () => {
-    return (
-      <Button asChild={!isPlanActive} disabled={isPlanActive} className="bg-gradient-to-r from-emerald-400 to-white text-emerald-900 font-bold hover:from-emerald-500 hover:to-gray-100">
-          {isPlanActive 
-              ? <span>Solicitar Rutina Personalizada</span> 
-              : <Link href={`/onboarding?email=${user?.email}`}>Solicitar Rutina Personalizada</Link>
-          }
-      </Button>
-    );
-  };
-
-  const renderCreateOwnPlanButton = () => {
-    return (
-      <Button asChild={!isPlanActive} disabled={isPlanActive} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
-          {isPlanActive
-              ? <span>Crea tu propia rutina</span>
-              : <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
-          }
-      </Button>
-    );
-  };
-
 
   return (
     <>
@@ -830,8 +807,12 @@ export default function DashboardPage() {
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <PlanGenerator onPlanGenerated={handlePlanGenerated} disabled={isPlanActive} />
-            {renderRequestPlanButton()}
-            {renderCreateOwnPlanButton()}
+            <Button asChild={!isPlanActive} disabled={isPlanActive} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
+                {isPlanActive
+                    ? <span>Crea tu propia rutina</span>
+                    : <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
+                }
+            </Button>
         </div>
       </motion.div>
       
@@ -974,3 +955,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
