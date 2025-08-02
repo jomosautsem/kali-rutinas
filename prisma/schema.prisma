@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -11,50 +12,50 @@ datasource db {
 }
 
 model User {
-  id                 String  @id @default(cuid())
-  firstName          String
-  paternalLastName   String
-  maternalLastName   String
-  name               String
-  email              String  @unique
-  password           String?
-  role               String  @default("client")
-  status             String  @default("pendiente")
-  registeredAt       DateTime @default(now())
-  planStatus         String  @default("sin-plan")
-  inviteCode         String?
-  avatarUrl          String?
-  customPlanRequest  String? @default("none")
-  planStartDate      DateTime?
-  planEndDate        DateTime?
-  currentWeek        Int?
+  id                  String       @id @default(cuid())
+  firstName           String
+  paternalLastName    String
+  maternalLastName    String
+  name                String
+  email               String       @unique
+  password            String?
+  role                String       @default("client")
+  status              String       @default("pendiente")
+  registeredAt        DateTime     @default(now())
+  planStatus          String       @default("sin-plan")
+  inviteCode          String?
+  avatarUrl           String?
+  customPlanRequest   String?      @default("none")
+  planStartDate       DateTime?
+  planEndDate         DateTime?
+  currentWeek         Int?
   planDurationInWeeks Int?
-
-  plan           UserPlan?
-  progress       Progress[]
-  planHistory    PlanHistory[]
-  onboardingData OnboardingData?
+  plans               UserPlan[]
+  progress            Progress[]
+  planHistory         PlanHistory[]
+  onboardingData      OnboardingData?
 }
 
 model UserPlan {
-  id                 Int      @id @default(autoincrement())
-  userId             String   @unique
-  planJustification  String?
-  warmup             String?
-  recommendations    String?
-  weeklyPlan         Json
-  createdAt          DateTime @default(now())
-  isActive           Boolean  @default(true)
+  id                Int       @id @default(autoincrement())
+  userId            String
+  planJustification String?
+  warmup            String?
+  recommendations   String?
+  weeklyPlan        Json
+  createdAt         DateTime  @default(now())
+  isActive          Boolean   @default(true)
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, isActive], name: "active_plan_per_user")
 }
 
 model LibraryExercise {
-  id           String @id @default(cuid())
-  name         String @unique
-  description  String?
-  muscleGroup  String
-  mediaUrl     String?
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  muscleGroup String
+  mediaUrl    String?
 }
 
 model Template {
@@ -73,8 +74,8 @@ model Progress {
   week      Int
   data      Json
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([userId, week])
 }
 
@@ -83,15 +84,13 @@ model PlanHistory {
   userId    String
   plan      Json
   createdAt DateTime @default(now())
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model OnboardingData {
-    id        Int      @id @default(autoincrement())
-    userId    String   @unique
-    data      Json
-    createdAt DateTime @default(now())
-
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique
+  data      Json
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
