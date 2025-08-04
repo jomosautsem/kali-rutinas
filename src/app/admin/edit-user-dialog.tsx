@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useEffect, useState } from "react";
@@ -115,6 +116,7 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
       const updatedUserData: User = {
         ...user,
         ...values,
+        name: `${values.firstName} ${values.paternalLastName} ${values.maternalLastName}`.trim(),
         planStartDate: values.planStartDate?.toISOString(),
         planEndDate: values.planEndDate?.toISOString(),
       };
@@ -357,16 +359,15 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
                     </AnimatePresence>
                 </div>
               
-                <DialogFooter className="flex-shrink-0 pt-4 border-t flex justify-between w-full">
-                    {/* Left aligned button */}
-                    <div className="flex justify-start">
+                <DialogFooter className="flex-shrink-0 pt-4 border-t w-full flex justify-between items-center">
+                    <div>
                         {currentStep > 0 && (
                             <Button type="button" variant="ghost" onClick={prevStep}>
                                 <ArrowLeft className="mr-2 h-4 w-4" /> Anterior
                             </Button>
                         )}
                     </div>
-                    {/* Right aligned buttons */}
+                    
                     <div className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
                         {currentStep < steps.length - 1 && (
@@ -388,5 +389,3 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
     </Dialog>
   );
 }
-
-    

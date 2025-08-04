@@ -21,7 +21,7 @@ export function FormNavigation({
   onCancel,
 }: FormNavigationProps) {
   return (
-    <div className="flex justify-between items-center pt-4 border-t border-border/20 gap-2">
+    <div className="grid grid-cols-3 items-center pt-4 border-t border-border/20 gap-2">
       {/* Left Aligned Buttons */}
       <div className="flex gap-2 items-center justify-start">
         {currentStep > 0 && (
@@ -43,7 +43,7 @@ export function FormNavigation({
       
       {/* Right Aligned Button */}
       <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : currentStep === totalSteps - 1 ? (
