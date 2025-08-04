@@ -402,9 +402,9 @@ export function PlanEditor({ user, isOpen, onClose, onSaveAndApprove }: PlanEdit
                 )}
 
 
-                 <DialogFooter className="pt-4 border-t mt-auto sticky bottom-0 bg-card">
-                    <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                    <Button type="submit">
+                 <DialogFooter className="pt-4 border-t mt-auto sticky bottom-0 bg-card gap-2">
+                    <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">Cancelar</Button>
+                    <Button type="submit" className="w-full sm:w-auto">
                         <Save className="mr-2 h-4 w-4" />
                         Guardar y Aprobar Plan
                     </Button>
