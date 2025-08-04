@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanGenerator } from "@/components/plan-generator"
-import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Calendar, PartyPopper, Info } from "lucide-react"
+import { Clock, Dumbbell, Youtube, Image as ImageIcon, Lightbulb, Check, Expand, Save, TrendingUp, PlusCircle, Wind, Sparkles, AlertTriangle, Calendar, PartyPopper, Info, UserCheck } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { User, UserPlan, ProgressData, Exercise } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -752,6 +752,23 @@ export default function DashboardPage() {
     }
   };
 
+    const handleRequestCustomPlan = () => {
+        if (!user || !userEmail) return;
+
+        const storedUsers = localStorage.getItem("registeredUsers");
+        let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+        const updatedUser: User = { ...user, customPlanRequest: 'requested' };
+        
+        users = users.map(u => u.email === user.email ? updatedUser : u);
+        localStorage.setItem("registeredUsers", JSON.stringify(users));
+        setUser(updatedUser);
+
+        toast({
+            title: "¡Solicitud Enviada!",
+            description: "Un entrenador revisará tu perfil y se pondrá en contacto contigo pronto.",
+        });
+    };
+
   const isPlanActive = planStatus === 'aprobado' || planStatus === 'pendiente';
 
   const renderPlanContent = () => {
@@ -807,12 +824,29 @@ export default function DashboardPage() {
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <PlanGenerator onPlanGenerated={handlePlanGenerated} disabled={isPlanActive} />
-            <Button asChild={!isPlanActive} disabled={isPlanActive} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500">
-                {isPlanActive
-                    ? <span>Crea tu propia rutina</span>
-                    : <Link href="/dashboard/create-plan">Crea tu propia rutina</Link>
-                }
-            </Button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button 
+                        variant="outline" 
+                        disabled={user?.customPlanRequest === 'requested'}
+                    >
+                        <UserCheck className="mr-2 h-4 w-4" />
+                         {user?.customPlanRequest === 'requested' ? "Solicitud Enviada" : "Solicitar Plan Personalizado"}
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar Solicitud de Plan Personalizado</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción notificará a un entrenador para que cree una rutina totalmente personalizada para ti, basada en tu perfil y metas. Este proceso puede tardar más que la generación con IA. ¿Deseas continuar?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleRequestCustomPlan}>Sí, solicitar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
       </motion.div>
       
@@ -955,5 +989,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    

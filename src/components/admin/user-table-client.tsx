@@ -39,7 +39,7 @@ import { PlanEditor } from "./plan-editor"
 import { GenerateInviteCodeDialog } from "./generate-invite-code-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ProgressAnalytics } from "./progress-analytics";
-import { EditUserDialog } from "./edit-user-dialog";
+import { EditUserDialog } from "../admin/edit-user-dialog";
 import { AssignTemplateDialog } from "./assign-template-dialog";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -146,8 +146,8 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     setIsOnboardingDataOpen(true);
   };
   
-  const handleSaveAndApproveWithToast = (userId: string, plan: UserPlan) => {
-    onSaveAndApprovePlan(userId, plan, 4); // Default to 4 weeks duration
+  const handleSaveAndApproveWithToast = (userId: string, plan: UserPlan, duration: number) => {
+    onSaveAndApprovePlan(userId, plan, duration); 
     toast({
         title: "Plan Aprobado",
         description: `El plan ha sido guardado y aprobado para el usuario.`,
@@ -320,7 +320,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
             user={selectedUser} 
             isOpen={isPlanEditorOpen}
             onClose={handlePlanEditorClose}
-            onSaveAndApprove={handleSaveAndApproveWithToast}
+            onSaveAndApprove={onSaveAndApproveWithToast}
           />
       )}
       
