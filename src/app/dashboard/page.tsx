@@ -839,9 +839,8 @@ export default function DashboardPage() {
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button 
-                        variant={null}
-                        className="text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg"
+                    <Button
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg"
                         disabled={user?.customPlanRequest === 'requested'}
                     >
                         <UserCheck className="mr-2 h-4 w-4" />
@@ -865,8 +864,7 @@ export default function DashboardPage() {
             
             <Button 
                 asChild 
-                variant={null} 
-                className="text-white bg-gradient-to-r from-red-600 to-black hover:from-red-700 hover:to-gray-800 shadow-lg"
+                className="bg-gradient-to-r from-red-600 to-black text-white hover:from-red-700 hover:to-gray-800 shadow-lg"
                 disabled={isPlanActive}
             >
                 <Link href="/dashboard/create-plan">
@@ -1016,5 +1014,3 @@ export default function DashboardPage() {
     </>
   )
 }
-
-    
