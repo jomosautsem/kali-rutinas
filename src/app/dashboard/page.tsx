@@ -839,7 +839,11 @@ export default function DashboardPage() {
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                     <Button variant="outline" disabled={user?.customPlanRequest === 'requested'}>
+                    <Button 
+                        variant={null}
+                        className="text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg"
+                        disabled={user?.customPlanRequest === 'requested'}
+                    >
                         <UserCheck className="mr-2 h-4 w-4" />
                         {user?.customPlanRequest === 'requested' ? "Solicitud Enviada" : "Solicitar Plan Personalizado"}
                     </Button>
@@ -859,7 +863,12 @@ export default function DashboardPage() {
                 </AlertDialogContent>
             </AlertDialog>
             
-            <Button asChild variant="secondary" disabled={isPlanActive}>
+            <Button 
+                asChild 
+                variant={null} 
+                className="text-white bg-gradient-to-r from-red-600 to-black hover:from-red-700 hover:to-gray-800 shadow-lg"
+                disabled={isPlanActive}
+            >
                 <Link href="/dashboard/create-plan">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Crear mi propia rutina
