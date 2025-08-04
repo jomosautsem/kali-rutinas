@@ -43,9 +43,6 @@ const registerSchema = z.object({
   email: z.string().email("Por favor, ingresa un correo electrónico válido."),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
   confirmPassword: z.string()
-}).refine(data => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirmPassword"],
 });
 
 
@@ -61,7 +58,11 @@ const onboardingSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
     }
 });
 
-const combinedSchema = registerSchema.merge(onboardingSchema);
+const combinedSchema = registerSchema.merge(onboardingSchema).refine(data => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+});
+
 
 type RegistrationFormValues = z.infer<typeof combinedSchema>;
 
@@ -533,5 +534,3 @@ export default function RegisterPage() {
     </AuthCard>
   )
 }
-
-    
