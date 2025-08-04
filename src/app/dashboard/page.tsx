@@ -847,6 +847,12 @@ export default function DashboardPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            <Button asChild variant="secondary" disabled={isPlanActive}>
+                <Link href="/dashboard/create-plan">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Crear mi propia rutina
+                </Link>
+            </Button>
         </div>
       </motion.div>
       
