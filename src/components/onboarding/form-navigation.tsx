@@ -22,9 +22,10 @@ export function FormNavigation({
 }: FormNavigationProps) {
   return (
     <div className="flex justify-between items-center pt-4 border-t border-border/20">
-      <div className="flex gap-2 justify-start min-w-[180px]">
+      {/* Left-side buttons */}
+      <div className="flex gap-2 justify-start items-center flex-1">
         {currentStep > 0 && (
-          <Button type="button" variant="outline" onClick={onBack} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={onBack} disabled={isLoading} className="hidden sm:inline-flex">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Anterior
           </Button>
@@ -34,11 +35,15 @@ export function FormNavigation({
             Cancelar
           </Button>
       </div>
-      <div className="text-sm text-muted-foreground text-center flex-shrink-0">
+      
+      {/* Center text */}
+      <div className="text-sm text-muted-foreground text-center flex-shrink-0 px-2">
         Paso {currentStep + 1} de {totalSteps}
       </div>
-      <div className="flex justify-end min-w-[180px]">
-        <Button type="submit" disabled={isLoading} className="w-full max-w-max">
+      
+      {/* Right-side button */}
+      <div className="flex justify-end flex-1">
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : currentStep === totalSteps - 1 ? (
