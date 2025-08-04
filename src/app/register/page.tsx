@@ -45,10 +45,11 @@ const registerSchema = z.object({
   confirmPassword: z.string()
 });
 
-
 const onboardingSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
     otherWorkoutStyle: z.string().optional()
-}).superRefine((data, ctx) => {
+});
+
+const combinedSchema = registerSchema.merge(onboardingSchema).superRefine((data, ctx) => {
     if (data.preferredWorkoutStyle === 'otro' && (!data.otherWorkoutStyle || data.otherWorkoutStyle.trim() === '')) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -56,9 +57,7 @@ const onboardingSchema = GeneratePersonalizedTrainingPlanInputSchema.extend({
             message: 'Por favor, especifica el estilo de entrenamiento.',
         });
     }
-});
-
-const combinedSchema = registerSchema.merge(onboardingSchema).refine(data => data.password === data.confirmPassword, {
+}).refine(data => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
     path: ["confirmPassword"],
 });
