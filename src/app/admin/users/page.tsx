@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -136,7 +135,7 @@ export default function AdminUsersPage() {
         onEditUser={handleEditUser}
         onDeleteUser={handleDeleteUser} 
         onSaveAndApprovePlan={handleSaveAndApprovePlan}
-        onApproveUser={onApproveUser}
+        onApproveUser={handleApproveUser}
         onToggleUserStatus={handleToggleUserStatus}
       />
     </div>
