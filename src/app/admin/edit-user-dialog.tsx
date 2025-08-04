@@ -357,25 +357,30 @@ export function EditUserDialog({ user, isOpen, onClose, onEditUser }: EditUserDi
                     </AnimatePresence>
                 </div>
               
-                <DialogFooter className="flex-shrink-0 pt-4 border-t">
-                    {currentStep > 0 && (
-                        <Button type="button" variant="ghost" onClick={prevStep}>
-                            <ArrowLeft className="mr-2 h-4 w-4" /> Anterior
-                        </Button>
-                    )}
-                    <div className="flex-grow" />
-                    <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                    {currentStep < steps.length - 1 && (
-                        <Button type="button" onClick={nextStep}>
-                            Siguiente
-                        </Button>
-                    )}
-                    {currentStep === steps.length - 1 && (
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isSubmitting ? "Guardando..." : "Guardar Cambios"}
-                        </Button>
-                    )}
+                <DialogFooter className="flex-shrink-0 pt-4 border-t flex justify-between w-full">
+                    {/* Left aligned button */}
+                    <div className="flex justify-start">
+                        {currentStep > 0 && (
+                            <Button type="button" variant="ghost" onClick={prevStep}>
+                                <ArrowLeft className="mr-2 h-4 w-4" /> Anterior
+                            </Button>
+                        )}
+                    </div>
+                    {/* Right aligned buttons */}
+                    <div className="flex justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+                        {currentStep < steps.length - 1 && (
+                            <Button type="button" onClick={nextStep}>
+                                Siguiente
+                            </Button>
+                        )}
+                        {currentStep === steps.length - 1 && (
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+                            </Button>
+                        )}
+                    </div>
                 </DialogFooter>
             </form>
           </Form>

@@ -21,8 +21,9 @@ export function FormNavigation({
   onCancel,
 }: FormNavigationProps) {
   return (
-    <div className="flex justify-between items-center pt-4 border-t border-border/20">
-      <div className="flex gap-2 items-center">
+    <div className="flex justify-between items-center pt-4 border-t border-border/20 gap-2">
+      {/* Left Aligned Buttons */}
+      <div className="flex gap-2 items-center justify-start">
         {currentStep > 0 && (
           <Button type="button" variant="outline" onClick={onBack} disabled={isLoading} className="hidden sm:inline-flex">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -35,10 +36,12 @@ export function FormNavigation({
           </Button>
       </div>
       
-      <div className="text-sm text-muted-foreground text-center px-2">
+      {/* Center Aligned Text */}
+      <div className="text-sm text-muted-foreground text-center whitespace-nowrap">
         Paso {currentStep + 1} de {totalSteps}
       </div>
       
+      {/* Right Aligned Button */}
       <div className="flex justify-end">
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (
