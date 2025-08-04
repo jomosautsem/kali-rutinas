@@ -36,8 +36,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { CustomPlanRequestForm } from "@/components/custom-plan-request-form";
 
 
 const isVideo = (url: string) => {
@@ -755,6 +755,18 @@ export default function DashboardPage() {
     const handleRequestCustomPlan = () => {
         if (!user || !userEmail) return;
 
+        const onboardingDataString = localStorage.getItem(`onboardingData_${user.email}`);
+        if (!onboardingDataString) {
+            toast({
+                variant: "destructive",
+                title: "Faltan datos",
+                description: "Por favor, completa tus datos de registro primero para solicitar un plan personalizado.",
+            });
+            // Optionally, redirect to a form if you want them to fill it now.
+            // router.push('/onboarding');
+            return;
+        }
+
         const storedUsers = localStorage.getItem("registeredUsers");
         let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
         const updatedUser: User = { ...user, customPlanRequest: 'requested' };
@@ -824,10 +836,29 @@ export default function DashboardPage() {
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <PlanGenerator onPlanGenerated={handlePlanGenerated} disabled={isPlanActive} />
-            <CustomPlanRequestForm 
-                onDataSubmitted={handleRequestCustomPlan} 
-                user={user} 
-            />
+
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                     <Button variant="outline" disabled={user?.customPlanRequest === 'requested'}>
+                        <UserCheck className="mr-2 h-4 w-4" />
+                        {user?.customPlanRequest === 'requested' ? "Solicitud Enviada" : "Solicitar Plan Personalizado"}
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>¿Confirmar Solicitud de Plan Personalizado?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Esto notificará a un entrenador para que revise tu perfil y cree una rutina a tu medida. 
+                        Este proceso puede tardar de 1 a 2 días hábiles.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRequestCustomPlan}>Sí, solicitar plan</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            
             <Button asChild variant="secondary" disabled={isPlanActive}>
                 <Link href="/dashboard/create-plan">
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -976,3 +1007,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
