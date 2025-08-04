@@ -36,8 +36,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { CustomPlanRequestForm } from "@/components/custom-plan-request-form";
 
 
 const isVideo = (url: string) => {
@@ -824,29 +824,10 @@ export default function DashboardPage() {
         )}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <PlanGenerator onPlanGenerated={handlePlanGenerated} disabled={isPlanActive} />
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button 
-                        variant="outline" 
-                        disabled={user?.customPlanRequest === 'requested'}
-                    >
-                        <UserCheck className="mr-2 h-4 w-4" />
-                         {user?.customPlanRequest === 'requested' ? "Solicitud Enviada" : "Solicitar Plan Personalizado"}
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Confirmar Solicitud de Plan Personalizado</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Esta acción notificará a un entrenador para que cree una rutina totalmente personalizada para ti, basada en tu perfil y metas. Este proceso puede tardar más que la generación con IA. ¿Deseas continuar?
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleRequestCustomPlan}>Sí, solicitar</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <CustomPlanRequestForm 
+                onDataSubmitted={handleRequestCustomPlan} 
+                user={user} 
+            />
             <Button asChild variant="secondary" disabled={isPlanActive}>
                 <Link href="/dashboard/create-plan">
                     <PlusCircle className="mr-2 h-4 w-4" />
