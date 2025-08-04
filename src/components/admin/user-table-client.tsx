@@ -320,7 +320,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
             user={selectedUser} 
             isOpen={isPlanEditorOpen}
             onClose={handlePlanEditorClose}
-            onSaveAndApprove={onSaveAndApproveWithToast}
+            onSaveAndApprove={handleSaveAndApproveWithToast}
           />
       )}
       
