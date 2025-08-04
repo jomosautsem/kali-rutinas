@@ -19,7 +19,7 @@ type StepsIndicatorProps = {
 export function StepsIndicator({ steps, currentStep }: StepsIndicatorProps) {
   return (
     <div className="flex flex-col gap-4">
-        <div className="hidden sm:flex items-center justify-between gap-4 p-2">
+        <div className="hidden sm:flex flex-wrap items-center justify-center gap-x-2 gap-y-4 p-2">
             {steps.map((step, index) => {
                 const isActive = index === currentStep;
                 const isCompleted = index < currentStep;
@@ -27,7 +27,7 @@ export function StepsIndicator({ steps, currentStep }: StepsIndicatorProps) {
                 return (
                 <motion.div 
                     key={step.id} 
-                    className="flex flex-col items-center gap-2 relative"
+                    className="flex flex-col items-center gap-2 relative w-16"
                     animate={{ scale: isActive ? 1.1 : 1 }}
                     transition={{ duration: 0.2 }}
                 >
@@ -45,7 +45,7 @@ export function StepsIndicator({ steps, currentStep }: StepsIndicatorProps) {
                     )} />
                     </motion.div>
                     <p className={cn(
-                        "text-xs font-medium transition-colors duration-300",
+                        "text-xs font-medium transition-colors duration-300 text-center",
                         isActive ? "text-primary" : "text-muted-foreground",
                         isCompleted ? "text-foreground" : ""
                     )}>
