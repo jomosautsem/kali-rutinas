@@ -27,6 +27,8 @@ const prompt = ai.definePrompt({
 
   Asegúrate de que los nombres de los días y los enfoques sean claros y descriptivos. El número de días debe ser lógico según la descripción (ej., si se pide una rutina de '3 días', genera 3 días de entrenamiento).
 
+  MUY IMPORTANTE: Para cada día en 'weeklyPlan', asegúrate de que el campo 'focus' contenga ÚNICAMENTE los grupos musculares o el tipo de entrenamiento para ESE DÍA en específico. No debe incluir información general de la plantilla como el nivel (principiante, etc.) o enfoques de otros días. Por ejemplo: 'Pecho y Hombros' o 'Cardio y Resistencia'.
+
   Además del plan, proporciona dos secciones de texto importantes:
   1. En el campo 'warmup', escribe una rutina de calentamiento y activación general (3-4 frases) apropiada para el tipo de plantilla descrita.
   2. En el campo 'recommendations', proporciona una recomendación general (2-3 frases) sobre consejos de post-entrenamiento, como enfriamiento, hidratación o nutrición.
