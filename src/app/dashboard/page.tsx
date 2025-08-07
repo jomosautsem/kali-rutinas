@@ -569,8 +569,6 @@ export default function DashboardPage() {
                   setCompletedDays(JSON.parse(storedCompletedDays));
               } else {
                   setCompletedDays([]); 
-                  localStorage.removeItem(`completedDays_week${currentWeek}_${currentUser.email}`);
-                  localStorage.removeItem(`progress_week${currentWeek}_${currentUser.email}`);
               }
 
               const storedProgress = localStorage.getItem(`progress_week${currentWeek}_${currentUser.email}`);
@@ -585,7 +583,7 @@ export default function DashboardPage() {
         setPlanStatus('sin-plan');
       }
     }
-  }, [user?.currentWeek, toast]);
+  }, [user?.currentWeek]);
 
 
   const handlePlanGenerated = (newPlan: UserPlan) => {

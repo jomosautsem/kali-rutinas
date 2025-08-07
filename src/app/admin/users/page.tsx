@@ -88,8 +88,14 @@ export default function AdminUsersPage() {
     );
     setUsers(updatedUsers);
     localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
-
     localStorage.setItem(`userPlan_${user.email}`, JSON.stringify(plan));
+    
+    // Clear all previous weekly progress data for this user
+    for (let i = 1; i <= 8; i++) { // Clear up to a potential 8 weeks
+        localStorage.removeItem(`completedDays_week${i}_${user.email}`);
+        localStorage.removeItem(`progress_week${i}_${user.email}`);
+    }
+
     toast({
         title: "Plan Asignado y Aprobado",
         description: `El plan ha sido asignado correctamente a ${user.name}.`,
