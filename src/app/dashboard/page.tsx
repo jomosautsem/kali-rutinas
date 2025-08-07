@@ -568,11 +568,9 @@ export default function DashboardPage() {
               if (storedCompletedDays) {
                   setCompletedDays(JSON.parse(storedCompletedDays));
               } else {
-                  if (completedDays.length === 0) {
-                      localStorage.removeItem(`completedDays_week${currentWeek}_${currentUser.email}`);
-                      localStorage.removeItem(`progress_week${currentWeek}_${currentUser.email}`);
-                  }
                   setCompletedDays([]); 
+                  localStorage.removeItem(`completedDays_week${currentWeek}_${currentUser.email}`);
+                  localStorage.removeItem(`progress_week${currentWeek}_${currentUser.email}`);
               }
 
               const storedProgress = localStorage.getItem(`progress_week${currentWeek}_${currentUser.email}`);
