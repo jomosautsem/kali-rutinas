@@ -1,12 +1,12 @@
 
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TemplateGeneratorAI } from "@/components/admin/template-generator-ai";
 import { TemplateEditor } from "@/components/admin/template-editor";
-import { PlusCircle, Dumbbell, Calendar, Trash2 } from "lucide-react";
+import { PlusCircle, Dumbbell, Calendar, Trash2, Upload, Download } from "lucide-react";
 import type { User, UserPlan } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -85,6 +85,9 @@ export default function AdminTemplatesPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+    const [isImportConfirmOpen, setIsImportConfirmOpen] = useState(false);
+    const [importedTemplates, setImportedTemplates] = useState<Template[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -129,13 +132,12 @@ export default function AdminTemplatesPage() {
     };
 
     const handleSaveTemplate = (templateData: Template) => {
-        // Automatically add mediaUrl to each exercise
         const planWithMedia = {
             ...templateData.plan,
             weeklyPlan: templateData.plan.weeklyPlan.map(day => ({
                 ...day,
                 exercises: day.exercises.map(exercise => {
-                    if (exercise.mediaUrl) return exercise; // Don't override if it already exists
+                    if (exercise.mediaUrl) return exercise; 
                     const query = encodeURIComponent(`${exercise.name} ejercicio tutorial`);
                     const mediaUrl = `https://www.youtube.com/results?search_query=${query}`;
                     return { ...exercise, mediaUrl };
@@ -183,7 +185,7 @@ export default function AdminTemplatesPage() {
             id: `template-ai-${Date.now()}`,
             title: title,
             description: description,
-            level: "Intermedio", // Default level for AI generated templates
+            level: "Intermedio",
             days: plan.weeklyPlan.length,
             plan: {
                 ...plan,
@@ -209,17 +211,84 @@ export default function AdminTemplatesPage() {
         });
     }
 
+    const handleExport = () => {
+        const jsonString = JSON.stringify(templates, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "dojo_templates_backup.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast({ title: "Exportación Exitosa", description: "Tus plantillas han sido guardadas." });
+    };
+
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target?.result;
+                if (typeof text !== 'string') throw new Error("File is not a text file.");
+                const parsedTemplates = JSON.parse(text);
+                // Basic validation
+                if (Array.isArray(parsedTemplates) && parsedTemplates.every(t => t.id && t.title && t.plan)) {
+                    setImportedTemplates(parsedTemplates);
+                    setIsImportConfirmOpen(true);
+                } else {
+                    throw new Error("Invalid template file format.");
+                }
+            } catch (error) {
+                toast({ variant: "destructive", title: "Error de Importación", description: "El archivo seleccionado no es un respaldo de plantillas válido." });
+            }
+        };
+        reader.readAsText(file);
+        // Reset file input to allow re-uploading the same file
+        event.target.value = ''; 
+    };
+    
+    const confirmImport = () => {
+        updateAndStoreTemplates(importedTemplates);
+        toast({ title: "Importación Exitosa", description: `${importedTemplates.length} plantillas han sido restauradas.` });
+        setIsImportConfirmOpen(false);
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Gestión de Plantillas</h1>
-                    <p className="text-muted-foreground">Revisa las plantillas existentes, créalas manualmente o usa IA.</p>
+                    <p className="text-muted-foreground">Revisa, crea, exporta e importa tus plantillas de entrenamiento.</p>
                 </div>
-                <Button onClick={handleCreateClick} className="w-full sm:w-auto">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Crear Plantilla Manualmente
-                </Button>
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <Button onClick={handleCreateClick} className="flex-grow sm:flex-grow-0">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Crear Manualmente
+                    </Button>
+                    <Button onClick={handleExport} variant="outline" className="flex-grow sm:flex-grow-0">
+                        <Download className="mr-2 h-4 w-4" />
+                        Exportar
+                    </Button>
+                    <Button onClick={handleImportClick} variant="outline" className="flex-grow sm:flex-grow-0">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Importar
+                    </Button>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        accept=".json"
+                        className="hidden"
+                    />
+                </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -297,6 +366,22 @@ export default function AdminTemplatesPage() {
                 onSave={handleSaveTemplate}
                 initialData={selectedTemplate}
             />
+
+            <AlertDialog open={isImportConfirmOpen} onOpenChange={setIsImportConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar Importación</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Estás a punto de reemplazar TODAS tus plantillas actuales con las del archivo de respaldo.
+                            Se encontraron <span className="font-bold">{importedTemplates.length}</span> plantillas. ¿Deseas continuar? Esta acción no se puede deshacer.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setImportedTemplates([])}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmImport}>Sí, Importar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
