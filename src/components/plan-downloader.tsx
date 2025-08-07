@@ -43,20 +43,47 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
       doc.setFont('helvetica', 'normal');
       doc.text(`Cliente: ${user.name}`, 14, 40);
 
+      let startY = 55;
+
+      // Warmup Section
+      if (plan.warmup) {
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text("Calentamiento y Activación:", 14, startY);
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          const splitText = doc.splitTextToSize(plan.warmup, 180);
+          doc.text(splitText, 14, startY + 7);
+          startY += splitText.length * 5 + 10;
+      }
+      
+      // Justification Section
+      if (plan.planJustification) {
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text("Justificación del Plan:", 14, startY);
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          const splitText = doc.splitTextToSize(plan.planJustification, 180);
+          doc.text(splitText, 14, startY + 7);
+          startY += splitText.length * 5 + 10;
+      }
+
       // Recommendations
       if (plan.recommendations) {
           doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
-          doc.text("Recomendaciones Generales:", 14, 55);
+          doc.text("Recomendaciones Generales:", 14, startY);
           
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           const splitRecommendations = doc.splitTextToSize(plan.recommendations, 180);
-          doc.text(splitRecommendations, 14, 62);
+          doc.text(splitRecommendations, 14, startY + 7);
+          startY += splitRecommendations.length * 5 + 10;
       }
       
-      let startY = plan.recommendations ? 80 : 60;
-
       // Weekly Plan
       plan.weeklyPlan.forEach((dayPlan) => {
           if (startY > 220) {
