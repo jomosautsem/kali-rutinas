@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus, XCircle, Power, Sparkles, FileText } from "lucide-react"
+import { MoreHorizontal, CheckCircle, Clock, FileEdit, UserCheck, BarChart2, Edit, FilePlus, XCircle, Power, Sparkles, FileText, Trash2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,6 +56,7 @@ type UserTableClientProps = {
   onSaveAndApprovePlan: (userId: string, plan: UserPlan, duration: number) => void;
   onApproveUser: (userId: string, inviteCode: string) => void;
   onToggleUserStatus: (userId: string, currentStatus: "activo" | "inactivo") => void;
+  onDeletePlan: (userId: string) => void;
 }
 
 const planStatusConfig = {
@@ -72,8 +73,9 @@ const userStatusConfig = {
 };
 
 
-export function UserTableClient({ users, templates, onEditUser, onDeleteUser, onSaveAndApprovePlan, onApproveUser, onToggleUserStatus }: UserTableClientProps) {
+export function UserTableClient({ users, templates, onEditUser, onDeleteUser, onSaveAndApprovePlan, onApproveUser, onToggleUserStatus, onDeletePlan }: UserTableClientProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDeletePlanDialogOpen, setIsDeletePlanDialogOpen] = useState(false);
   const [isPlanEditorOpen, setIsPlanEditorOpen] = useState(false)
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [isInviteCodeDialogOpen, setIsInviteCodeDialogOpen] = useState(false);
@@ -90,6 +92,11 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     setSelectedUser(user)
     setIsDeleteDialogOpen(true)
   }
+
+  const handleDeletePlanClick = (user: User) => {
+    setSelectedUser(user);
+    setIsDeletePlanDialogOpen(true);
+  };
   
   const handleConfirmDelete = () => {
     if (selectedUser) {
@@ -98,6 +105,14 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
       setSelectedUser(null)
     }
   }
+
+   const handleConfirmDeletePlan = () => {
+    if (selectedUser) {
+      onDeletePlan(selectedUser.id);
+      setIsDeletePlanDialogOpen(false);
+      setSelectedUser(null);
+    }
+  };
   
   const handleEditUserClick = (user: User) => {
     setSelectedUser(user);
@@ -275,6 +290,15 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                               <BarChart2 className="mr-2 h-4 w-4" />
                               Ver Progreso
                           </DropdownMenuItem>
+                           {user.planStatus === 'aprobado' && (
+                            <DropdownMenuItem 
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => handleDeletePlanClick(user)}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar Plan Asignado
+                            </DropdownMenuItem>
+                           )}
                         </>
                       )}
                       {user.role !== 'admin' && (
@@ -312,6 +336,23 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <AlertDialog open={isDeletePlanDialogOpen} onOpenChange={setIsDeletePlanDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>¿Eliminar el plan de este usuario?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se eliminará el plan de entrenamiento actual de <span className="font-semibold">{selectedUser?.name}</span> y todo su progreso asociado. El usuario tendrá que solicitar o generar un nuevo plan.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDeletePlan} className="bg-destructive hover:bg-destructive/90">
+                    Sí, eliminar plan
+                </AlertDialogAction>
+            </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 

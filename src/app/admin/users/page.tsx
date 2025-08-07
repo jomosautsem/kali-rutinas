@@ -102,6 +102,39 @@ export default function AdminUsersPage() {
     });
   };
 
+  const handleDeletePlan = (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+
+    const updatedUsers = users.map(u =>
+      u.id === userId ? {
+        ...u,
+        planStatus: 'sin-plan',
+        customPlanRequest: 'none',
+        planStartDate: undefined,
+        planEndDate: undefined,
+        planDurationInWeeks: undefined,
+        currentWeek: undefined,
+      } : u
+    );
+    setUsers(updatedUsers);
+    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+    localStorage.removeItem(`userPlan_${user.email}`);
+    
+    // Clear all previous weekly progress data for this user
+    for (let i = 1; i <= 8; i++) {
+        localStorage.removeItem(`completedDays_week${i}_${user.email}`);
+        localStorage.removeItem(`progress_week${i}_${user.email}`);
+    }
+
+    toast({
+        variant: "destructive",
+        title: "Plan Eliminado",
+        description: `Se ha eliminado el plan de ${user.name}.`,
+    });
+  };
+
+
   const handleApproveUser = (userId: string, inviteCode: string) => {
     const updatedUsers = users.map(user =>
       user.id === userId ? { ...user, status: 'activo', inviteCode } : user
@@ -141,6 +174,7 @@ export default function AdminUsersPage() {
         onEditUser={handleEditUser}
         onDeleteUser={handleDeleteUser} 
         onSaveAndApprovePlan={handleSaveAndApprovePlan}
+        onDeletePlan={handleDeletePlan}
         onApproveUser={handleApproveUser}
         onToggleUserStatus={handleToggleUserStatus}
       />
