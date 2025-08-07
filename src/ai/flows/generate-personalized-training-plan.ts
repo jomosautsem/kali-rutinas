@@ -75,6 +75,8 @@ const prompt = ai.definePrompt({
 
   IMPORTANTE: Para cada ejercicio, rellena el campo 'description' con una breve descripción de 1-2 frases sobre los principales músculos que trabaja el ejercicio. Por ejemplo: "Este ejercicio se enfoca en el pectoral mayor, deltoides anterior y tríceps.".
   
+  CRÍTICO: El campo 'focus' para cada día de entrenamiento debe contener ÚNICAMENTE los grupos musculares o el tipo de entrenamiento para ESE DÍA en específico (ej. "Pecho y Hombros", "Cardio y Resistencia"). NO incluyas información general como el nivel de fitness ("Principiante"), el objetivo ("Hipertrofia") o detalles de otros días en este campo.
+
   Objetivos: {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Nivel de Condición Física Actual: {{{currentFitnessLevel}}}
   Días de Entrenamiento: {{#each trainingDays}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
@@ -102,19 +104,42 @@ const generatePersonalizedTrainingPlanFlow = ai.defineFlow(
       throw new Error("La IA no pudo generar un plan.");
     }
     
-    // Post-procesamiento para asegurar que los ejercicios tengan valores por defecto si faltan
+    // Keywords generales a eliminar del campo 'focus'
+    const generalKeywords = [
+        "principiante", "intermedio", "avanzado", "hipertrofia", 
+        "fuerza", "resistencia", "definición", "intensivo", "en", "glúteos", 
+        "cardio", "hiit"
+    ];
+
+    // Post-procesamiento para asegurar que los ejercicios tengan valores por defecto y el 'focus' sea limpio
     const sanitizedPlan: GeneratePersonalizedTrainingPlanOutput = {
       ...output,
-      weeklyPlan: output.weeklyPlan.map(day => ({
-        ...day,
-        exercises: day.exercises.map(exercise => ({
-          ...exercise,
-          series: exercise.series || "3", // Valor por defecto para series
-          reps: exercise.reps || "10-12", // Valor por defecto para reps
-          description: exercise.description || "Descripción no disponible.",
-          mediaUrl: exercise.mediaUrl || "",
-        })),
-      })),
+      weeklyPlan: output.weeklyPlan.map(day => {
+        
+        let cleanFocus = day.focus || "";
+        // Eliminar keywords generales del campo 'focus'
+        generalKeywords.forEach(keyword => {
+            const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+            cleanFocus = cleanFocus.replace(regex, '').replace(/[, -]+/g, ' ').trim();
+        });
+        
+        // Reemplazar múltiples espacios con uno solo y limpiar comas/guiones sobrantes
+        cleanFocus = cleanFocus.replace(/\s+/g, ' ').trim();
+        cleanFocus = cleanFocus.replace(/ , /g, ', ').replace(/ - /g, ' - ').trim();
+        cleanFocus = cleanFocus.replace(/^[, -]+|[, -]+$/g, ''); // Limpiar caracteres sobrantes al inicio/fin
+
+        return {
+            ...day,
+            focus: cleanFocus || "Entrenamiento General", // Fallback por si queda vacío
+            exercises: day.exercises.map(exercise => ({
+                ...exercise,
+                series: exercise.series || "3", // Valor por defecto para series
+                reps: exercise.reps || "10-12", // Valor por defecto para reps
+                description: exercise.description || "Descripción no disponible.",
+                mediaUrl: exercise.mediaUrl || "",
+            })),
+        };
+      }),
     };
 
     return sanitizedPlan;
