@@ -4,34 +4,42 @@
 import { useState } from "react";
 import { jsPDF, GState } from "jspdf";
 import autoTable from 'jspdf-autotable';
-import type { User, UserPlan } from "@/lib/types";
+import type { User, UserPlan, Exercise } from "@/lib/types";
 import { Button } from "./ui/button";
 import { Download, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type PlanDownloaderProps = {
   user: User;
   plan: UserPlan;
 };
 
-// You need to add the font file to your project, e.g., in /public/fonts
-// This is a placeholder, as I cannot add binary files.
-// You would need to add a Base64 encoded font or host it.
-const font = "..." // Base64 representation of a .ttf file
+const isYoutubeUrl = (url: string): boolean => {
+    if (!url) return false;
+    try {
+        const urlObj = new URL(url);
+        return urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be');
+    } catch (e) {
+        return false;
+    }
+};
 
 export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const { toast } = useToast();
 
   const handleDownload = async () => {
     setIsDownloading(true);
+    toast({ title: "Generando PDF...", description: "Esto puede tardar un momento." });
+
     try {
       const doc = new jsPDF();
       
-      // Load image data first
       const logoImg = new Image();
-      logoImg.src = '/images/logo.png'; // Path to your logo in the public folder
+      logoImg.src = '/images/logo.png';
       await new Promise(resolve => {
         logoImg.onload = resolve;
-        logoImg.onerror = resolve; // Continue even if logo fails to load
+        logoImg.onerror = resolve;
       });
 
       // Header
@@ -45,12 +53,24 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
 
       let startY = 55;
 
+      // Urgent Message
+      doc.setFillColor(255, 250, 235); // Light yellow background
+      doc.setDrawColor(234, 179, 8); // Yellow border
+      doc.setTextColor(180, 83, 9); // Yellow text
+      doc.setFont('helvetica', 'bold');
+      const message = "IMPORTANTE: Por el momento, Dojo Dynamics no cuenta con videos propios de Kali Gym, pero estamos trabajando en ello. Los videos son de YouTube.";
+      const splitMessage = doc.splitTextToSize(message, 180);
+      const messageHeight = splitMessage.length * 5 + 8;
+      doc.rect(14, startY - 5, 182, messageHeight, 'FD');
+      doc.text(splitMessage, 105, startY, { align: 'center', maxWidth: 180 });
+      startY += messageHeight + 5;
+      doc.setTextColor(0, 0, 0); // Reset text color
+
       // Warmup Section
       if (plan.warmup) {
           doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
           doc.text("Calentamiento y Activación:", 14, startY);
-          
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           const splitText = doc.splitTextToSize(plan.warmup, 180);
@@ -63,7 +83,6 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
           doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
           doc.text("Justificación del Plan:", 14, startY);
-          
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           const splitText = doc.splitTextToSize(plan.planJustification, 180);
@@ -76,7 +95,6 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
           doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
           doc.text("Recomendaciones Generales:", 14, startY);
-          
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           const splitRecommendations = doc.splitTextToSize(plan.recommendations, 180);
@@ -84,8 +102,8 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
           startY += splitRecommendations.length * 5 + 10;
       }
       
-      // Weekly Plan
-      plan.weeklyPlan.forEach((dayPlan) => {
+      // Weekly Plan with QR Codes
+      for (const dayPlan of plan.weeklyPlan) {
           if (startY > 220) {
               doc.addPage();
               startY = 20;
@@ -95,39 +113,69 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
           doc.setFont('helvetica', 'bold');
           doc.text(`${dayPlan.day} - ${dayPlan.focus}`, 14, startY);
           
-          const head = [['Ejercicio', 'Series', 'Reps', 'Descanso']];
-          const body = dayPlan.exercises.map(ex => [ex.name, ex.series, ex.reps, ex.rest]);
+          const head = [['Ejercicio', 'Series', 'Reps', 'Descanso', 'Video (QR)']];
+          const body: (string | { image: string; width: number; height: number; } | null)[][] = [];
+          
+          // Pre-fetch QR code images
+          const qrCodePromises = dayPlan.exercises.map(ex => {
+              if (ex.mediaUrl && isYoutubeUrl(ex.mediaUrl)) {
+                  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(ex.mediaUrl)}`;
+                  return fetch(qrUrl)
+                      .then(res => res.blob())
+                      .then(blob => new Promise<string>((resolve, reject) => {
+                          const reader = new FileReader();
+                          reader.onloadend = () => resolve(reader.result as string);
+                          reader.onerror = reject;
+                          reader.readAsDataURL(blob);
+                      }))
+                      .catch(() => null);
+              }
+              return Promise.resolve(null);
+          });
+          
+          const qrCodes = await Promise.all(qrCodePromises);
+
+          dayPlan.exercises.forEach((ex, index) => {
+              body.push([
+                  ex.name, 
+                  ex.series, 
+                  ex.reps, 
+                  ex.rest, 
+                  qrCodes[index] ? { image: qrCodes[index]!, width: 20, height: 20 } : ''
+              ]);
+          });
 
           autoTable(doc, {
               head: head,
               body: body,
               startY: startY + 5,
               theme: 'striped',
-              headStyles: { fillColor: [160, 80, 190] }, // Primary color
-              styles: { font: 'helvetica', fontSize: 10 },
+              headStyles: { fillColor: [48, 96, 53] }, // Primary color
+              styles: { font: 'helvetica', fontSize: 10, valign: 'middle', cellPadding: 2 },
+              columnStyles: {
+                  4: { cellWidth: 22, halign: 'center' }
+              }
           });
 
           const tableHeight = (doc as any).lastAutoTable.finalY;
           startY = tableHeight + 15;
-      });
+      }
 
       // Add Watermark and Footer to all pages
       const pageCount = (doc as any).internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
           doc.setPage(i);
           
-          // Watermark
           if (logoImg.complete && logoImg.naturalHeight !== 0) {
             const imgWidth = 100;
             const imgHeight = (logoImg.naturalHeight * imgWidth) / logoImg.naturalWidth;
             const x = (doc.internal.pageSize.getWidth() - imgWidth) / 2;
             const y = (doc.internal.pageSize.getHeight() - imgHeight) / 2;
-            doc.setGState(new GState({opacity: 0.1}));
+            doc.setGState(new GState({opacity: 0.08}));
             doc.addImage(logoImg, 'PNG', x, y, imgWidth, imgHeight);
-            doc.setGState(new GState({opacity: 1})); // Reset opacity
+            doc.setGState(new GState({opacity: 1}));
           }
 
-          // Footer
           doc.setFontSize(8);
           doc.setFont('helvetica', 'normal');
           doc.text(`Página ${i} de ${pageCount}`, 105, 287, { align: 'center' });
@@ -137,6 +185,7 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
       doc.save(`Plan_Entrenamiento_${user.firstName}_${user.paternalLastName}.pdf`);
     } catch (error) {
       console.error("Failed to generate PDF:", error);
+      toast({ variant: "destructive", title: "Error", description: "No se pudo generar el PDF." });
     } finally {
       setIsDownloading(false);
     }
@@ -158,3 +207,4 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
     </Button>
   );
 }
+
