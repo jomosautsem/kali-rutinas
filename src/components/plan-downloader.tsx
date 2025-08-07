@@ -43,19 +43,6 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
 
       let startY = 55;
 
-      // Urgent Message
-      doc.setFillColor(255, 250, 235); // Light yellow background
-      doc.setDrawColor(234, 179, 8); // Yellow border
-      doc.setTextColor(180, 83, 9); // Yellow text
-      doc.setFont('helvetica', 'bold');
-      const message = "IMPORTANTE: Por el momento, Dojo Dynamics no cuenta con videos propios de Kali Gym, pero estamos trabajando en ello. Los videos son de YouTube.";
-      const splitMessage = doc.splitTextToSize(message, 180);
-      const messageHeight = splitMessage.length * 5 + 8;
-      doc.rect(14, startY - 5, 182, messageHeight, 'FD');
-      doc.text(splitMessage, 105, startY, { align: 'center', maxWidth: 180 });
-      startY += messageHeight + 5;
-      doc.setTextColor(0, 0, 0); // Reset text color
-
       // Warmup Section
       if (plan.warmup) {
           doc.setFontSize(12);
