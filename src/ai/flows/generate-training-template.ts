@@ -48,6 +48,49 @@ const generateTrainingTemplateFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await prompt(input);
-    return output!;
+    
+    if (!output) {
+      throw new Error("La IA no pudo generar una plantilla.");
+    }
+    
+    // Keywords generales a eliminar del campo 'focus'
+    const generalKeywords = [
+        "principiante", "intermedio", "avanzado", "hipertrofia", 
+        "fuerza", "resistencia", "definición", "intensivo", "en", "glúteos", 
+        "cardio", "hiit"
+    ];
+
+    // Post-procesamiento para limpiar el campo 'focus'
+    const sanitizedPlan: UserPlan = {
+      ...output,
+      weeklyPlan: output.weeklyPlan.map(day => {
+        
+        let cleanFocus = day.focus || "";
+        // Eliminar keywords generales del campo 'focus'
+        generalKeywords.forEach(keyword => {
+            const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+            cleanFocus = cleanFocus.replace(regex, '').replace(/[, -]+/g, ' ').trim();
+        });
+        
+        // Reemplazar múltiples espacios con uno solo y limpiar comas/guiones sobrantes
+        cleanFocus = cleanFocus.replace(/\s+/g, ' ').trim();
+        cleanFocus = cleanFocus.replace(/ , /g, ', ').replace(/ - /g, ' - ').trim();
+        cleanFocus = cleanFocus.replace(/^[, -]+|[, -]+$/g, ''); // Limpiar caracteres sobrantes al inicio/fin
+
+        return {
+            ...day,
+            focus: cleanFocus || "Entrenamiento General", // Fallback por si queda vacío
+            exercises: day.exercises.map(exercise => ({
+                ...exercise,
+                series: exercise.series || "3",
+                reps: exercise.reps || "10-12",
+                description: exercise.description || "Descripción no disponible.",
+                mediaUrl: exercise.mediaUrl || `https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name)}+ejercicio+tutorial`,
+            })),
+        };
+      }),
+    };
+
+    return sanitizedPlan;
   }
 );
