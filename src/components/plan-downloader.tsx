@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { jsPDF, GState } from "jspdf";
 import autoTable from 'jspdf-autotable';
-import type { User, UserPlan, Exercise } from "@/lib/types";
+import type { User, UserPlan } from "@/lib/types";
 import { Button } from "./ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -12,16 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 type PlanDownloaderProps = {
   user: User;
   plan: UserPlan;
-};
-
-const isYoutubeUrl = (url: string): boolean => {
-    if (!url) return false;
-    try {
-        const urlObj = new URL(url);
-        return urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be');
-    } catch (e) {
-        return false;
-    }
 };
 
 export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
@@ -102,7 +92,7 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
           startY += splitRecommendations.length * 5 + 10;
       }
       
-      // Weekly Plan with QR Codes
+      // Weekly Plan
       for (const dayPlan of plan.weeklyPlan) {
           if (startY > 220) {
               doc.addPage();
@@ -113,53 +103,16 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
           doc.setFont('helvetica', 'bold');
           doc.text(`${dayPlan.day} - ${dayPlan.focus}`, 14, startY);
           
-          const head = [['Ejercicio', 'Series', 'Reps', 'Descanso', 'Video (QR)']];
-          
-          const body = await Promise.all(
-            dayPlan.exercises.map(async (ex) => {
-              let qrCell: string | { image: string; width: number; height: number } = '';
-              if (ex.mediaUrl && isYoutubeUrl(ex.mediaUrl)) {
-                try {
-                  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(ex.mediaUrl)}`;
-                  const res = await fetch(qrUrl);
-                  const blob = await res.blob();
-                  const dataUrl = await new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result as string);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                  });
-                  qrCell = { image: dataUrl, width: 20, height: 20 };
-                } catch (e) {
-                  console.error("QR Code generation failed", e);
-                  qrCell = 'Error QR';
-                }
-              }
-              return [ex.name, ex.series, ex.reps, ex.rest, qrCell];
-            })
-          );
+          const head = [['Ejercicio', 'Series', 'Reps', 'Descanso']];
+          const body = dayPlan.exercises.map(ex => [ex.name, ex.series, ex.reps, ex.rest]);
 
           autoTable(doc, {
               head: head,
-              body: body as any, // Cast to any to satisfy the library's type
+              body: body,
               startY: startY + 5,
               theme: 'striped',
               headStyles: { fillColor: [160, 80, 190] }, // Primary color
               styles: { font: 'helvetica', fontSize: 10, valign: 'middle', cellPadding: 2 },
-              columnStyles: {
-                  4: { cellWidth: 22, halign: 'center' }
-              },
-              didDrawCell: (data) => {
-                 if (data.column.index === 4 && typeof data.cell.raw === 'object' && data.cell.raw?.image) {
-                    const img = data.cell.raw as { image: string; width: number; height: number };
-                    const { x, y, width, height } = data.cell;
-                    const imgWidth = 18; // Smaller than cell width for padding
-                    const imgHeight = 18; // Smaller than cell height for padding
-                    const imgX = x + (width - imgWidth) / 2;
-                    const imgY = y + (height - imgHeight) / 2;
-                    doc.addImage(img.image, 'PNG', imgX, imgY, imgWidth, imgHeight);
-                }
-              }
           });
 
           const tableHeight = (doc as any).lastAutoTable.finalY;
