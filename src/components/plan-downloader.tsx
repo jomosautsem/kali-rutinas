@@ -114,46 +114,51 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
           doc.text(`${dayPlan.day} - ${dayPlan.focus}`, 14, startY);
           
           const head = [['Ejercicio', 'Series', 'Reps', 'Descanso', 'Video (QR)']];
-          const body: (string | { image: string; width: number; height: number; } | null)[][] = [];
           
-          // Pre-fetch QR code images
-          const qrCodePromises = dayPlan.exercises.map(ex => {
+          const body = await Promise.all(
+            dayPlan.exercises.map(async (ex) => {
+              let qrCell: string | { image: string; width: number; height: number } = '';
               if (ex.mediaUrl && isYoutubeUrl(ex.mediaUrl)) {
+                try {
                   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(ex.mediaUrl)}`;
-                  return fetch(qrUrl)
-                      .then(res => res.blob())
-                      .then(blob => new Promise<string>((resolve, reject) => {
-                          const reader = new FileReader();
-                          reader.onloadend = () => resolve(reader.result as string);
-                          reader.onerror = reject;
-                          reader.readAsDataURL(blob);
-                      }))
-                      .catch(() => null);
+                  const res = await fetch(qrUrl);
+                  const blob = await res.blob();
+                  const dataUrl = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                  });
+                  qrCell = { image: dataUrl, width: 20, height: 20 };
+                } catch (e) {
+                  console.error("QR Code generation failed", e);
+                  qrCell = 'Error QR';
+                }
               }
-              return Promise.resolve(null);
-          });
-          
-          const qrCodes = await Promise.all(qrCodePromises);
-
-          dayPlan.exercises.forEach((ex, index) => {
-              body.push([
-                  ex.name, 
-                  ex.series, 
-                  ex.reps, 
-                  ex.rest, 
-                  qrCodes[index] ? { image: qrCodes[index]!, width: 20, height: 20 } : ''
-              ]);
-          });
+              return [ex.name, ex.series, ex.reps, ex.rest, qrCell];
+            })
+          );
 
           autoTable(doc, {
               head: head,
-              body: body,
+              body: body as any, // Cast to any to satisfy the library's type
               startY: startY + 5,
               theme: 'striped',
-              headStyles: { fillColor: [48, 96, 53] }, // Primary color
+              headStyles: { fillColor: [160, 80, 190] }, // Primary color
               styles: { font: 'helvetica', fontSize: 10, valign: 'middle', cellPadding: 2 },
               columnStyles: {
                   4: { cellWidth: 22, halign: 'center' }
+              },
+              didDrawCell: (data) => {
+                 if (data.column.index === 4 && typeof data.cell.raw === 'object' && data.cell.raw?.image) {
+                    const img = data.cell.raw as { image: string; width: number; height: number };
+                    const { x, y, width, height } = data.cell;
+                    const imgWidth = 18; // Smaller than cell width for padding
+                    const imgHeight = 18; // Smaller than cell height for padding
+                    const imgX = x + (width - imgWidth) / 2;
+                    const imgY = y + (height - imgHeight) / 2;
+                    doc.addImage(img.image, 'PNG', imgX, imgY, imgWidth, imgHeight);
+                }
               }
           });
 
@@ -207,4 +212,3 @@ export function PlanDownloader({ user, plan }: PlanDownloaderProps) {
     </Button>
   );
 }
-
