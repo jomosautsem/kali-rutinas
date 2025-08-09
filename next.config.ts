@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -38,7 +43,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ["http://31.97.100.191"],
 };
 
 export default nextConfig;
