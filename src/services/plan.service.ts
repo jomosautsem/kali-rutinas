@@ -1,93 +1,95 @@
 
 'use client'; 
 
-import type { UserPlan, ProgressData, GeneratePersonalizedTrainingPlanInput, Template } from '@/lib/types';
+import type { UserPlan, ProgressData, GeneratePersonalizedTrainingPlanInput } from '@/lib/types';
 import { getUserById } from './user.service';
 import prisma from '@/lib/prisma';
 
 
 // PLAN SERVICES
 export async function getActivePlanForUser(userId: string): Promise<UserPlan | null> {
-    const user = await getUserById(userId);
-    if (!user || typeof window === 'undefined') return null;
+    const plan = await prisma.training_plans.findFirst({
+        where: { user_id: userId, is_active: true }
+    });
 
-    // This data would live in a `training_plans` table in a real DB
-    const storedPlan = localStorage.getItem(`userPlan_${user.email}`);
-    return storedPlan ? JSON.parse(storedPlan) : null;
+    if (!plan || !plan.plan_data) return null;
+    return plan.plan_data as UserPlan;
 }
 
 export async function assignPlanToUser(userId: string, planData: UserPlan): Promise<void> {
-    const user = await getUserById(userId);
-    if (!user || typeof window === 'undefined') return;
+    // Deactivate any old active plans for this user
+    await prisma.training_plans.updateMany({
+        where: { user_id: userId, is_active: true },
+        data: { is_active: false },
+    });
     
-    // This data would live in a `training_plans` table in a real DB
-    localStorage.setItem(`userPlan_${user.email}`, JSON.stringify(planData));
+    // Create the new active plan
+    await prisma.training_plans.create({
+        data: {
+            user_id: userId,
+            plan_data: planData,
+            is_active: true,
+        }
+    });
 }
 
 // PROGRESS SERVICES
 export async function getProgressForWeek(userId: string, week: number): Promise<ProgressData | null> {
-    const user = await getUserById(userId);
-    if (!user || typeof window === 'undefined') return null;
-
-    // This data would live in a `workout_progress` table in a real DB
-    const progress = localStorage.getItem(`progress_week${week}_${user.email}`);
-    return progress ? JSON.parse(progress) : null;
+    const progress = await prisma.workout_progress.findUnique({
+        where: { user_id_week: { user_id: userId, week: week } }
+    });
+    
+    if (!progress || !progress.progress_data) return null;
+    return progress.progress_data as ProgressData;
 }
 
 export async function saveProgressForWeek(userId: string, week: number, data: ProgressData): Promise<void> {
-    const user = await getUserById(userId);
-    if (!user || typeof window === 'undefined') return;
-
-    // This data would live in a `workout_progress` table in a real DB
-    localStorage.setItem(`progress_week${week}_${user.email}`, JSON.stringify(data));
+    await prisma.workout_progress.upsert({
+        where: { user_id_week: { user_id: userId, week: week } },
+        update: { progress_data: data },
+        create: { user_id: userId, week: week, progress_data: data },
+    });
 }
 
 export async function getAllProgressForUser(userId: string): Promise<ProgressData[]> {
     const user = await getUserById(userId);
-    if (!user || typeof window === 'undefined') return [];
+    if (!user) return [];
 
-    const allProgress: ProgressData[] = [];
-    const totalWeeks = user.planDurationInWeeks || 8; 
-
-    for (let i = 1; i <= totalWeeks; i++) {
-        // This data would live in a `workout_progress` table in a real DB
-        const progress = localStorage.getItem(`progress_week${i}_${user.email}`);
-        if (progress) {
-            allProgress.push(JSON.parse(progress));
-        }
-    }
-    return allProgress;
+    const allProgressRecords = await prisma.workout_progress.findMany({
+        where: { user_id: userId },
+        orderBy: { week: 'asc' },
+    });
+    
+    return allProgressRecords.map(p => p.progress_data as ProgressData);
 }
 
-
 // ONBOARDING DATA SERVICES
-export async function getOnboardingData(userId: string): Promise<any | null> {
-    // This now reads from the DB instead of localStorage
+export async function getOnboardingData(userId: string): Promise<GeneratePersonalizedTrainingPlanInput | null> {
     const data = await prisma.onboarding_data.findUnique({
         where: { id: userId }
     });
-    return data;
+    if (!data) return null;
+    // We need to cast because the generated Prisma type is slightly different
+    return data as unknown as GeneratePersonalizedTrainingPlanInput;
 }
 
 // PLAN HISTORY SERVICES
 export async function getPlanHistory(userId: string): Promise<UserPlan[]> {
-    const user = await getUserById(userId);
-    if (!user || typeof window === 'undefined') return [];
-    
-    // This data would live in a `training_plan_history` table in a real DB
-    const history = localStorage.getItem(`planHistory_${user.email}`);
-    return history ? JSON.parse(history) : [];
+    const historyRecords = await prisma.plan_history.findMany({
+        where: { user_id: userId },
+        orderBy: { created_at: 'desc' },
+        take: 3,
+    });
+    return historyRecords.map(h => h.plan_data as UserPlan);
 }
 
 export async function addPlanToHistory(userId: string, plan: UserPlan): Promise<void> {
-    const user = await getUserById(userId);
-    if (!user || typeof window === 'undefined') return;
-
-    let history = await getPlanHistory(userId);
-    history.push(plan);
-    if (history.length > 3) {
-        history = history.slice(-3);
-    }
-    // This data would live in a `training_plan_history` table in a real DB
-    localStorage.setItem(`planHistory_${user.email}`, JSON.stringify(history));
+    await prisma.plan_history.create({
+        data: {
+            user_id: userId,
+            plan_data: plan,
+        }
+    });
 }
+
+    

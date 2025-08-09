@@ -87,8 +87,11 @@ export async function getUserById(id: string): Promise<User | null> {
     };
 }
 
-
+// NOTE: This function simulates creating a Supabase auth user and a profile.
+// In a real project, you'd use the Supabase client-side library for signUp,
+// which would then trigger a function to create the profile.
 export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus' | 'name' | 'inviteCode' | 'avatarUrl' | 'customPlanRequest'> & { password?: string }): Promise<User> {
+    
     const existingUser = await prisma.profiles.findUnique({
         where: { email: userData.email }
     });
@@ -96,19 +99,10 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
     if (existingUser) {
         throw new Error("Este correo electrónico ya ha sido registrado.");
     }
-
-    if (!userData.password) {
-        throw new Error("La contraseña es requerida.");
-    }
     
-    // In a real Supabase environment, you would call Supabase Auth signUp here.
-    // Since we don't have direct access to Supabase Auth, we'll simulate the creation
-    // and rely on Prisma to create the user profile, which is linked to auth.users via a trigger.
-    
-    // IMPORTANT: This simplified flow assumes a trigger on the Supabase `profiles` table
-    // that creates an `auth.users` record. We are not handling the password directly.
-    // The password would be sent to the Supabase client-side library `signUp` method.
-    // For this server action, we proceed with profile creation.
+    // In a real Supabase env, you would NOT handle the password here.
+    // The password would be passed to the supabase.auth.signUp client-side method.
+    // For this backend simulation, we're just creating the profile.
 
     const newProfile = await prisma.profiles.create({
         data: {
@@ -124,8 +118,11 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
         }
     });
 
-    // We can't return the full User object with password, as it's handled by Auth
-    return await getUserById(newProfile.id) as User;
+    const user = await getUserById(newProfile.id);
+    if (!user) {
+        throw new Error("Failed to retrieve created user.");
+    }
+    return user;
 }
 
 
@@ -133,7 +130,6 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
     try {
         const dataToUpdate: any = {};
         
-        // Map camelCase to snake_case for Prisma
         if(updatedData.firstName) dataToUpdate.first_name = updatedData.firstName;
         if(updatedData.paternalLastName) dataToUpdate.paternal_last_name = updatedData.paternalLastName;
         if(updatedData.maternalLastName) dataToUpdate.maternal_last_name = updatedData.maternalLastName;
@@ -146,6 +142,13 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
         if(updatedData.currentWeek) dataToUpdate.current_week = updatedData.currentWeek;
         if(updatedData.planDurationInWeeks) dataToUpdate.plan_duration_in_weeks = updatedData.planDurationInWeeks;
         if(updatedData.status) dataToUpdate.status = updatedData.status;
+
+        // Handle cases where a value should be set to null
+        if ('planStartDate' in updatedData && updatedData.planStartDate === undefined) dataToUpdate.plan_start_date = null;
+        if ('planEndDate' in updatedData && updatedData.planEndDate === undefined) dataToUpdate.plan_end_date = null;
+        if ('currentWeek' in updatedData && updatedData.currentWeek === undefined) dataToUpdate.current_week = null;
+        if ('planDurationInWeeks' in updatedData && updatedData.planDurationInWeeks === undefined) dataToUpdate.plan_duration_in_weeks = null;
+
 
         const updatedProfile = await prisma.profiles.update({
             where: { id: userId },
@@ -162,8 +165,6 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
 
 export async function deleteUser(userId: string): Promise<boolean> {
     try {
-        // In a real Supabase setup, deleting the user from auth.users would cascade
-        // and delete the profile. Here, we delete the profile directly.
         await prisma.profiles.delete({
             where: { id: userId }
         });
@@ -174,12 +175,24 @@ export async function deleteUser(userId: string): Promise<boolean> {
     }
 }
 
+
 export async function saveOnboardingData(userId: string, data: Omit<GeneratePersonalizedTrainingPlanInput, 'history'>): Promise<void> {
-    // This is not a standard Prisma schema field, so we use localStorage for this demo
-    if (typeof window !== 'undefined') {
-        const user = await getUserById(userId);
-        if (user) {
-            localStorage.setItem(`onboardingData_${user.email}`, JSON.stringify(data));
-        }
-    }
+    // This now saves to a separate table
+    const { goals, muscleFocus, ...restOfData } = data;
+    await prisma.onboarding_data.upsert({
+        where: { id: userId },
+        update: {
+            ...restOfData,
+            goals,
+            muscleFocus: muscleFocus || [],
+        },
+        create: {
+            id: userId,
+            ...restOfData,
+            goals,
+            muscleFocus: muscleFocus || [],
+        },
+    });
 }
+
+    
