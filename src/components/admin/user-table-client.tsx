@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useState } from "react"
@@ -426,3 +425,5 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     </>
   )
 }
+
+    

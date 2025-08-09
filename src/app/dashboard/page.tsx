@@ -1,8 +1,7 @@
 
-
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,6 +37,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+
+import { getUserByEmail, updateUser } from "@/services/user.service";
+import { getActivePlanForUser, getProgressForWeek, saveProgressForWeek, assignPlanToUser, addPlanToHistory } from "@/services/plan.service";
 
 
 const isVideo = (url: string) => {
@@ -508,16 +510,16 @@ const ProgressSummary = ({ totalDays, completedDays, user }: { totalDays: number
 
 
 export default function DashboardPage() {
-  const [planStatus, setPlanStatus] = useState<'aprobado' | 'pendiente' | 'sin-plan' | null>(null);
-  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [completedDays, setCompletedDays] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressData>({});
   const [savedProgress, setSavedProgress] = useState<ProgressData>({});
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [cycleModalState, setCycleModalState] = useState<'closed' | 'week_complete' | 'cycle_complete'>('closed');
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [confetti, setConfetti] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const { toast } = useToast();
   const router = useRouter();
 
@@ -543,62 +545,60 @@ export default function DashboardPage() {
     },
   };
 
-  useEffect(() => {
+  const loadDashboardData = useCallback(async () => {
     if (typeof window !== 'undefined') {
+      setLoading(true);
       const loggedInUserEmail = sessionStorage.getItem("loggedInUser");
-      setUserEmail(loggedInUserEmail);
+      
+      if (!loggedInUserEmail) {
+        router.push('/login');
+        return;
+      }
 
-      const storedUsers = localStorage.getItem("registeredUsers");
-      if (loggedInUserEmail && storedUsers) {
-        const users: User[] = JSON.parse(storedUsers);
-        const currentUser = users.find(u => u.email === loggedInUserEmail);
-        if (currentUser) {
-          setUser(currentUser);
-          setPlanStatus(currentUser.planStatus as any);
-          
-          if (currentUser.planStatus === 'aprobado') {
-              const storedPlan = localStorage.getItem(`userPlan_${currentUser.email}`);
-              if (storedPlan) {
-                  setUserPlan(JSON.parse(storedPlan));
-              }
-              
-              const currentWeek = currentUser.currentWeek || 1;
-              const storedCompletedDays = localStorage.getItem(`completedDays_week${currentWeek}_${currentUser.email}`);
-              
-              if (storedCompletedDays) {
-                  setCompletedDays(JSON.parse(storedCompletedDays));
-              } else {
-                  setCompletedDays([]); 
-              }
-
-              const storedProgress = localStorage.getItem(`progress_week${currentWeek}_${currentUser.email}`);
-              const initialProgress = storedProgress ? JSON.parse(storedProgress) : {};
-              setProgress(initialProgress);
-              setSavedProgress(initialProgress);
-          }
-        } else {
-          setPlanStatus('sin-plan');
+      try {
+        const currentUser = await getUserByEmail(loggedInUserEmail);
+        if (!currentUser) {
+          router.push('/login');
+          return;
         }
-      } else {
-        setPlanStatus('sin-plan');
+        setUser(currentUser);
+        
+        if (currentUser.planStatus === 'aprobado') {
+          const plan = await getActivePlanForUser(currentUser.id);
+          setUserPlan(plan);
+
+          const currentWeek = currentUser.currentWeek || 1;
+          const weekProgress = await getProgressForWeek(currentUser.id, currentWeek);
+          const initialProgress = weekProgress || {};
+          setProgress(initialProgress);
+          setSavedProgress(initialProgress);
+
+          const storedCompletedDays = localStorage.getItem(`completedDays_week${currentWeek}_${currentUser.email}`);
+          setCompletedDays(storedCompletedDays ? JSON.parse(storedCompletedDays) : []);
+        }
+      } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar los datos del panel." });
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
     }
-  }, [user?.currentWeek]);
+  }, [router, toast]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData, user?.currentWeek]);
 
 
-  const handlePlanGenerated = (newPlan: UserPlan) => {
-    if (typeof window !== 'undefined' && userEmail && user) {
-        const storedUsers = localStorage.getItem("registeredUsers");
-        let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-        const currentUser = users.find(u => u.email === userEmail);
-        const planDuration = currentUser?.planDurationInWeeks || 4;
-        
+  const handlePlanGenerated = async (newPlan: UserPlan) => {
+    if (!user) return;
+    try {
+        const planDuration = user.planDurationInWeeks || 4;
         const today = new Date();
         const endDate = new Date();
         endDate.setDate(today.getDate() + (planDuration * 7));
 
-        const updatedUser: User = {
-            ...user,
+        const updatedUserData: Partial<User> = {
             planStatus: 'aprobado',
             planStartDate: today.toISOString(),
             planEndDate: endDate.toISOString(),
@@ -606,35 +606,25 @@ export default function DashboardPage() {
             currentWeek: 1
         };
 
-        users = users.map(u => u.email === userEmail ? updatedUser : u);
+        const updatedUser = await updateUser(user.id, updatedUserData);
+        await assignPlanToUser(user.id, newPlan);
+        await addPlanToHistory(user.id, newPlan);
         
-        localStorage.setItem("registeredUsers", JSON.stringify(users));
-        setUser(updatedUser);
+        if (updatedUser) {
+            setUser(updatedUser);
+        }
         setUserPlan(newPlan);
-        localStorage.setItem(`userPlan_${userEmail}`, JSON.stringify(newPlan));
-        
-        setPlanStatus('aprobado');
-        
-        const planHistoryString = localStorage.getItem(`planHistory_${userEmail}`);
-        let planHistory: UserPlan[] = planHistoryString ? JSON.parse(planHistoryString) : [];
-        planHistory.push(newPlan);
-        if (planHistory.length > 3) {
-            planHistory.shift(); 
-        }
-        localStorage.setItem(`planHistory_${userEmail}`, JSON.stringify(planHistory));
-
-        for (let i = 1; i <= planDuration; i++) {
-            localStorage.removeItem(`completedDays_week${i}_${userEmail}`);
-            localStorage.removeItem(`progress_week${i}_${userEmail}`);
-        }
         setCompletedDays([]);
         setProgress({});
         setSavedProgress({});
+
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el plan generado." });
     }
   };
 
   const handleToggleDay = (day: string) => {
-      if (!user || !userPlan || !userEmail) return;
+      if (!user || !userPlan) return;
 
       const newCompletedDays = completedDays.includes(day)
           ? completedDays.filter(d => d !== day)
@@ -642,7 +632,7 @@ export default function DashboardPage() {
       
       setCompletedDays(newCompletedDays);
       const currentWeek = user.currentWeek || 1;
-      localStorage.setItem(`completedDays_week${currentWeek}_${userEmail}`, JSON.stringify(newCompletedDays));
+      localStorage.setItem(`completedDays_week${currentWeek}_${user.email}`, JSON.stringify(newCompletedDays));
 
       const allDaysInPlan = userPlan.weeklyPlan.map(d => d.day);
       const isWeekComplete = allDaysInPlan.length > 0 && allDaysInPlan.every(d => newCompletedDays.includes(d));
@@ -660,62 +650,46 @@ export default function DashboardPage() {
       }
   }
 
-  const handleAdvanceToNextWeek = () => {
-      if (!user || !userEmail) return;
+  const handleAdvanceToNextWeek = async () => {
+      if (!user) return;
 
       const currentWeek = user.currentWeek || 1;
       const nextWeek = currentWeek + 1;
-      const updatedUser = { ...user, currentWeek: nextWeek };
+      const updatedUser = await updateUser(user.id, { currentWeek: nextWeek });
 
-      const storedUsers = localStorage.getItem("registeredUsers");
-      let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-      users = users.map(u => u.email === user.email ? updatedUser : u);
-      localStorage.setItem("registeredUsers", JSON.stringify(users));
-      setUser(updatedUser);
-
+      if (updatedUser) {
+          setUser(updatedUser);
+      }
+      
       setCompletedDays([]);
       setProgress({});
       setSavedProgress({});
       setActiveDayIndex(0);
-      
       setCycleModalState('closed');
       window.scrollTo(0, 0);
   }
 
-  const handleFinishCycle = () => {
-    if (!user || !userEmail || !userPlan) return;
-
-    localStorage.setItem(`lastCompletedPlan_${userEmail}`, JSON.stringify(userPlan));
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 7);
-    localStorage.setItem(`progressExpiration_${userEmail}`, expirationDate.toISOString());
-
-    const storedUsers = localStorage.getItem("registeredUsers");
-    let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+  const handleFinishCycle = async () => {
+    if (!user) return;
     
-    const updatedUser: User = {
-      ...user,
+    // In a real DB setup, you might archive this plan instead of just updating status.
+    const updatedUser = await updateUser(user.id, {
       planStatus: 'sin-plan',
       customPlanRequest: 'none',
       currentWeek: undefined,
       planStartDate: undefined,
       planEndDate: undefined,
-      planDurationInWeeks: undefined,
-    };
+    });
     
-    users = users.map(u => u.email === user.email ? updatedUser : u);
-    localStorage.setItem("registeredUsers", JSON.stringify(users));
-
-    localStorage.removeItem(`userPlan_${userEmail}`);
-
-    setUser(updatedUser);
+    if (updatedUser) {
+      setUser(updatedUser);
+    }
+    
     setUserPlan(null);
-    setPlanStatus('sin-plan');
     setCompletedDays([]);
     setProgress({});
     setSavedProgress({});
     setActiveDayIndex(0);
-    
     setCycleModalState('closed');
   }
 
@@ -736,10 +710,10 @@ export default function DashboardPage() {
     });
   };
 
-  const handleSaveChanges = () => {
-    if (userEmail && user) {
+  const handleSaveChanges = async () => {
+    if (user) {
         const currentWeek = user.currentWeek || 1;
-        localStorage.setItem(`progress_week${currentWeek}_${userEmail}`, JSON.stringify(progress));
+        await saveProgressForWeek(user.id, currentWeek, progress);
         setSavedProgress(progress);
         toast({
             title: "¡Progreso Guardado!",
@@ -748,42 +722,26 @@ export default function DashboardPage() {
     }
   };
 
-    const handleRequestCustomPlan = () => {
-        if (!user || !userEmail) return;
+    const handleRequestCustomPlan = async () => {
+        if (!user) return;
 
-        const onboardingDataString = localStorage.getItem(`onboardingData_${user.email}`);
-        if (!onboardingDataString) {
+        const updatedUser = await updateUser(user.id, { customPlanRequest: 'requested' });
+        if (updatedUser) {
+            setUser(updatedUser);
             toast({
-                variant: "destructive",
-                title: "Faltan datos",
-                description: "Por favor, completa tus datos de registro primero para solicitar un plan personalizado.",
+                title: "¡Solicitud Enviada!",
+                description: "Un entrenador revisará tu perfil y se pondrá en contacto contigo pronto.",
             });
-            // Optionally, redirect to a form if you want them to fill it now.
-            // router.push('/onboarding');
-            return;
         }
-
-        const storedUsers = localStorage.getItem("registeredUsers");
-        let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-        const updatedUser: User = { ...user, customPlanRequest: 'requested' };
-        
-        users = users.map(u => u.email === user.email ? updatedUser : u);
-        localStorage.setItem("registeredUsers", JSON.stringify(users));
-        setUser(updatedUser);
-
-        toast({
-            title: "¡Solicitud Enviada!",
-            description: "Un entrenador revisará tu perfil y se pondrá en contacto contigo pronto.",
-        });
     };
 
-  const isPlanActive = planStatus === 'aprobado' || planStatus === 'pendiente';
+  const isPlanActive = user?.planStatus === 'aprobado' || user?.planStatus === 'pendiente';
 
   const renderPlanContent = () => {
-    if (planStatus === null) {
-        return <p>Cargando estado del plan...</p>; // Or a skeleton loader
+    if (loading) {
+        return <Skeleton className="w-full h-96" />;
     }
-    switch(planStatus) {
+    switch(user?.planStatus) {
       case 'aprobado':
         return userPlan ? <PlanAprobado 
             plan={userPlan} 
@@ -882,7 +840,7 @@ export default function DashboardPage() {
                     <CardHeader>
                         <CardTitle className="font-headline">Tu Plan de Entrenamiento</CardTitle>
                         <CardDescription>
-                            {planStatus === 'aprobado' 
+                            {user?.planStatus === 'aprobado' 
                                 ? `Este es tu horario de entrenamiento para la semana.`
                                 : "Tu plan de entrenamiento aparecerá aquí una vez que esté listo."
                             }
@@ -902,7 +860,7 @@ export default function DashboardPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {planStatus === 'aprobado' && userPlan ? (
+                        {user?.planStatus === 'aprobado' && userPlan ? (
                             <div className="grid gap-6 md:grid-cols-2">
                                 <div className="h-[400px] flex items-center justify-center">
                                     <ProgressSummary 
@@ -1010,3 +968,5 @@ export default function DashboardPage() {
     </>
   )
 }
+
+    
