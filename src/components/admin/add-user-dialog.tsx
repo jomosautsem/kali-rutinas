@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { PlusCircle, Loader2 } from "lucide-react";
 import type { User } from "@/lib/types";
 import { AvatarSelector } from "./avatar-selector";
+import { createUser } from "@/services/user.service";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "El nombre es requerido."),
@@ -39,10 +40,10 @@ const formSchema = z.object({
 });
 
 type AddUserDialogProps = {
-  onAddUser: (user: Omit<User, 'id' | 'role' | 'status' | 'registeredAt' | 'planStatus' | 'name'>) => void;
+  onUserAdded: () => void; // Callback to refresh the user list
 };
 
-export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
+export function AddUserDialog({ onUserAdded }: AddUserDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
@@ -60,34 +61,27 @@ export function AddUserDialog({ onAddUser }: AddUserDialogProps) {
 
   const { isSubmitting } = form.formState;
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const storedUsers = localStorage.getItem("registeredUsers");
-      const users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-
-      if (users.some(user => user.email === values.email)) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Este correo electrónico ya está registrado.",
-        });
-        return;
-      }
+      // This is a simplified flow. In a real app, you'd create the
+      // user in Supabase Auth, get the ID, then create the profile.
+      // For now, we call our service that's supposed to do that.
+      await createUser(values);
       
-      onAddUser(values);
       const fullName = `${values.firstName} ${values.paternalLastName}`.trim();
       toast({
         title: "Usuario Añadido",
         description: `El usuario ${fullName} ha sido creado exitosamente.`,
       });
+      onUserAdded(); // Refresh the parent component's user list
       setIsOpen(false);
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding user:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo añadir el usuario.",
+        description: error.message || "No se pudo añadir el usuario.",
       });
     }
   }

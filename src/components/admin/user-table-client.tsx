@@ -46,6 +46,7 @@ import { Label } from "../ui/label";
 import { ViewOnboardingDataDialog } from "./view-onboarding-data-dialog";
 import type { GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { getOnboardingData } from "@/services/plan.service";
 
 
 type UserTableClientProps = {
@@ -140,6 +141,8 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
   };
   
   const handleAnalyticsOpen = (user: User) => {
+    // This part would now fetch from the DB
+    // For now, it will likely show no data as it's still reading from LS
     const progressData = localStorage.getItem(`progress_${user.email}`);
     const planData = localStorage.getItem(`userPlan_${user.email}`);
     if (progressData && planData) {
@@ -154,9 +157,9 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
     setIsAnalyticsOpen(true);
   }
 
-  const handleViewOnboardingData = (user: User) => {
-    const data = localStorage.getItem(`onboardingData_${user.email}`);
-    setSelectedOnboardingData(data ? JSON.parse(data) : null);
+  const handleViewOnboardingData = async (user: User) => {
+    const data = await getOnboardingData(user.id);
+    setSelectedOnboardingData(data);
     setSelectedUser(user);
     setIsOnboardingDataOpen(true);
   };
@@ -196,7 +199,7 @@ export function UserTableClient({ users, templates, onEditUser, onDeleteUser, on
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={user.avatarUrl} alt={user.name} />
-                      <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="font-medium">{user.name}</div>

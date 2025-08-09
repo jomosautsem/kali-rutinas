@@ -1,163 +1,139 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { UserTableClient } from "@/components/admin/user-table-client"
 import type { User, UserPlan } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import type { Template } from "@/app/admin/templates/page";
-
-// In a real app, this data would be fetched from your database.
-const initialMockUsers: User[] = [
-  { id: "user-alice-1", firstName: "Alice", paternalLastName: "Johnson", maternalLastName: "Smith", name: "Alice Johnson Smith", email: "alice@example.com", role: "client", status: "activo", registeredAt: "2023-10-01", planStatus: "aprobado", inviteCode: "JOALSM23", avatarUrl: "/images/avatars/avatar-01.png", customPlanRequest: 'none' },
-  { id: "user-bob-2", firstName: "Bob", paternalLastName: "Williams", maternalLastName: "Jones", name: "Bob Williams Jones", email: "bob@example.com", role: "client", status: "activo", registeredAt: "2023-09-25", planStatus: "sin-plan", inviteCode: "WIBOJO45", avatarUrl: "/images/avatars/avatar-02.png", customPlanRequest: 'none' },
-  { id: "user-charlie-3", firstName: "Charlie", paternalLastName: "Brown", maternalLastName: "Davis", name: "Charlie Brown Davis", email: "charlie@example.com", role: "client", status: "pendiente", registeredAt: "2023-10-05", planStatus: "sin-plan", avatarUrl: "/images/avatars/avatar-03.png", customPlanRequest: 'none' },
-  { id: "user-jorge-4", firstName: "Jorge", paternalLastName: "Morales", maternalLastName: "", name: "Jorge Morales", email: "kalicentrodeportivotemixco@gmail.com", role: "admin", status: "activo", registeredAt: "2023-01-15", planStatus: "n/a", avatarUrl: "/images/avatars/avatar-04.png", customPlanRequest: 'none' },
-  { id: "user-ethan-5", firstName: "Ethan", paternalLastName: "Hunt", maternalLastName: "Carter", name: "Ethan Hunt Carter", email: "ethan@example.com", role: "client", status: "pendiente", registeredAt: "2023-08-11", planStatus: "sin-plan", avatarUrl: "/images/avatars/avatar-05.png", customPlanRequest: 'none' },
-];
+import { getAllUsers, updateUser, deleteUser } from "@/services/user.service";
+import { assignPlanToUser, getActivePlanForUser, getAllProgressForUser } from "@/services/plan.service";
 
 const TEMPLATES_STORAGE_KEY = "trainingTemplates";
-
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // This is a client-side only effect to load data from localStorage
-    if (typeof window !== 'undefined') {
-      try {
-        // Load Users
-        const storedUsers = localStorage.getItem("registeredUsers");
-        if (storedUsers) {
-          setUsers(JSON.parse(storedUsers));
-        } else {
-          localStorage.setItem("registeredUsers", JSON.stringify(initialMockUsers));
-          setUsers(initialMockUsers);
-        }
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const dbUsers = await getAllUsers();
+      setUsers(dbUsers);
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar los usuarios." });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
-        // Load Templates
-        const storedTemplates = localStorage.getItem(TEMPLATES_STORAGE_KEY);
-        if (storedTemplates) {
-          setTemplates(JSON.parse(storedTemplates));
-        }
-      } catch (error) {
-        console.error("Failed to parse data from localStorage", error);
-        setUsers(initialMockUsers);
+  useEffect(() => {
+    fetchUsers();
+    // Load templates from localStorage (can be migrated later)
+    if (typeof window !== 'undefined') {
+      const storedTemplates = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+      if (storedTemplates) {
+        setTemplates(JSON.parse(storedTemplates));
       }
     }
-  }, []);
+  }, [fetchUsers]);
 
-  const handleEditUser = (updatedUser: User) => {
-     const updatedUsers = users.map(user =>
-      user.id === updatedUser.id ? { ...user, ...updatedUser, name: `${updatedUser.firstName} ${updatedUser.paternalLastName} ${updatedUser.maternalLastName}`.trim() } : user
-    );
-    setUsers(updatedUsers);
-    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+  const handleEditUser = async (updatedUser: User) => {
+    const result = await updateUser(updatedUser.id, updatedUser);
+    if (result) {
+      await fetchUsers(); // Refresh list
+    } else {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar el usuario." });
+    }
   }
 
-  const handleDeleteUser = (userId: string) => {
-    const updatedUsers = users.filter(user => user.id !== userId);
-    setUsers(updatedUsers);
-    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
-     // Also remove the user's plan if it exists
-    const user = users.find(u => u.id === userId);
-    if (user) {
-        localStorage.removeItem(`userPlan_${user.email}`);
+  const handleDeleteUser = async (userId: string) => {
+    const success = await deleteUser(userId);
+    if (success) {
+      await fetchUsers();
+      toast({ title: "Usuario Eliminado", description: "El usuario ha sido eliminado de la base de datos." });
+    } else {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el usuario." });
     }
   };
   
-  const handleSaveAndApprovePlan = (userId: string, plan: UserPlan, duration: number) => {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-    
+  const handleSaveAndApprovePlan = async (userId: string, plan: UserPlan, duration: number) => {
     const today = new Date();
     const endDate = new Date(today.getTime() + duration * 7 * 24 * 60 * 60 * 1000);
-
-    const updatedUsers = users.map(u => 
-      u.id === userId ? { 
-          ...u, 
-          planStatus: 'aprobado',
-          customPlanRequest: 'none', // Reset custom plan request on approval
-          planStartDate: today.toISOString(),
-          planEndDate: endDate.toISOString(),
-          planDurationInWeeks: duration,
-          currentWeek: 1
-      } : u
-    );
-    setUsers(updatedUsers);
-    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
-    localStorage.setItem(`userPlan_${user.email}`, JSON.stringify(plan));
     
-    // Clear all previous weekly progress data for this user
-    for (let i = 1; i <= 8; i++) { // Clear up to a potential 8 weeks
-        localStorage.removeItem(`completedDays_week${i}_${user.email}`);
-        localStorage.removeItem(`progress_week${i}_${user.email}`);
-    }
-
-    toast({
-        title: "Plan Asignado y Aprobado",
-        description: `El plan ha sido asignado correctamente a ${user.name}.`,
+    await assignPlanToUser(userId, plan);
+    const result = await updateUser(userId, {
+        planStatus: 'aprobado',
+        customPlanRequest: 'none',
+        planStartDate: today.toISOString(),
+        planEndDate: endDate.toISOString(),
+        planDurationInWeeks: duration,
+        currentWeek: 1
     });
+
+    if (result) {
+      await fetchUsers();
+      toast({
+          title: "Plan Asignado y Aprobado",
+          description: `El plan ha sido asignado correctamente a ${result.name}.`,
+      });
+    } else {
+       toast({ variant: "destructive", title: "Error", description: "No se pudo asignar el plan." });
+    }
   };
 
-  const handleDeletePlan = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-
-    const updatedUsers = users.map(u =>
-      u.id === userId ? {
-        ...u,
+  const handleDeletePlan = async (userId: string) => {
+    // This is more complex now. It would involve deleting/archiving the plan and progress.
+    // For now, let's just update the user status.
+    const result = await updateUser(userId, {
         planStatus: 'sin-plan',
         customPlanRequest: 'none',
         planStartDate: undefined,
         planEndDate: undefined,
         planDurationInWeeks: undefined,
         currentWeek: undefined,
-      } : u
-    );
-    setUsers(updatedUsers);
-    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
-    localStorage.removeItem(`userPlan_${user.email}`);
-    
-    // Clear all previous weekly progress data for this user
-    for (let i = 1; i <= 8; i++) {
-        localStorage.removeItem(`completedDays_week${i}_${user.email}`);
-        localStorage.removeItem(`progress_week${i}_${user.email}`);
-    }
-
-    toast({
-        variant: "destructive",
-        title: "Plan Eliminado",
-        description: `Se ha eliminado el plan de ${user.name}.`,
     });
-  };
+    // You would also delete from `training_plans` and `workout_progress` tables here.
 
-
-  const handleApproveUser = (userId: string, inviteCode: string) => {
-    const updatedUsers = users.map(user =>
-      user.id === userId ? { ...user, status: 'activo', inviteCode } : user
-    );
-    setUsers(updatedUsers);
-    localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
-    toast({
-      title: "Usuario Aprobado",
-      description: `El KaliCodigo se ha generado y guardado.`,
-    });
-  };
-
-  const handleToggleUserStatus = (userId: string, currentStatus: "activo" | "inactivo") => {
-      const newStatus = currentStatus === "activo" ? "inactivo" : "activo";
-      const updatedUsers = users.map(user =>
-          user.id === userId ? { ...user, status: newStatus } : user
-      );
-      setUsers(updatedUsers);
-      localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+     if (result) {
+      await fetchUsers();
       toast({
-          title: `Usuario ${newStatus === "activo" ? "Activado" : "Desactivado"}`,
-          description: `El acceso para el usuario ha sido ${newStatus === "activo" ? "restaurado" : "revocado"}.`,
+          variant: "destructive",
+          title: "Plan Eliminado",
+          description: `Se ha eliminado el plan de ${result.name}.`,
       });
+    } else {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el plan." });
+    }
+  };
+
+  const handleApproveUser = async (userId: string, inviteCode: string) => {
+    const result = await updateUser(userId, { status: 'activo', inviteCode });
+    if (result) {
+      await fetchUsers();
+      toast({
+        title: "Usuario Aprobado",
+        description: `El KaliCodigo se ha generado y guardado.`,
+      });
+    } else {
+       toast({ variant: "destructive", title: "Error", description: "No se pudo aprobar el usuario." });
+    }
+  };
+
+  const handleToggleUserStatus = async (userId: string, currentStatus: "activo" | "inactivo") => {
+      const newStatus = currentStatus === "activo" ? "inactivo" : "activo";
+      const result = await updateUser(userId, { status: newStatus });
+      if(result) {
+        await fetchUsers();
+        toast({
+            title: `Usuario ${newStatus === "activo" ? "Activado" : "Desactivado"}`,
+            description: `El acceso para el usuario ha sido ${newStatus === "activo" ? "restaurado" : "revocado"}.`,
+        });
+      } else {
+        toast({ variant: "destructive", title: "Error", description: "No se pudo cambiar el estado del usuario." });
+      }
   };
 
   return (
@@ -168,16 +144,19 @@ export default function AdminUsersPage() {
           <p className="text-muted-foreground">Ver, gestionar y confirmar cuentas de usuario.</p>
         </div>
       </div>
-      <UserTableClient 
-        users={users}
-        templates={templates}
-        onEditUser={handleEditUser}
-        onDeleteUser={handleDeleteUser} 
-        onSaveAndApprovePlan={handleSaveAndApprovePlan}
-        onDeletePlan={handleDeletePlan}
-        onApproveUser={handleApproveUser}
-        onToggleUserStatus={handleToggleUserStatus}
-      />
+      {/* Add a loading state */}
+      {loading ? <p>Cargando usuarios...</p> : (
+        <UserTableClient 
+          users={users}
+          templates={templates}
+          onEditUser={handleEditUser}
+          onDeleteUser={handleDeleteUser} 
+          onSaveAndApprovePlan={handleSaveAndApprovePlan}
+          onDeletePlan={handleDeletePlan}
+          onApproveUser={handleApproveUser}
+          onToggleUserStatus={handleToggleUserStatus}
+        />
+      )}
     </div>
   )
 }
