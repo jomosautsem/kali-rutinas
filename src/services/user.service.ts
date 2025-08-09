@@ -8,28 +8,48 @@ import type { User, GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
 // --- USER SERVICE FUNCTIONS ---
 
 export async function getAllUsers(): Promise<User[]> {
-    // This function needs to be adapted to not expose sensitive data like passwords
-    // For now, it fetches all profiles. In a real app, you'd be more selective.
     const profiles = await prisma.profiles.findMany();
-    return profiles as User[];
+    
+    return profiles.map(profile => ({
+        ...profile,
+        name: `${profile.first_name} ${profile.paternal_last_name} ${profile.maternal_last_name || ''}`.trim(),
+        firstName: profile.first_name,
+        paternalLastName: profile.paternal_last_name,
+        maternalLastName: profile.maternal_last_name || '',
+        registeredAt: profile.registered_at?.toISOString() || new Date().toISOString()
+    })) as User[];
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
     const profile = await prisma.profiles.findUnique({
         where: { email },
     });
-    return profile as User | null;
+    if (!profile) return null;
+    return {
+        ...profile,
+        name: `${profile.first_name} ${profile.paternal_last_name} ${profile.maternal_last_name || ''}`.trim(),
+        firstName: profile.first_name,
+        paternalLastName: profile.paternal_last_name,
+        maternalLastName: profile.maternal_last_name || '',
+        registeredAt: profile.registered_at?.toISOString() || new Date().toISOString()
+    } as User;
 }
 
 export async function getUserById(id: string): Promise<User | null> {
     const profile = await prisma.profiles.findUnique({
         where: { id },
     });
-    return profile as User | null;
+    if (!profile) return null;
+    return {
+        ...profile,
+        name: `${profile.first_name} ${profile.paternal_last_name} ${profile.maternal_last_name || ''}`.trim(),
+        firstName: profile.first_name,
+        paternalLastName: profile.paternal_last_name,
+        maternalLastName: profile.maternal_last_name || '',
+        registeredAt: profile.registered_at?.toISOString() || new Date().toISOString()
+    } as User;
 }
 
-// NOTE: This now only creates the profile. Authentication is separate.
-// We assume Supabase Auth handles the actual user creation in auth.users.
 export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus' | 'name' | 'inviteCode' | 'avatarUrl' | 'customPlanRequest' | 'password'> & { password?: string }): Promise<User> {
     const existingUser = await prisma.profiles.findUnique({
         where: { email: userData.email }
@@ -45,45 +65,38 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
     
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    // This part of the code assumes you have a `users` table that is NOT `auth.users`
-    // If you are using Supabase Auth, you should handle user creation via the Supabase client.
-    // This implementation creates a user and a profile in a single transaction in your public schema.
     const newUser = await prisma.users.create({
         data: {
             email: userData.email,
             encrypted_password: hashedPassword,
-            // Create the profile in the same transaction
-            profile: {
-                create: {
-                    first_name: userData.firstName,
-                    paternal_last_name: userData.paternalLastName,
-                    maternal_last_name: userData.maternalLastName,
-                    email: userData.email,
-                    role: 'client',
-                    status: 'pendiente',
-                    plan_status: 'sin-plan'
-                }
-            }
-        },
-        include: {
-            profile: true // Include the created profile in the return value
         }
     });
 
-    if (!newUser || !newUser.profile) {
+    const newProfile = await prisma.profiles.create({
+        data: {
+            id: newUser.id,
+            first_name: userData.firstName,
+            paternal_last_name: userData.paternalLastName,
+            maternal_last_name: userData.maternalLastName,
+            email: userData.email,
+            role: 'client',
+            status: 'pendiente',
+            plan_status: 'sin-plan'
+        }
+    });
+
+    if (!newProfile) {
         throw new Error("No se pudo crear el perfil del usuario.");
     }
 
-    // This casting is not safe, but for the sake of making it "work" with the current structure.
-    const profile = newUser.profile;
     return {
-        id: profile.id,
-        ...profile,
-        name: `${profile.first_name} ${profile.paternal_last_name} ${profile.maternal_last_name || ''}`.trim(),
-        firstName: profile.first_name,
-        paternalLastName: profile.paternal_last_name,
-        maternalLastName: profile.maternal_last_name || '',
-        registeredAt: profile.registered_at?.toISOString() || new Date().toISOString()
+        id: newProfile.id,
+        ...newProfile,
+        name: `${newProfile.first_name} ${newProfile.paternal_last_name} ${newProfile.maternal_last_name || ''}`.trim(),
+        firstName: newProfile.first_name,
+        paternalLastName: newProfile.paternal_last_name,
+        maternalLastName: newProfile.maternal_last_name || '',
+        registeredAt: newProfile.registered_at?.toISOString() || new Date().toISOString()
     } as User;
 }
 
@@ -121,7 +134,9 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
 
 export async function deleteUser(userId: string): Promise<boolean> {
     try {
-        // This will cascade and delete the profile due to the relation
+        await prisma.profiles.delete({
+            where: { id: userId }
+        });
         await prisma.users.delete({
             where: { id: userId }
         });
