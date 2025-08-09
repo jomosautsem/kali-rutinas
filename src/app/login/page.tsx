@@ -11,7 +11,8 @@ import { AuthCard } from "@/components/auth-card"
 import { useToast } from "@/hooks/use-toast"
 import type { User } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { KeyRound } from "lucide-react"
+import { KeyRound, Loader2 } from "lucide-react"
+import { getUserByEmail } from "@/services/user.service"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -21,11 +22,10 @@ export default function LoginPage() {
   const [inviteCode, setInviteCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Clear previous session data to prevent session bleed
     if (typeof window !== 'undefined') {
       sessionStorage.clear();
     }
@@ -33,7 +33,6 @@ export default function LoginPage() {
     const adminEmail = "kalicentrodeportivotemixco@gmail.com"
     const adminPassword = "1q2w3e12"
     
-    // Check for admin credentials first
     if (email === adminEmail && password === adminPassword) {
       toast({
         title: "Inicio de Sesión Exitoso",
@@ -41,14 +40,11 @@ export default function LoginPage() {
       })
       sessionStorage.setItem("loggedInUser", email);
       router.push("/admin/dashboard")
-      return; // Stop execution here for admin
+      return;
     }
 
-    // If not admin, proceed with client login logic
     try {
-        const storedUsers = localStorage.getItem("registeredUsers");
-        const users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-        const user = users.find(u => u.email === email);
+        const user = await getUserByEmail(email);
 
         if (user) {
             if (user.status === 'pendiente') {
@@ -71,13 +67,14 @@ export default function LoginPage() {
                 return;
             }
             
-            // In a real app, you would verify the password hash here
+            // In a real app with Supabase Auth, you would use `supabase.auth.signInWithPassword`.
+            // Here, we are simulating a check against the invite code since we don't handle passwords.
             
             if (user.inviteCode !== inviteCode) {
                  toast({
                     variant: "destructive",
                     title: "KaliCodigo Inválido",
-                    description: "Por favor, verifica tu KaliCodigo.",
+                    description: "Por favor, verifica tu KaliCodigo. Debe ser el que te proporcionó el administrador.",
                 });
                 setIsLoading(false);
                 return;
@@ -89,11 +86,12 @@ export default function LoginPage() {
             });
             sessionStorage.setItem("loggedInUser", email);
             router.push("/dashboard");
+
         } else {
              toast({
                 variant: "destructive",
                 title: "Inicio de Sesión Fallido",
-                description: "Correo o contraseña inválidos. Por favor, inténtalo de nuevo.",
+                description: "Correo o KaliCodigo inválidos. Por favor, inténtalo de nuevo.",
             });
             setIsLoading(false);
         }
@@ -153,6 +151,7 @@ export default function LoginPage() {
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 disabled={isLoading}
+                required
             />
         </div>
         <Alert className="border-primary/30 bg-primary/10">
@@ -163,7 +162,7 @@ export default function LoginPage() {
           </AlertDescription>
         </Alert>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Iniciar Sesión"}
         </Button>
       </form>
     </AuthCard>
