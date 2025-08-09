@@ -30,7 +30,7 @@ export async function getUserById(id: string): Promise<User | null> {
 
 // NOTE: This now only creates the profile. Authentication is separate.
 // We assume Supabase Auth handles the actual user creation in auth.users.
-export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus' | 'name' | 'inviteCode' | 'avatarUrl' | 'customPlanRequest'>): Promise<User> {
+export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus' | 'name' | 'inviteCode' | 'avatarUrl' | 'customPlanRequest' | 'password'> & { password?: string }): Promise<User> {
     const existingUser = await prisma.profiles.findUnique({
         where: { email: userData.email }
     });
@@ -39,36 +39,51 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
         throw new Error("Este correo electrónico ya ha sido registrado.");
     }
 
-    // In a real scenario, you would not handle the password here.
-    // Supabase Auth would handle it. This is a placeholder for the logic.
-    // Let's assume the password is for a different system or just remove it.
-    // For this example, we will proceed without storing the password directly.
+    if (!userData.password) {
+        throw new Error("La contraseña es requerida.");
+    }
+    
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    const newUserProfile = await prisma.profiles.create({
+    // This part of the code assumes you have a `users` table that is NOT `auth.users`
+    // If you are using Supabase Auth, you should handle user creation via the Supabase client.
+    // This implementation creates a user and a profile in a single transaction in your public schema.
+    const newUser = await prisma.users.create({
         data: {
-            // This 'id' should come from Supabase Auth after a user signs up.
-            // Since we don't have the auth flow fully integrated, we'll use a placeholder
-            // which will cause issues. This part needs to be connected to the auth provider.
-            // For now, let's create a placeholder to avoid breaking the code, but this is NOT a real solution.
-            id: `temp-${Date.now()}`, // THIS IS NOT A VALID UUID AND WILL FAIL IF you have a foreign key constraint
-            first_name: userData.firstName,
-            paternal_last_name: userData.paternalLastName,
-            maternal_last_name: userData.maternalLastName,
             email: userData.email,
-            role: 'client',
-            status: 'pendiente',
-            plan_status: 'sin-plan',
+            encrypted_password: hashedPassword,
+            // Create the profile in the same transaction
+            profile: {
+                create: {
+                    first_name: userData.firstName,
+                    paternal_last_name: userData.paternalLastName,
+                    maternal_last_name: userData.maternalLastName,
+                    email: userData.email,
+                    role: 'client',
+                    status: 'pendiente',
+                    plan_status: 'sin-plan'
+                }
+            }
+        },
+        include: {
+            profile: true // Include the created profile in the return value
         }
     });
 
+    if (!newUser || !newUser.profile) {
+        throw new Error("No se pudo crear el perfil del usuario.");
+    }
+
     // This casting is not safe, but for the sake of making it "work" with the current structure.
+    const profile = newUser.profile;
     return {
-        ...newUserProfile,
-        name: `${newUserProfile.first_name} ${newUserProfile.paternal_last_name} ${newUserProfile.maternal_last_name || ''}`.trim(),
-        firstName: newUserProfile.first_name,
-        paternalLastName: newUserProfile.paternal_last_name,
-        maternalLastName: newUserProfile.maternal_last_name || '',
-        registeredAt: newUserProfile.registered_at?.toISOString() || new Date().toISOString()
+        id: profile.id,
+        ...profile,
+        name: `${profile.first_name} ${profile.paternal_last_name} ${profile.maternal_last_name || ''}`.trim(),
+        firstName: profile.first_name,
+        paternalLastName: profile.paternal_last_name,
+        maternalLastName: profile.maternal_last_name || '',
+        registeredAt: profile.registered_at?.toISOString() || new Date().toISOString()
     } as User;
 }
 
@@ -106,7 +121,8 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
 
 export async function deleteUser(userId: string): Promise<boolean> {
     try {
-        await prisma.profiles.delete({
+        // This will cascade and delete the profile due to the relation
+        await prisma.users.delete({
             where: { id: userId }
         });
         return true;
