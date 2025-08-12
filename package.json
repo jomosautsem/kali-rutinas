@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate",
     "genkit:dev": "genkit start -- tsx src/ai/genkit.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/genkit.ts"
   },
@@ -74,5 +75,3 @@
     "typescript": "^5"
   }
 }
-
-    

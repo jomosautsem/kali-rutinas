@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ==============
+//  PUBLIC Schema
+// ==============
+
+model profiles {
+  id                    String    @id @default(uuid())
+  user_id               String    @unique
+  first_name            String
+  paternal_last_name    String
+  maternal_last_name    String?
+  email                 String    @unique
+  role                  String    @default("client")
+  status                String    @default("pendiente")
+  plan_status           String    @default("sin-plan")
+  invite_code           String?   @unique
+  avatar_url            String?
+  custom_plan_request   String?   @default("none")
+  plan_start_date       DateTime?
+  plan_end_date         DateTime?
+  current_week          Int?
+  plan_duration_in_weeks Int?
+  registered_at         DateTime  @default(now())
+
+  // Relation to auth.users table
+  user                  auth.users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  onboarding_data       onboarding_data?
+  training_plans        training_plans[]
+  workout_progress      workout_progress[]
+  plan_history          plan_history[]
+
+  @@schema("public")
+}
+
+model onboarding_data {
+  id                      String   @id @default(uuid())
+  user_id                 String   @unique
+  goals                   String[]
+  currentFitnessLevel     String
+  trainingDays            String[]
+  trainingTimePerDay      String
+  preferredWorkoutStyle   String
+  muscleFocus             String[]
+  age                     Int
+  weight                  Int
+  height                  Int
+  goalTerm                String
+  planDuration            Int
+  injuriesOrConditions    String?
+  exercisesPerDay         Int
+  
+  // Relation to profiles
+  profile                 profiles @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@map("onboarding_data")
+  @@schema("public")
+}
+
+
+model training_plans {
+  id          String   @id @default(uuid())
+  user_id     String
+  plan_data   Json
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  
+  // Relation to profiles
+  user        profiles @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@map("training_plans")
+  @@schema("public")
+}
+
+model workout_progress {
+  user_id         String
+  week            Int
+  progress_data   Json
+  updated_at      DateTime @updatedAt
+
+  // Relation to profiles
+  user            profiles @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@id([user_id, week])
+  @@map("workout_progress")
+  @@schema("public")
+}
+
+model plan_history {
+    id          String @id @default(uuid())
+    user_id     String
+    plan_data   Json
+    created_at  DateTime @default(now())
+
+    // Relation to profiles
+    user        profiles @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+    @@map("plan_history")
+    @@schema("public")
+}
+
+
+// ==============
+//  AUTH Schema
+// ==============
+
+model users {
+  id            String     @id @db.Uuid
+  // ... other fields from auth.users that you might need to reference
+  raw_user_meta_data Json?   @db.JsonB
+
+  // Relation to profiles table
+  profile       profiles?
+
+  @@map("users")
+  @@schema("auth")
+}

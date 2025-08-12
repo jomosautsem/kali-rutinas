@@ -12,9 +12,6 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
-      // This is the crucial fix for the fetch error in production
-      serverActions: true, 
-      allowedOrigins: ['localhost:3000', '31.97.100.191:3000'],
     },
   },
   images: {
@@ -49,5 +46,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-    
