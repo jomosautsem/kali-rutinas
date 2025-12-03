@@ -10,7 +10,7 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-  schemas   = ["public", "auth"]
+  schemas   = ["public"]
 }
 
 // =============
@@ -36,8 +36,6 @@ model profiles {
   plan_duration_in_weeks Int?
   registered_at         DateTime  @default(now())
 
-  // Relation to auth.users table
-  user                  users @relation(fields: [user_id], references: [id], onDelete: Cascade)
   onboarding_data       onboarding_data?
   training_plans        training_plans[]
   workout_progress      workout_progress[]
@@ -110,21 +108,4 @@ model plan_history {
 
     @@map("plan_history")
     @@schema("public")
-}
-
-
-// ==============
-//  AUTH Schema
-// ==============
-
-model users {
-  id            String     @id @db.Uuid
-  // ... other fields from auth.users that you might need to reference
-  raw_user_meta_data Json?   @db.JsonB
-
-  // Relation to profiles table
-  profile       profiles?
-
-  @@map("users")
-  @@schema("auth")
 }
