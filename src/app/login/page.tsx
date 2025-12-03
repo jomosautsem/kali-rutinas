@@ -151,7 +151,6 @@ export default function LoginPage() {
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 disabled={isLoading}
-                required
             />
         </div>
         <Alert className="border-primary/30 bg-primary/10">
