@@ -3,17 +3,19 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+  schemas   = ["public", "auth"]
 }
 
-// ==============
+// =============
 //  PUBLIC Schema
-// ==============
+// =============
 
 model profiles {
   id                    String    @id @default(uuid())
@@ -35,7 +37,7 @@ model profiles {
   registered_at         DateTime  @default(now())
 
   // Relation to auth.users table
-  user                  auth.users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user                  users @relation(fields: [user_id], references: [id], onDelete: Cascade)
   onboarding_data       onboarding_data?
   training_plans        training_plans[]
   workout_progress      workout_progress[]
