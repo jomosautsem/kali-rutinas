@@ -21,7 +21,7 @@ export async function getAllUsers(): Promise<User[]> {
             },
         });
 
-        const users: User[] = profiles.map(p => ({
+        return profiles.map(p => ({
             id: p.id,
             firstName: p.first_name,
             paternalLastName: p.paternal_last_name,
@@ -34,8 +34,6 @@ export async function getAllUsers(): Promise<User[]> {
             registeredAt: p.registered_at.toISOString(),
             avatarUrl: p.avatar_url || undefined,
         }));
-
-        return users;
     } catch (error: any) {
         console.error("[Service-Error:getAllUsers] Failed to fetch users:", error);
         throw new Error("No se pudieron cargar los usuarios desde la base de datos.");
@@ -83,10 +81,7 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
                 plan_status: 'sin-plan',
                 avatar_url: supbaseUrl,
             },
-            select: { 
-                id: true, 
-                registered_at: true
-            }
+            select: { id: true, registered_at: true }
         });
 
         return {
@@ -104,15 +99,14 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
 
     } catch (prismaError: any) {
         console.error("[Service-Error:createUser] Prisma profile creation failed:", prismaError);
-        // We now throw the REAL prisma error for clear diagnosis.
         throw new Error(`Error de base de datos al crear el perfil: ${prismaError.message}`);
     }
 }
 
 /**
- * Saves the user's onboarding form data with robust sanitization.
+ * Saves the user's onboarding form data with robust sanitization and data cleaning.
  */
-export async function saveOnboardingData(profileId: string, data: Omit<GeneratePersonalizedTrainingPlanInput, 'history'>): Promise<void> {
+export async function saveOnboardingData(profileId: string, data: Omit<GeneratePersonalizedTrainingPlanInput, 'history'> & { confirmPassword?: string }): Promise<void> {
     try {
         const userProfile = await prisma.profiles.findUnique({
             where: { id: profileId },
@@ -123,30 +117,31 @@ export async function saveOnboardingData(profileId: string, data: Omit<GenerateP
             throw new Error(`[Service-Error:saveOnboardingData] Profile with ID ${profileId} not found.`);
         }
 
-        // --- ROBUST SANITIZATION LAYER ---
-        // Default all required-but-nullable-in-form numeric fields to 0.
-        const sanitizedData = {
-            ...data,
-            age: data.age ?? 0,
-            weight: data.weight ?? 0,
-            height: data.height ?? 0,
-            planDuration: data.planDuration ?? 4, // Default to 4 weeks
-            exercisesPerDay: data.exercisesPerDay ?? 5, // Default to 5 exercises
-        };
-        // --- END OF SANITIZATION ---
+        // --- THE FINAL, DEFINITIVE FIX ---
+        // 1. Destructure to explicitly remove fields that are NOT in the onboarding_data table.
+        const { goals, muscleFocus, confirmPassword, ...restOfData } = data;
 
-        const { goals, muscleFocus, ...restOfData } = sanitizedData;
+        // 2. Sanitize all numeric fields that are required by DB but optional in the form.
+        const sanitizedData = {
+            ...restOfData,
+            age: restOfData.age ?? 0,
+            weight: restOfData.weight ?? 0,
+            height: restOfData.height ?? 0,
+            planDuration: restOfData.planDuration ?? 4,
+            exercisesPerDay: restOfData.exercisesPerDay ?? 5,
+        };
+        // --- END OF FIX ---
 
         await prisma.onboarding_data.upsert({
             where: { user_id: userProfile.user_id },
             update: { 
-                ...restOfData, 
+                ...sanitizedData, 
                 goals, 
                 muscleFocus: muscleFocus || [] 
             },
             create: {
                 user_id: userProfile.user_id,
-                ...restOfData,
+                ...sanitizedData,
                 goals,
                 muscleFocus: muscleFocus || [],
             },
@@ -154,7 +149,6 @@ export async function saveOnboardingData(profileId: string, data: Omit<GenerateP
 
     } catch (error: any) {
         console.error("[Service-Error:saveOnboardingData] Failed to save onboarding data:", error);
-        // We now throw the REAL error message for clear diagnosis.
         throw new Error(`Ocurrió un error de base de datos al guardar los datos del formulario: ${error.message}`);
     }
 }
