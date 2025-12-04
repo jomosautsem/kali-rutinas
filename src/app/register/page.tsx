@@ -184,20 +184,22 @@ export default function RegisterPage() {
     console.log("Executing FINAL onSubmit...");
 
     try {
+        // --- DIAGNOSTIC --- 
+        // We are simulating the user creation to isolate the timeout problem.
+        console.log("DIAGNOSTIC: Simulating user creation. Bypassing real createUser call...");
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        const newUser = {
+            id: "fake-profile-id-12345", // Using a fake profile ID
+            email: values.email,
+            firstName: values.firstName,
+            paternalLastName: values.paternalLastName,
+            maternalLastName: values.maternalLastName || ''
+        };
+        console.log("DIAGNOSTIC: Simulation finished. Fake Profile ID:", newUser.id);
+
         const { firstName, paternalLastName, maternalLastName, email, password, otherWorkoutStyle, ...onboardingValues} = values;
 
-        // Step 1: Create the user using the correct Supabase Auth flow
-        console.log("Calling FINAL createUser...");
-        const newUser = await createUser({
-            firstName,
-            paternalLastName,
-            maternalLastName,
-            email,
-            password: password!, // Password is required
-        });
-        console.log("FINAL createUser finished successfully. Profile ID:", newUser.id);
-
-        // Step 2: Save the onboarding data
+        // Step 2: Save the onboarding data (This part remains active for the test)
         const finalWorkoutStyle = onboardingValues.preferredWorkoutStyle === 'otro' 
             ? otherWorkoutStyle
             : onboardingValues.preferredWorkoutStyle;
@@ -207,9 +209,9 @@ export default function RegisterPage() {
             preferredWorkoutStyle: finalWorkoutStyle!,
         };
         
-        console.log("Calling FINAL saveOnboardingData...");
+        console.log("Calling REAL saveOnboardingData...");
         await saveOnboardingData(newUser.id, onboardingDataToSave);
-        console.log("FINAL saveOnboardingData finished successfully.");
+        console.log("REAL saveOnboardingData finished successfully.");
         
         setIsSuccess(true);
         toast({ title: "¡Registro Completo!", description: "Tu cuenta ha sido creada y está pendiente de aprobación." });
