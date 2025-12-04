@@ -33,6 +33,7 @@ import { StepsIndicator } from "@/components/onboarding/steps-indicator"
 import { Step } from "@/components/onboarding/step"
 import { MultiToggleButtonGroup } from "@/components/ui/multi-toggle"
 import { FormNavigation } from "@/components/onboarding/form-navigation"
+// IMPORTANT: We are now importing from the new, simplified user service
 import { saveOnboardingData, createUser } from "@/services/user.service"
 import Link from "next/link"
 
@@ -181,20 +182,23 @@ export default function RegisterPage() {
 
   async function onSubmit(values: RegistrationFormValues) {
     setIsLoading(true);
-    
+    console.log("Executing onSubmit with FAST services...");
+
     try {
         const { firstName, paternalLastName, maternalLastName, email, password, otherWorkoutStyle, ...onboardingValues} = values;
 
-        // 1. Create User
+        // Step 1: Create the user. This is now a fast operation.
+        console.log("Calling FAST createUser...");
         const newUser = await createUser({
             firstName,
             paternalLastName,
             maternalLastName,
             email,
-            password: password!, // Password is required by schema
+            password: password!, // Password is required
         });
+        console.log("FAST createUser finished successfully. Profile ID:", newUser.id);
 
-        // 2. Save Onboarding Data
+        // Step 2: Save the onboarding data. This is also a fast operation.
         const finalWorkoutStyle = onboardingValues.preferredWorkoutStyle === 'otro' 
             ? otherWorkoutStyle
             : onboardingValues.preferredWorkoutStyle;
@@ -204,14 +208,16 @@ export default function RegisterPage() {
             preferredWorkoutStyle: finalWorkoutStyle!,
         };
         
+        console.log("Calling FAST saveOnboardingData...");
         await saveOnboardingData(newUser.id, onboardingDataToSave);
+        console.log("FAST saveOnboardingData finished successfully.");
         
         setIsSuccess(true);
         toast({ title: "¡Registro Completo!", description: "Tu cuenta ha sido creada y está pendiente de aprobación." });
         setTimeout(() => router.push("/login"), 4000); 
 
     } catch (error: any) {
-        console.error("Registration failed:", error);
+        console.error("Registration failed during FAST implementation:", error);
         toast({ variant: "destructive", title: "Error en el Registro", description: error.message || "No se pudo crear la cuenta. Por favor, inténtalo de nuevo." });
         setIsLoading(false);
     }
@@ -533,5 +539,3 @@ export default function RegisterPage() {
     </AuthCard>
   )
 }
-
-    
