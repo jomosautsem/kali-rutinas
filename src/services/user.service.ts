@@ -7,7 +7,6 @@ import type { User, GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
 
 const supabaseUrl = 'https://adoqdbdswuarsifbeszs.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkb3FkYmRzd3VhcnNpZmJlc3pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3NDEyOTgsImV4cCI6MjA4MDMxNzI5OH0._Pae8XsyClpHdpZUDGWzU2ZV5XNQLq2sB6wVG_0qVQw';
-// NOTE: This client uses the ANON key and is only for public, non-admin actions.
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 
@@ -15,15 +14,14 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
  * Fetches all user profiles from the public.profiles table for the admin panel.
  */
 export async function getAllUsers(): Promise<User[]> {
-    console.log("Executing getAllUsers...");
+    console.log("Executing getAllUsers with correct field name...");
     try {
         const profiles = await prisma.profiles.findMany({
             orderBy: {
-                created_at: 'desc', // Using the automatic timestamp from the database
+                registered_at: 'desc', // CORRECTED: Was created_at, now is registered_at
             },
         });
 
-        // Manual mapping from Prisma model to our application-level User type
         const users: User[] = profiles.map(p => ({
             id: p.id,
             firstName: p.first_name,
@@ -34,7 +32,7 @@ export async function getAllUsers(): Promise<User[]> {
             role: p.role as 'admin' | 'client',
             status: p.status as 'activo' | 'pendiente' | 'inactivo',
             planStatus: p.plan_status as 'aprobado' | 'pendiente' | 'sin-plan' | 'n/a',
-            registeredAt: p.created_at.toISOString(),
+            registeredAt: p.registered_at.toISOString(), // CORRECTED: Was created_at, now is registered_at
             avatarUrl: p.avatar_url || undefined,
         }));
 
@@ -42,7 +40,6 @@ export async function getAllUsers(): Promise<User[]> {
         return users;
     } catch (error: any) {
         console.error("CRITICAL: Failed to fetch users from profiles table.", error);
-        // Re-throw the error to be caught by the calling page
         throw new Error("No se pudieron cargar los usuarios desde la base de datos.");
     }
 }
@@ -58,7 +55,6 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
         throw new Error("La contraseña es requerida para el registro.");
     }
 
-    // Step 1: Create the user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -79,7 +75,6 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
     const supbaseUrl = 'https://adoqdbdswuarsifbeszs.supabase.co/storage/v1/object/public/avatars/avatar-01.png';
     console.log(`Supabase user created successfully. ID: ${authData.user.id}`);
 
-    // Step 2: Create the corresponding profile in the public `profiles` table
     try {
         const newProfile = await prisma.profiles.create({
             data: {
@@ -93,7 +88,10 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
                 plan_status: 'sin-plan',
                 avatar_url: supbaseUrl,
             },
-            select: { id: true, created_at: true }
+            select: { 
+                id: true, 
+                registered_at: true // CORRECTED: Was created_at, now is registered_at
+            }
         });
 
         console.log(`Prisma profile created successfully. Profile ID: ${newProfile.id}`);
@@ -108,16 +106,13 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
             role: 'client',
             status: 'pendiente',
             planStatus: 'sin-plan',
-            registeredAt: newProfile.created_at.toISOString(),
+            registeredAt: newProfile.registered_at.toISOString(), // CORRECTED: Was created_at, now is registered_at
         };
 
         return finalUser;
 
     } catch (prismaError: any) {
         console.error("CRITICAL: Prisma profile creation failed after Supabase user creation.", prismaError);
-        // The cleanup logic was removed because it requires admin privileges not available with the anon key.
-        // It's better to have an orphaned auth user than to have the error handling fail.
-        // Now, we throw the REAL prisma error for clear diagnosis.
         throw new Error(`Error de base de datos al crear el perfil: ${prismaError.message}`);
     }
 }
