@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Loader2, CheckCircle, User as UserIcon } from "lucide-react"
+import { createClient } from '@supabase/supabase-js'
+import { Loader2, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { Button } from "@/components/ui/button"
@@ -18,7 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { createUser } from "@/services/user.service"
 import Link from "next/link"
 
 // Schema for the simplified registration form
@@ -35,6 +35,12 @@ const simpleRegisterSchema = z.object({
 });
 
 type RegistrationFormValues = z.infer<typeof simpleRegisterSchema>;
+
+// Create a Supabase client for client-side operations
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -58,20 +64,37 @@ export default function RegisterPage() {
 
   async function onSubmit(values: RegistrationFormValues) {
     setIsLoading(true);
-    console.log("Executing SIMPLIFIED onSubmit...");
+    console.log("Executing CLIENT-SIDE Supabase signUp...");
 
     try {
         const { firstName, paternalLastName, maternalLastName, email, password } = values;
 
-        console.log("Calling createUser from SIMPLIFIED flow...");
-        await createUser({
-            firstName,
-            paternalLastName,
-            maternalLastName,
+        const { data, error } = await supabase.auth.signUp({
             email,
-            password: password!, // Password is required
+            password,
+            options: {
+                // Pass user names as metadata for the trigger to use
+                data: {
+                    firstName,
+                    paternalLastName,
+                    maternalLastName,
+                }
+            }
         });
-        console.log("SIMPLIFIED createUser finished successfully.");
+
+        if (error) {
+            console.error("Supabase client-side signUp failed:", error);
+            if (error.message.includes("User already registered")) {
+                throw new Error("Este correo electrónico ya ha sido registrado.");
+            }
+            throw new Error(error.message || "No se pudo crear la cuenta.");
+        }
+
+        if (!data.user) {
+           throw new Error("El registro no devolvió un usuario. Por favor, intenta de nuevo.");
+        }
+
+        console.log("Supabase signUp successful. The trigger will handle profile creation.");
         
         setIsSuccess(true);
         toast({ 
@@ -80,11 +103,10 @@ export default function RegisterPage() {
         });
 
     } catch (error: any) {
-        console.error("Simplified registration failed:", error);
         toast({ 
             variant: "destructive", 
             title: "Error en el Registro", 
-            description: error.message || "No se pudo crear la cuenta. Por favor, inténtalo de nuevo." 
+            description: error.message
         });
     } finally {
         setIsLoading(false);
