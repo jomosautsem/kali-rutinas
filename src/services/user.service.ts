@@ -1,4 +1,3 @@
-
 'use server';
 
 import { createClient } from '@supabase/supabase-js';
@@ -10,9 +9,6 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 
-/**
- * Fetches all user profiles from the public.profiles table for the admin panel.
- */
 export async function getAllUsers(): Promise<User[]> {
     try {
         const profiles = await prisma.profiles.findMany({
@@ -40,10 +36,6 @@ export async function getAllUsers(): Promise<User[]> {
     }
 }
 
-
-/**
- * Creates a user via Supabase Auth, then creates a corresponding profile in Prisma.
- */
 export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus' | 'name' | 'inviteCode' | 'avatarUrl' | 'customPlanRequest'> & { password?: string }): Promise<User> {
     if (!userData.password) {
         throw new Error("La contraseña es requerida para el registro.");
@@ -103,10 +95,7 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
     }
 }
 
-/**
- * Saves the user's onboarding form data with robust sanitization and data cleaning.
- */
-export async function saveOnboardingData(profileId: string, data: Omit<GeneratePersonalizedTrainingPlanInput, 'history'> & { confirmPassword?: string }): Promise<void> {
+export async function saveOnboardingData(profileId: string, data: any): Promise<void> {
     try {
         const userProfile = await prisma.profiles.findUnique({
             where: { id: profileId },
@@ -114,36 +103,34 @@ export async function saveOnboardingData(profileId: string, data: Omit<GenerateP
         });
 
         if (!userProfile) {
-            throw new Error(`[Service-Error:saveOnboardingData] Profile with ID ${profileId} not found.`);
+            throw new Error(`Profile with ID ${profileId} not found.`);
         }
 
-        // --- THE FINAL, DEFINITIVE FIX ---
-        // 1. Destructure to explicitly remove fields that are NOT in the onboarding_data table.
-        const { goals, muscleFocus, confirmPassword, ...restOfData } = data;
-
-        // 2. Sanitize all numeric fields that are required by DB but optional in the form.
-        const sanitizedData = {
-            ...restOfData,
-            age: restOfData.age ?? 0,
-            weight: restOfData.weight ?? 0,
-            height: restOfData.height ?? 0,
-            planDuration: restOfData.planDuration ?? 4,
-            exercisesPerDay: restOfData.exercisesPerDay ?? 5,
+        // --- THE WHITELIST FIX ---
+        // We create a new object with ONLY the fields that are valid for the onboarding_data table.
+        // This is robust and prevents any extra fields from causing an error.
+        const cleanData = {
+            goals: data.goals,
+            currentFitnessLevel: data.currentFitnessLevel,
+            trainingDays: data.trainingDays,
+            trainingTimePerDay: data.trainingTimePerDay,
+            preferredWorkoutStyle: data.preferredWorkoutStyle,
+            muscleFocus: data.muscleFocus || [],
+            age: data.age ?? 0,
+            weight: data.weight ?? 0,
+            height: data.height ?? 0,
+            goalTerm: data.goalTerm,
+            planDuration: data.planDuration ?? 4,
+            injuriesOrConditions: data.injuriesOrConditions,
+            exercisesPerDay: data.exercisesPerDay ?? 5
         };
-        // --- END OF FIX ---
 
         await prisma.onboarding_data.upsert({
             where: { user_id: userProfile.user_id },
-            update: { 
-                ...sanitizedData, 
-                goals, 
-                muscleFocus: muscleFocus || [] 
-            },
+            update: cleanData,
             create: {
                 user_id: userProfile.user_id,
-                ...sanitizedData,
-                goals,
-                muscleFocus: muscleFocus || [],
+                ...cleanData,
             },
         });
 
