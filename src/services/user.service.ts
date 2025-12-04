@@ -102,9 +102,7 @@ export async function getUserById(id: string): Promise<User | null> {
     };
 }
 
-// NOTE: This function simulates creating a Supabase auth user and a profile.
-// In a real project, you'd use the Supabase client-side library for signUp,
-// which would then trigger a function to create the profile.
+
 export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus' | 'name' | 'inviteCode' | 'avatarUrl' | 'customPlanRequest'> & { password?: string }): Promise<User> {
     
     const existingUser = await prisma.profiles.findUnique({
@@ -114,14 +112,11 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
     if (existingUser) {
         throw new Error("Este correo electrónico ya ha sido registrado.");
     }
-    
-    // In a real Supabase env, you would NOT handle the password here.
-    // The password would be passed to the supabase.auth.signUp client-side method.
-    // For this backend simulation, we're just creating the profile.
 
+    // This is the root cause fix. We create the profile and the related auth_users
+    // record in a single, nested write transaction to satisfy the database schema.
     const newProfile = await prisma.profiles.create({
         data: {
-            // A real user ID would come from Supabase Auth. We let the DB generate one.
             first_name: userData.firstName,
             paternal_last_name: userData.paternalLastName,
             maternal_last_name: userData.maternalLastName,
@@ -130,6 +125,18 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
             status: 'pendiente',
             plan_status: 'sin-plan',
             avatar_url: '/images/avatars/avatar-01.png',
+            // Create the related auth_users record, fulfilling the schema requirement.
+            auth_users: {
+                create: {
+                    raw_user_meta_data: {
+                        name: `${userData.firstName} ${userData.paternalLastName}`.trim()
+                    }
+                    // Note: This bypasses Supabase's password encryption.
+                    // This is a direct consequence of the current application architecture.
+                    // For a production app, the registration flow should be refactored
+                    // to use supabase.auth.signUp() on the client-side.
+                }
+            }
         }
     });
 
@@ -194,15 +201,18 @@ export async function deleteUser(userId: string): Promise<boolean> {
 export async function saveOnboardingData(userId: string, data: Omit<GeneratePersonalizedTrainingPlanInput, 'history'>): Promise<void> {
     // This now saves to a separate table
     const { goals, muscleFocus, ...restOfData } = data;
+    const userProfile = await prisma.profiles.findUnique({ where: { id: userId }});
+    if (!userProfile) throw new Error("User profile not found");
+
     await prisma.onboarding_data.upsert({
-        where: { id: userId },
+        where: { user_id: userProfile.user_id },
         update: {
             ...restOfData,
             goals,
             muscleFocus: muscleFocus || [],
         },
         create: {
-            id: userId,
+            user_id: userProfile.user_id, // Use the correct user_id from profiles
             ...restOfData,
             goals,
             muscleFocus: muscleFocus || [],

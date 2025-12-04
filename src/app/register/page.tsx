@@ -194,22 +194,20 @@ export default function RegisterPage() {
             password: password!, // Password is required by schema
         });
 
-        // 2. Save Onboarding Data (Temporarily disabled for debugging)
-        // const finalWorkoutStyle = onboardingValues.preferredWorkoutStyle === 'otro' 
-        //     ? otherWorkoutStyle
-        //     : onboardingValues.preferredWorkoutStyle;
+        // 2. Save Onboarding Data
+        const finalWorkoutStyle = onboardingValues.preferredWorkoutStyle === 'otro' 
+            ? otherWorkoutStyle
+            : onboardingValues.preferredWorkoutStyle;
 
-        // const onboardingDataToSave = {
-        //     ...onboardingValues,
-        //     preferredWorkoutStyle: finalWorkoutStyle!,
-        // };
+        const onboardingDataToSave = {
+            ...onboardingValues,
+            preferredWorkoutStyle: finalWorkoutStyle!,
+        };
         
-        // await saveOnboardingData(newUser.id, onboardingDataToSave);
+        await saveOnboardingData(newUser.id, onboardingDataToSave);
         
-        console.log("DEBUG: User created, skipping saveOnboardingData. User ID:", newUser.id);
-
         setIsSuccess(true);
-        toast({ title: "¡Registro Completo! (Modo Depuración)", description: "Tu cuenta ha sido creada y está pendiente de aprobación." });
+        toast({ title: "¡Registro Completo!", description: "Tu cuenta ha sido creada y está pendiente de aprobación." });
         setTimeout(() => router.push("/login"), 4000); 
 
     } catch (error: any) {
@@ -535,3 +533,5 @@ export default function RegisterPage() {
     </AuthCard>
   )
 }
+
+    
