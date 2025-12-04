@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock, Calendar, Sparkles, ArrowLeft, ListChecks, KeyRound, Lock, Mail } from "lucide-react"
+import { Loader2, CheckCircle, Dumbbell, CalendarDays, Zap, HeartPulse, Shield, User as UserIcon, Trophy, Scale, Ruler, Clock, Calendar, Sparkles, ArrowLeft, ListChecks, KeyRound, Lock, Mail, Send } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthCard } from "@/components/auth-card"
 import { Textarea } from "@/components/ui/textarea"
@@ -33,7 +33,6 @@ import { StepsIndicator } from "@/components/onboarding/steps-indicator"
 import { Step } from "@/components/onboarding/step"
 import { MultiToggleButtonGroup } from "@/components/ui/multi-toggle"
 import { FormNavigation } from "@/components/onboarding/form-navigation"
-// IMPORTANT: We are now importing from the new, simplified user service
 import { saveOnboardingData, createUser } from "@/services/user.service"
 import Link from "next/link"
 
@@ -182,13 +181,13 @@ export default function RegisterPage() {
 
   async function onSubmit(values: RegistrationFormValues) {
     setIsLoading(true);
-    console.log("Executing onSubmit with FAST services...");
+    console.log("Executing FINAL onSubmit...");
 
     try {
         const { firstName, paternalLastName, maternalLastName, email, password, otherWorkoutStyle, ...onboardingValues} = values;
 
-        // Step 1: Create the user. This is now a fast operation.
-        console.log("Calling FAST createUser...");
+        // Step 1: Create the user using the correct Supabase Auth flow
+        console.log("Calling FINAL createUser...");
         const newUser = await createUser({
             firstName,
             paternalLastName,
@@ -196,9 +195,9 @@ export default function RegisterPage() {
             email,
             password: password!, // Password is required
         });
-        console.log("FAST createUser finished successfully. Profile ID:", newUser.id);
+        console.log("FINAL createUser finished successfully. Profile ID:", newUser.id);
 
-        // Step 2: Save the onboarding data. This is also a fast operation.
+        // Step 2: Save the onboarding data
         const finalWorkoutStyle = onboardingValues.preferredWorkoutStyle === 'otro' 
             ? otherWorkoutStyle
             : onboardingValues.preferredWorkoutStyle;
@@ -208,16 +207,16 @@ export default function RegisterPage() {
             preferredWorkoutStyle: finalWorkoutStyle!,
         };
         
-        console.log("Calling FAST saveOnboardingData...");
+        console.log("Calling FINAL saveOnboardingData...");
         await saveOnboardingData(newUser.id, onboardingDataToSave);
-        console.log("FAST saveOnboardingData finished successfully.");
+        console.log("FINAL saveOnboardingData finished successfully.");
         
         setIsSuccess(true);
         toast({ title: "¡Registro Completo!", description: "Tu cuenta ha sido creada y está pendiente de aprobación." });
         setTimeout(() => router.push("/login"), 4000); 
 
     } catch (error: any) {
-        console.error("Registration failed during FAST implementation:", error);
+        console.error("Registration failed during FINAL implementation:", error);
         toast({ variant: "destructive", title: "Error en el Registro", description: error.message || "No se pudo crear la cuenta. Por favor, inténtalo de nuevo." });
         setIsLoading(false);
     }
