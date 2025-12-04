@@ -22,6 +22,9 @@ export default function LoginPage() {
   const [inviteCode, setInviteCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
+  const adminEmail = "kalicentrodeportivotemixco@gmail.com";
+  const isAdminLogin = email === adminEmail;
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
@@ -30,19 +33,29 @@ export default function LoginPage() {
       sessionStorage.clear();
     }
 
-    const adminEmail = "kalicentrodeportivotemixco@gmail.com"
-    const adminPassword = "1q2w3e12"
+    const adminPassword = "1q2w3e12";
     
-    if (email === adminEmail && password === adminPassword) {
-      toast({
-        title: "Inicio de Sesión Exitoso",
-        description: "Redirigiendo al panel de administrador...",
-      })
-      sessionStorage.setItem("loggedInUser", email);
-      router.push("/admin/dashboard")
-      return;
+    // --- Admin Login Path ---
+    if (isAdminLogin) {
+      if (password === adminPassword) {
+        toast({
+          title: "Inicio de Sesión Exitoso",
+          description: "Redirigiendo al panel de administrador...",
+        });
+        sessionStorage.setItem("loggedInUser", email);
+        router.push("/admin/dashboard");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Contraseña Incorrecta",
+          description: "La contraseña para la cuenta de administrador es incorrecta.",
+        });
+        setIsLoading(false);
+      }
+      return; // Stop execution for admin attempts
     }
 
+    // --- Regular User Login Path ---
     try {
         const user = await getUserByEmail(email);
 
@@ -66,9 +79,6 @@ export default function LoginPage() {
                 setIsLoading(false);
                 return;
             }
-            
-            // In a real app with Supabase Auth, you would use `supabase.auth.signInWithPassword`.
-            // Here, we are simulating a check against the invite code since we don't handle passwords.
             
             if (user.inviteCode !== inviteCode) {
                  toast({
@@ -143,23 +153,28 @@ export default function LoginPage() {
             disabled={isLoading}
           />
         </div>
-        <div className="space-y-2">
-            <Label htmlFor="inviteCode">KaliCodigo</Label>
-            <Input 
-                id="inviteCode" 
-                placeholder="Ingresa tu código único" 
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value)}
-                disabled={isLoading}
-            />
-        </div>
-        <Alert className="border-primary/30 bg-primary/10">
-          <KeyRound className="h-5 w-5 text-primary" />
-          <AlertTitle className="font-semibold text-primary/90">¿No tienes tu KaliCodigo?</AlertTitle>
-          <AlertDescription className="text-foreground/80">
-            Solicítalo en recepción o a través de nuestro WhatsApp para activar tu cuenta.
-          </AlertDescription>
-        </Alert>
+        {!isAdminLogin && (
+          <>
+            <div className="space-y-2">
+                <Label htmlFor="inviteCode">KaliCodigo</Label>
+                <Input 
+                    id="inviteCode" 
+                    placeholder="Ingresa tu código único" 
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value)}
+                    disabled={isLoading}
+                    required={!isAdminLogin}
+                />
+            </div>
+            <Alert className="border-primary/30 bg-primary/10">
+              <KeyRound className="h-5 w-5 text-primary" />
+              <AlertTitle className="font-semibold text-primary/90">¿No tienes tu KaliCodigo?</AlertTitle>
+              <AlertDescription className="text-foreground/80">
+                Solicítalo en recepción o a través de nuestro WhatsApp para activar tu cuenta.
+              </AlertDescription>
+            </Alert>
+          </>
+        )}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Iniciar Sesión"}
         </Button>

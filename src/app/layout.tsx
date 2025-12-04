@@ -3,6 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { WhatsAppFAB } from '@/components/whatsapp-fab';
 
+export const runtime = "nodejs";
+
 export const metadata: Metadata = {
   title: 'Dojo Dynamics',
   description: 'Planes de entrenamiento personalizados por IA.',

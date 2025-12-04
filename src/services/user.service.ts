@@ -1,8 +1,6 @@
 
 'use server';
 
-export const runtime = "nodejs";
-
 import prisma from '@/lib/prisma';
 import type { User, GeneratePersonalizedTrainingPlanInput } from "@/lib/types";
 
@@ -69,7 +67,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
         planStatus: profile.plan_status as User['planStatus'],
         inviteCode: profile.invite_code || undefined,
         avatarUrl: profile.avatar_url || undefined,
-customPlanRequest: profile.custom_plan_request as User['customPlanRequest'] || 'none',
+        customPlanRequest: profile.custom_plan_request as User['customPlanRequest'] || 'none',
         planStartDate: profile.plan_start_date?.toISOString(),
         planEndDate: profile.plan_end_date?.toISOString(),
         currentWeek: profile.current_week || undefined,
@@ -95,7 +93,7 @@ export async function getUserById(id: string): Promise<User | null> {
         planStatus: profile.plan_status as User['planStatus'],
         inviteCode: profile.invite_code || undefined,
         avatarUrl: profile.avatar_url || undefined,
-customPlanRequest: profile.custom_plan_request as User['customPlanRequest'] || 'none',
+        customPlanRequest: profile.custom_plan_request as User['customPlanRequest'] || 'none',
         planStartDate: profile.plan_start_date?.toISOString(),
         planEndDate: profile.plan_end_date?.toISOString(),
         currentWeek: profile.current_week || undefined,
