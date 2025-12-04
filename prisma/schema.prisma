@@ -21,7 +21,7 @@ model profiles {
   role                    String      @default("client")
   status                  String      @default("pendiente")
   plan_status             String      @default("sin-plan")
-  invite_code             String?     @unique
+  kalicode                String?     @unique // Changed from invite_code
   avatar_url              String?
   custom_plan_request     String?     @default("none")
   plan_start_date         DateTime?
