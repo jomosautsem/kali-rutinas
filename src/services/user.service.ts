@@ -14,7 +14,6 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
  * Fetches all user profiles from the public.profiles table for the admin panel.
  */
 export async function getAllUsers(): Promise<User[]> {
-    console.log("Executing getAllUsers with correct field name...");
     try {
         const profiles = await prisma.profiles.findMany({
             orderBy: {
@@ -36,10 +35,9 @@ export async function getAllUsers(): Promise<User[]> {
             avatarUrl: p.avatar_url || undefined,
         }));
 
-        console.log(`Successfully fetched ${users.length} users.`);
         return users;
     } catch (error: any) {
-        console.error("CRITICAL: Failed to fetch users from profiles table.", error);
+        console.error("[Service-Error:getAllUsers] Failed to fetch users:", error);
         throw new Error("No se pudieron cargar los usuarios desde la base de datos.");
     }
 }
@@ -49,8 +47,6 @@ export async function getAllUsers(): Promise<User[]> {
  * Creates a user via Supabase Auth, then creates a corresponding profile in Prisma.
  */
 export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'role' | 'status' | 'planStatus' | 'name' | 'inviteCode' | 'avatarUrl' | 'customPlanRequest'> & { password?: string }): Promise<User> {
-    console.log("Executing FINAL createUser for email:", userData.email);
-
     if (!userData.password) {
         throw new Error("La contraseña es requerida para el registro.");
     }
@@ -61,7 +57,7 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
     });
 
     if (authError) {
-        console.error("CRITICAL: Supabase auth signUp failed.", authError);
+        console.error("[Service-Error:createUser] Supabase auth signUp failed:", authError);
         if (authError.message.includes("User already registered")) {
             throw new Error("Este correo electrónico ya ha sido registrado.");
         }
@@ -73,7 +69,6 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
     }
     
     const supbaseUrl = 'https://adoqdbdswuarsifbeszs.supabase.co/storage/v1/object/public/avatars/avatar-01.png';
-    console.log(`Supabase user created successfully. ID: ${authData.user.id}`);
 
     try {
         const newProfile = await prisma.profiles.create({
@@ -94,9 +89,7 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
             }
         });
 
-        console.log(`Prisma profile created successfully. Profile ID: ${newProfile.id}`);
-
-        const finalUser: User = {
+        return {
             id: newProfile.id,
             firstName: userData.firstName,
             paternalLastName: userData.paternalLastName,
@@ -109,19 +102,17 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
             registeredAt: newProfile.registered_at.toISOString(),
         };
 
-        return finalUser;
-
     } catch (prismaError: any) {
-        console.error("CRITICAL: Prisma profile creation failed after Supabase user creation.", prismaError);
+        console.error("[Service-Error:createUser] Prisma profile creation failed:", prismaError);
+        // We now throw the REAL prisma error for clear diagnosis.
         throw new Error(`Error de base de datos al crear el perfil: ${prismaError.message}`);
     }
 }
 
 /**
- * Saves the user's onboarding form data.
+ * Saves the user's onboarding form data with robust sanitization.
  */
 export async function saveOnboardingData(profileId: string, data: Omit<GeneratePersonalizedTrainingPlanInput, 'history'>): Promise<void> {
-    console.log("Executing FINAL saveOnboardingData for profileId:", profileId);
     try {
         const userProfile = await prisma.profiles.findUnique({
             where: { id: profileId },
@@ -129,24 +120,30 @@ export async function saveOnboardingData(profileId: string, data: Omit<GenerateP
         });
 
         if (!userProfile) {
-            throw new Error(`Profile with ID ${profileId} not found.`);
+            throw new Error(`[Service-Error:saveOnboardingData] Profile with ID ${profileId} not found.`);
         }
 
-        // ** THE FIX IS HERE **
-        // Ensure numeric fields have a default value to prevent DB errors for NOT NULL constraints.
+        // --- ROBUST SANITIZATION LAYER ---
+        // Default all required-but-nullable-in-form numeric fields to 0.
         const sanitizedData = {
             ...data,
             age: data.age ?? 0,
             weight: data.weight ?? 0,
             height: data.height ?? 0,
+            planDuration: data.planDuration ?? 4, // Default to 4 weeks
+            exercisesPerDay: data.exercisesPerDay ?? 5, // Default to 5 exercises
         };
-        // ** END OF FIX **
+        // --- END OF SANITIZATION ---
 
         const { goals, muscleFocus, ...restOfData } = sanitizedData;
 
         await prisma.onboarding_data.upsert({
             where: { user_id: userProfile.user_id },
-            update: { ...restOfData, goals, muscleFocus: muscleFocus || [] },
+            update: { 
+                ...restOfData, 
+                goals, 
+                muscleFocus: muscleFocus || [] 
+            },
             create: {
                 user_id: userProfile.user_id,
                 ...restOfData,
@@ -154,9 +151,10 @@ export async function saveOnboardingData(profileId: string, data: Omit<GenerateP
                 muscleFocus: muscleFocus || [],
             },
         });
-        console.log("Successfully saved onboarding data for profileId:", profileId);
-    } catch (error) {
-        console.error("CRITICAL: Failed to save onboarding data.", error);
-        throw new Error("Ocurrió un error de base de datos al guardar los datos del formulario.");
+
+    } catch (error: any) {
+        console.error("[Service-Error:saveOnboardingData] Failed to save onboarding data:", error);
+        // We now throw the REAL error message for clear diagnosis.
+        throw new Error(`Ocurrió un error de base de datos al guardar los datos del formulario: ${error.message}`);
     }
 }
