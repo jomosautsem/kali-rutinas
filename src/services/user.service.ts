@@ -18,7 +18,7 @@ export async function getAllUsers(): Promise<User[]> {
     try {
         const profiles = await prisma.profiles.findMany({
             orderBy: {
-                registered_at: 'desc', // CORRECTED: Was created_at, now is registered_at
+                registered_at: 'desc',
             },
         });
 
@@ -32,7 +32,7 @@ export async function getAllUsers(): Promise<User[]> {
             role: p.role as 'admin' | 'client',
             status: p.status as 'activo' | 'pendiente' | 'inactivo',
             planStatus: p.plan_status as 'aprobado' | 'pendiente' | 'sin-plan' | 'n/a',
-            registeredAt: p.registered_at.toISOString(), // CORRECTED: Was created_at, now is registered_at
+            registeredAt: p.registered_at.toISOString(),
             avatarUrl: p.avatar_url || undefined,
         }));
 
@@ -90,7 +90,7 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
             },
             select: { 
                 id: true, 
-                registered_at: true // CORRECTED: Was created_at, now is registered_at
+                registered_at: true
             }
         });
 
@@ -106,7 +106,7 @@ export async function createUser(userData: Omit<User, 'id' | 'registeredAt' | 'r
             role: 'client',
             status: 'pendiente',
             planStatus: 'sin-plan',
-            registeredAt: newProfile.registered_at.toISOString(), // CORRECTED: Was created_at, now is registered_at
+            registeredAt: newProfile.registered_at.toISOString(),
         };
 
         return finalUser;
@@ -132,7 +132,17 @@ export async function saveOnboardingData(profileId: string, data: Omit<GenerateP
             throw new Error(`Profile with ID ${profileId} not found.`);
         }
 
-        const { goals, muscleFocus, ...restOfData } = data;
+        // ** THE FIX IS HERE **
+        // Ensure numeric fields have a default value to prevent DB errors for NOT NULL constraints.
+        const sanitizedData = {
+            ...data,
+            age: data.age ?? 0,
+            weight: data.weight ?? 0,
+            height: data.height ?? 0,
+        };
+        // ** END OF FIX **
+
+        const { goals, muscleFocus, ...restOfData } = sanitizedData;
 
         await prisma.onboarding_data.upsert({
             where: { user_id: userProfile.user_id },
