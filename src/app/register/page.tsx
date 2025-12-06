@@ -75,9 +75,9 @@ export default function RegisterPage() {
             options: {
                 // Pass user names as metadata for the trigger to use
                 data: {
-                    first_name: firstName, // CORRECTED to snake_case
-                    paternal_last_name: paternalLastName, // CORRECTED to snake_case
-                    maternal_last_name: maternalLastName, // CORRECTED to snake_case
+                    first_name: firstName, 
+                    paternal_last_name: paternalLastName, 
+                    maternal_last_name: maternalLastName,
                 }
             }
         });
@@ -87,7 +87,6 @@ export default function RegisterPage() {
             if (error.message.includes("User already registered")) {
                 throw new Error("Este correo electrónico ya ha sido registrado.");
             }
-            // Provide a more specific error message if the trigger fails
             if (error.message.includes("Database error saving new user")) {
                 throw new Error("Hubo un problema al crear tu perfil en la base de datos. Verifica los datos.");
             }
@@ -165,7 +164,7 @@ export default function RegisterPage() {
                 <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                <FormItem><FormLabel>Confirmar Contraseña</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormMessage></FormItem>
+                <FormItem><FormLabel>Confirmar Contraseña</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
 
             <Button type="submit" className="w-full !mt-6" disabled={isLoading}>
