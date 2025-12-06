@@ -75,9 +75,9 @@ export default function RegisterPage() {
             options: {
                 // Pass user names as metadata for the trigger to use
                 data: {
-                    firstName,
-                    paternalLastName,
-                    maternalLastName,
+                    first_name: firstName, // CORRECTED to snake_case
+                    paternal_last_name: paternalLastName, // CORRECTED to snake_case
+                    maternal_last_name: maternalLastName, // CORRECTED to snake_case
                 }
             }
         });
@@ -86,6 +86,10 @@ export default function RegisterPage() {
             console.error("Supabase client-side signUp failed:", error);
             if (error.message.includes("User already registered")) {
                 throw new Error("Este correo electrónico ya ha sido registrado.");
+            }
+            // Provide a more specific error message if the trigger fails
+            if (error.message.includes("Database error saving new user")) {
+                throw new Error("Hubo un problema al crear tu perfil en la base de datos. Verifica los datos.");
             }
             throw new Error(error.message || "No se pudo crear la cuenta.");
         }
@@ -161,7 +165,7 @@ export default function RegisterPage() {
                 <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                <FormItem><FormLabel>Confirmar Contraseña</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Confirmar Contraseña</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormMessage></FormItem>
             )} />
 
             <Button type="submit" className="w-full !mt-6" disabled={isLoading}>
